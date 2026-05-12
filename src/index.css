@@ -1,0 +1,294 @@
+:root {
+  font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #0a0a0f;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --primary: #c5a059;
+  --primary-hover: #e0bc7a;
+  --bg-dark: #0a0a0f;
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --text-muted: #a1a1aa;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at top right, #1a1a2e, #0a0a0f);
+}
+
+#root { width: 100%; }
+
+h1, h2, h3 {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* ── Layout ───────────────────────────────── */
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.card {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Header ───────────────────────────────── */
+
+.page-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.header-eyebrow {
+  margin: 0 0 12px;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.header-title {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  background: linear-gradient(to bottom, #fff, #c5a059);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header-sub {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 1.05rem;
+}
+
+/* ── Form sections ────────────────────────── */
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--primary);
+  font-size: 1rem;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field label {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+.label-optional {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ── Inputs ───────────────────────────────── */
+
+input, select, textarea {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: white;
+  font-family: inherit;
+  font-size: 1rem;
+  width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(197, 160, 89, 0.2);
+}
+
+select option {
+  background: #1a1a2e;
+  color: white;
+}
+
+/* ── Checkboxes & Radios ─────────────────── */
+
+.checkbox-group {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.radio-group {
+  display: flex;
+  gap: 24px;
+}
+
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.check-label input[type="checkbox"],
+.check-label input[type="radio"] {
+  width: auto;
+  accent-color: var(--primary);
+}
+
+/* ── Buttons ──────────────────────────────── */
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--primary);
+  color: #0a0a0f;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 12px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.15s;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-full { width: 100%; }
+
+/* ── Error message ────────────────────────── */
+
+.error-msg {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: #f87171;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+}
+
+/* ── Success screen ───────────────────────── */
+
+.success-card {
+  text-align: center;
+}
+
+.success-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.success-icon > div,
+.success-icon svg {
+  background: rgba(197, 160, 89, 0.1);
+  padding: 20px;
+  border-radius: 50%;
+}
+
+.success-title {
+  font-size: 2.5rem;
+  margin-bottom: 16px;
+}
+
+.success-msg {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  max-width: 500px;
+  margin: 0 auto 32px;
+}
+
+/* ── Footer ───────────────────────────────── */
+
+.page-footer {
+  margin-top: 40px;
+  padding-bottom: 40px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+/* ── Responsive ───────────────────────────── */
+
+@media (max-width: 640px) {
+  .card {
+    padding: 24px;
+  }
+
+  .container {
+    padding: 20px 16px;
+  }
+
+  .header-title {
+    font-size: 2.2rem;
+  }
+
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .checkbox-group {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
