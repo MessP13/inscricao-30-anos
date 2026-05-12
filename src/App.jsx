@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { User, Phone, Church, Award, Home, CheckCircle2, ChevronRight, AlertCircle } from 'lucide-react';
 import { supabase } from './lib/supabaseClient';
+import AdminPanel from './AdminPanel';
 
 const DISTRITOS = ['Chimoio', 'Gondola', 'Guro (Mungari)', 'Macossa', 'Sussundenga', 'Vanduzi'];
 const LOCALIZACOES = ['3 de Fevereiro', '7 de Setembro', '25 de Junho', 'Muotoe', 'Bela Vista', 'Chichira', 'Samora Machel', '7 de Abril'];
@@ -8,7 +9,7 @@ const IDADES = ['Até 11 anos', '12 - 17', '18 - 34', '35 - 54', '55+'];
 const FUNCOES = [
   'Pastor', 'Evangelista', 'Diácono', 'Secretário da igreja', 'Tesoureiro da igreja',
   'Líder de Crianças', 'Líder de Adolescentes', 'Líder de Jovens', 'Líder de Mulheres',
-  'Líder de Homens', 'Líder de Terceira idade', 'Grupo de louvor', 'Maestro',
+  'Líder de Homens', 'Líder de Terceira idade',
   'Líder de Célula', 'Líder de Missões', 'Líder de Igreja', 'Outro (indicar)',
 ];
 
@@ -26,6 +27,8 @@ const INITIAL_FORM = {
   funcao: '',
   outraFuncao: '',
   hospedagem: '',
+  contribuicao: '',
+  valorContribuicao: '',
 };
 
 function App() {
@@ -33,6 +36,9 @@ function App() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [adminView, setAdminView] = useState(false);
+
+  if (adminView) return <AdminPanel onBack={() => setAdminView(false)} />;
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -57,6 +63,8 @@ function App() {
       batizado_espirito: formData.batizadoEspirito,
       funcao: formData.funcao === 'Outro (indicar)' ? formData.outraFuncao : formData.funcao,
       hospedagem: formData.hospedagem,
+      contribuicao: formData.contribuicao,
+      valor_contribuicao: formData.contribuicao === 'Sim' ? (formData.valorContribuicao || null) : null,
     }]);
 
     setLoading(false);
@@ -213,6 +221,30 @@ function App() {
                 </label>
               </div>
             </div>
+            <div className="field">
+              <label>Vai contribuir financeiramente?</label>
+              <div className="radio-group">
+                <label className="check-label">
+                  <input type="radio" name="contribuicao" value="Sim" checked={formData.contribuicao === 'Sim'} onChange={handleChange} required />
+                  <span>Sim</span>
+                </label>
+                <label className="check-label">
+                  <input type="radio" name="contribuicao" value="Não" checked={formData.contribuicao === 'Não'} onChange={handleChange} />
+                  <span>Não</span>
+                </label>
+              </div>
+            </div>
+            {formData.contribuicao === 'Sim' && (
+              <div className="field">
+                <label>Valor da contribuição <span className="label-optional">(opcional)</span></label>
+                <input
+                  name="valorContribuicao"
+                  value={formData.valorContribuicao}
+                  onChange={handleChange}
+                  placeholder="Ex: 500 MZN"
+                />
+              </div>
+            )}
           </section>
 
           {error && (
@@ -222,15 +254,25 @@ function App() {
             </div>
           )}
 
-          <button type="submit" className="btn-primary btn-full" disabled={loading}>
-            {loading ? 'A processar...' : <><span>Realizar Inscrição</span><ChevronRight size={20} /></>}
-          </button>
+          <div className="btn-row">
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => { setFormData(INITIAL_FORM); setError(null); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            >
+              Limpar Formulário
+            </button>
+            <button type="submit" className="btn-primary btn-grow" disabled={loading}>
+              {loading ? 'A processar...' : <><span>Guardar Inscrição</span><ChevronRight size={20} /></>}
+            </button>
+          </div>
 
         </form>
       </div>
 
       <footer className="page-footer">
         &copy; 2026 Visão Cristã · Celebração de 30 Anos de Impacto
+        <button className="admin-link" onClick={() => setAdminView(true)}>·</button>
       </footer>
     </div>
   );
