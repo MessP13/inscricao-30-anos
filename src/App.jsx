@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Phone, Church, Award, Home, CheckCircle2, ChevronRight, AlertCircle } from 'lucide-react';
+import { User, Phone, Church, Award, Home, CheckCircle2, ChevronRight, AlertCircle, Plus, Minus } from 'lucide-react';
 import { supabase } from './lib/supabaseClient';
 import AdminPanel from './AdminPanel';
 
@@ -16,14 +16,16 @@ const FUNCOES = [
 const INITIAL_FORM = {
   nome: '',
   sexo: '',
-  contacto: '',
+  telephones: [''],
   whatsapp: '',
   distrito: '',
   localizacao: '',
   idade: '',
   departamento: '',
   batizadoAgua: false,
+  dataBatizadoAgua: '',
   batizadoEspirito: false,
+  dataBatizadoEspirito: '',
   funcao: '',
   outraFuncao: '',
   hospedagem: '',
@@ -42,7 +44,31 @@ function App() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    setFormData(prev => {
+      const next = { ...prev, [name]: type === 'checkbox' ? checked : value };
+      if (name === 'batizadoAgua' && !checked) next.dataBatizadoAgua = '';
+      if (name === 'batizadoEspirito' && !checked) next.dataBatizadoEspirito = '';
+      return next;
+    });
+  };
+
+  const updatePhone = (index, value) => {
+    setFormData(prev => {
+      const telephones = [...prev.telephones];
+      telephones[index] = value;
+      return { ...prev, telephones };
+    });
+  };
+
+  const addPhone = () => {
+    setFormData(prev => ({ ...prev, telephones: [...prev.telephones, ''] }));
+  };
+
+  const removePhone = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      telephones: prev.telephones.filter((_, i) => i !== index),
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -50,17 +76,21 @@ function App() {
     setLoading(true);
     setError(null);
 
+    const contacto = formData.telephones.filter(t => t.trim()).join(', ') || null;
+
     const { error: sbError } = await supabase.from('inscricoes_30_anos').insert([{
       nome: formData.nome,
       sexo: formData.sexo,
-      contacto: formData.contacto,
-      whatsapp: formData.whatsapp,
+      contacto,
+      whatsapp: formData.whatsapp || null,
       distrito: formData.distrito,
       localizacao: formData.localizacao,
       idade: formData.idade,
       departamento: formData.departamento || null,
       batizado_agua: formData.batizadoAgua,
+      data_batizado_agua: formData.batizadoAgua && formData.dataBatizadoAgua ? formData.dataBatizadoAgua : null,
       batizado_espirito: formData.batizadoEspirito,
+      data_batizado_espirito: formData.batizadoEspirito && formData.dataBatizadoEspirito ? formData.dataBatizadoEspirito : null,
       funcao: formData.funcao === 'Outro (indicar)' ? formData.outraFuncao : formData.funcao,
       hospedagem: formData.hospedagem,
       contribuicao: formData.contribuicao,
@@ -141,15 +171,33 @@ function App() {
           {/* Contactos */}
           <section className="form-section">
             <h3 className="section-title"><Phone size={18} /> Contactos</h3>
-            <div className="grid-2">
-              <div className="field">
-                <label>Telefone</label>
-                <input required name="contacto" value={formData.contacto} onChange={handleChange} placeholder="+258 8X XXX XXXX" />
-              </div>
-              <div className="field">
-                <label>WhatsApp</label>
-                <input required name="whatsapp" value={formData.whatsapp} onChange={handleChange} placeholder="+258 8X XXX XXXX" />
-              </div>
+            <div className="field">
+              <label>
+                Telefone <span className="label-optional">(opcional)</span>
+              </label>
+              {formData.telephones.map((tel, i) => (
+                <div key={i} className="phone-row">
+                  <input
+                    value={tel}
+                    onChange={e => updatePhone(i, e.target.value)}
+                    placeholder="+258 8X XXX XXXX"
+                  />
+                  {formData.telephones.length > 1 && (
+                    <button type="button" className="btn-icon btn-icon-remove" onClick={() => removePhone(i)} title="Remover">
+                      <Minus size={15} />
+                    </button>
+                  )}
+                  {i === formData.telephones.length - 1 && (
+                    <button type="button" className="btn-icon btn-icon-add" onClick={addPhone} title="Adicionar número">
+                      <Plus size={15} />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="field">
+              <label>WhatsApp <span className="label-optional">(opcional)</span></label>
+              <input name="whatsapp" value={formData.whatsapp} onChange={handleChange} placeholder="+258 8X XXX XXXX" />
             </div>
           </section>
 
@@ -181,15 +229,27 @@ function App() {
           {/* Vida Cristã */}
           <section className="form-section">
             <h3 className="section-title"><Award size={18} /> Vida Cristã</h3>
-            <div className="checkbox-group">
+            <div className="baptism-group">
               <label className="check-label">
                 <input type="checkbox" name="batizadoAgua" checked={formData.batizadoAgua} onChange={handleChange} />
                 <span>Batizado nas Águas</span>
               </label>
+              {formData.batizadoAgua && (
+                <div className="baptism-date">
+                  <label>Data do Baptismo nas Águas <span className="label-optional">(opcional)</span></label>
+                  <input type="date" name="dataBatizadoAgua" value={formData.dataBatizadoAgua} onChange={handleChange} />
+                </div>
+              )}
               <label className="check-label">
                 <input type="checkbox" name="batizadoEspirito" checked={formData.batizadoEspirito} onChange={handleChange} />
                 <span>Batizado no Espírito Santo</span>
               </label>
+              {formData.batizadoEspirito && (
+                <div className="baptism-date">
+                  <label>Data do Baptismo no Espírito Santo <span className="label-optional">(opcional)</span></label>
+                  <input type="date" name="dataBatizadoEspirito" value={formData.dataBatizadoEspirito} onChange={handleChange} />
+                </div>
+              )}
             </div>
             <div className="field">
               <label>Função na Igreja</label>
@@ -222,7 +282,7 @@ function App() {
               </div>
             </div>
             <div className="field">
-              <label>Vai contribuir financeiramente?</label>
+              <label>Já fez a Contribuição para o Evento ou para a Celebração?</label>
               <div className="radio-group">
                 <label className="check-label">
                   <input type="radio" name="contribuicao" value="Sim" checked={formData.contribuicao === 'Sim'} onChange={handleChange} required />

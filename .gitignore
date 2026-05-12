@@ -30,3 +30,5 @@ teste123.md
 *.njsproj
 *.sln
 *.sw?
+
+.vercel

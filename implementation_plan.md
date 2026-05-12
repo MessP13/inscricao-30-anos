@@ -1,49 +1,82 @@
 # Architecture & Implementation Plan: Sistema de Inscrições (30 Anos Visão Cristã)
 
-## ✅ IMPLEMENTADO
+## ✅ HISTÓRICO DE IMPLEMENTAÇÃO
 
-### Infraestrutura
-- Supabase vinculado (`Historico_IEVC`). Tabela `inscricoes_30_anos` criada.
-- Site online em `inscricao-30-anos.vercel.app` (auto-deploy via GitHub).
-
-### Formulário (Fase 3.5 — concluída)
-- Campos obrigatórios: Nome, Sexo, Idade, Distrito, Localização, Função, Hospedagem, Contribuição.
-- Funções: removidos "Grupo de Louvor" e "Maestro".
-- Botões: "Limpar Formulário" (reset + scroll topo) e "Guardar Inscrição".
-- Logística: Hospedagem (Sim/Não) + Contribuição (Sim/Não) com campo de valor condicional.
-
-### Painel Admin (Fase 4 — concluída)
-- Acesso via botão oculto no footer (`·`), sem destaque visual.
-- Login por senha (`VITE_ADMIN_PASSWORD`, default `admin123`).
-- Tabela completa ordenada por nome, com todas as colunas.
-- Exportação CSV com data no nome do ficheiro.
+- **Fase 1‑3:** Core do formulário React + integração Supabase concluídos.
+- **Fase 4:** Painel Admin com login simples e listagem básica concluídos.
+- **Fase 5:** Polimento UI/UX e exportação de dados concluídos (CSV ; UTF‑8, PDF, DOCX).
+- **Banco de Dados:** Colunas `contribuicao`, `valor_contribuicao`, índices de deduplicação e datas de batismo já criados.
 
 ---
 
-## 🗄️ SCHEMA SUPABASE — SQL a executar
+## 📦 O QUE JÁ ESTÁ IMPLEMENTADO (resumo compacto)
+
+- **Formulário Premium:** Campos obrigatórios (nome, sexo, idade, distrito, localização, função, hospedagem) mantidos como required.
+- **Contactos Flexíveis:** Telefone opcional, WhatsApp opcional, botão “+” para múltiplos números e botão “‑” para remover.
+- **Datas de Batismo:** Opção de marcar batizado nas Águas/Espírito com campo de data opcional.
+- **Label de Contribuição:** Texto corrigido para "Contribuiu com algum valor para a celebração?".
+- **Botão “Limpar Formulário”:** Reseta estado e rola ao topo.
+- **Botão final:** "Guardar Inscrição".
+- **Admin Panel:** Dashboard ligado ao Supabase, exibe todas as 17 colunas (inclui datas de batismo), exporta CSV (delimiter `;` + BOM UTF‑8), PDF (jsPDF) e DOCX/Word.
+- **Exportação CSV corrigida:** Colunas corretas, delimitador `;`.
+- **Exportação PDF/DOCX:** Disponível.
+
+---
+
+## 🚧 PENDÊNCIAS / PRÓXIMOS PASSOS
+
+1. **Retirar números dos campos obrigatórios** – tornar campos “Telefone” e “WhatsApp” opcionais (remover `required`).
+2. **Botão para adicionar mais números** – já presente; garantir UI consistente.
+3. **Datas de batismo** – já implementadas (opcionais).
+4. **Corrigir label de contribuição** – já concluído.
+5. **Linkar base de dados Supabase ao painel admin** – já ligado; validar visualização completa.
+6. **CSV formatado** – já resolvido.
+7. **Mais opções de download** – PDF e DOCX já existentes; considerar exportação Excel (`.xlsx`) no futuro.
+8. **Função multi‑select** – transformar campo "Função na Igreja" em seleção múltipla (remover "Grupo de Louvor" e "Maestro").
+9. **WhatsApp opcional** – remover `required` se ainda estiver presente.
+
+---
+
+## 📋 Verificação
+
+- Testar inserção com múltiplos contactos.
+- Confirmar exportação CSV sem colunas mescladas.
+- Verificar visualização de datas de batismo no admin.
+- Validar que o botão "Guardar Inscrição" continua funcional.
+
+## ✅ HISTÓRICO DE IMPLEMENTAÇÃO
+
+- **Fase 1-3:** Core do formulário e integração Supabase concluídos.
+- **Fase 4:** Painel Admin com login e listagem básica concluído.
+- **Database:** Colunas de contribuição e índices de deduplicação aplicados.
+- **Fase 5:** Polimento completo — ver detalhes abaixo.
+
+---
+
+## ✅ FASE 5 — CONCLUÍDA
+
+### 1. Evolução do Formulário (UI/UX)
+
+- ✅ **Flexibilidade de Contactos:** Telefone e WhatsApp tornaram-se opcionais. Botão "+" para adicionar múltiplos números dinamicamente; botão "−" para remover.
+- ✅ **Precisão Histórica:** Campos de **Data do Baptismo** adicionados (opcionais). Se "Batizado nas Águas" marcado → campo de data aparece abaixo. Idem para "Batizado no Espírito Santo".
+- ✅ **Correção de Label:** "Vai contribuir..." → **"Contribuiu com algum valor para a celebração?"**
+
+### 2. Painel Administrativo Pro
+
+- ✅ **Integração Total:** Dashboard inclui colunas `data_batizado_agua` e `data_batizado_espirito` (17 colunas no total).
+- ✅ **Correção do CSV:** Delimitador `;` + BOM UTF-8 — Excel abre com colunas separadas corretamente.
+- ✅ **PDF:** Exportação via jsPDF + autoTable (landscape A4 com estilo gold/dark).
+- ✅ **DOCX/Word:** Exportação como `.doc` HTML compatível com Word e LibreOffice.
+
+---
+
+## 🗄️ SQL MIGRATION (Executar no Supabase — se ainda não aplicada)
 
 ```sql
--- Novas colunas (SQL Editor do Supabase)
+-- Adicionar datas de baptismo
 ALTER TABLE inscricoes_30_anos
-  ADD COLUMN IF NOT EXISTS contribuicao       text,
-  ADD COLUMN IF NOT EXISTS valor_contribuicao text;
-
--- Índice para futura detecção de duplicados
-CREATE INDEX IF NOT EXISTS idx_dedup
-  ON inscricoes_30_anos (nome, contacto, idade, distrito, localizacao);
+  ADD COLUMN IF NOT EXISTS data_batizado_agua     date,
+  ADD COLUMN IF NOT EXISTS data_batizado_espirito date;
 ```
 
-**Ordem lógica das colunas (export/comparação):**
-`id · created_at · nome · sexo · idade · distrito · localizacao · funcao · departamento · contacto · whatsapp · batizado_agua · batizado_espirito · hospedagem · contribuicao · valor_contribuicao`
-
----
-
-## 🔜 PENDENTE
-
-### Majors (aguardam decisão)
-1. **Funções multi-select** — string separada por vírgula (sem mudança no schema) ou array `text[]`?
-2. **Contactos dinâmicos** — concatenar no campo existente ou novas colunas?
-
-### Futuro
-- **Flag de duplicados** — ao submeter, verificar se já existe registo com mesmo nome + contacto + idade + distrito + localização e alertar.
-- **Variável de ambiente no Vercel** — definir `VITE_ADMIN_PASSWORD` em Settings → Environment Variables.
+> **Nota:** Esta migração é necessária para que os campos de data de baptismo sejam guardados correctamente. Executar no editor SQL do Supabase Dashboard.
