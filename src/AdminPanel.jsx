@@ -1,7 +1,7 @@
 // ✏️  LOG: após qualquer alteração neste ficheiro, execute "npm run logs"
 import { useState } from 'react';
 import { supabase } from './lib/supabaseClient';
-import { LogOut, Download, FileText, FileSpreadsheet, Table } from 'lucide-react';
+import { LogOut, Download, FileText, FileSpreadsheet, Table, Columns } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
@@ -45,6 +45,9 @@ export default function AdminPanel({ onBack }) {
   const [data, setData]             = useState([]);
   const [loading, setLoading]       = useState(false);
   const [fetchError, setFetchError] = useState('');
+  const [filterType, setFilterType] = useState('Geral');
+  const [selectedCols, setSelectedCols] = useState(COLS.map(c => c.key));
+  const [showColPicker, setShowColPicker] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -67,22 +70,38 @@ export default function AdminPanel({ onBack }) {
     setData(rows);
   };
 
+  const getFilteredData = () => {
+    let filtered = [...data];
+    if (filterType === 'Ordenados') {
+      filtered = filtered.filter(r => r.funcao && r.funcao.trim() !== '' && !r.funcao.includes('Outro'));
+      filtered.sort((a, b) => (a.funcao || '').localeCompare(b.funcao || ''));
+    } else if (filterType === 'Departamentos') {
+      filtered = filtered.filter(r => r.departamento && r.departamento.trim() !== '');
+      filtered.sort((a, b) => (a.departamento || '').localeCompare(b.departamento || ''));
+    } else if (filterType === 'Faixas Etárias') {
+      filtered.sort((a, b) => (a.idade || '').localeCompare(b.idade || ''));
+    }
+    return filtered;
+  };
+
+  const activeCols = COLS.filter(c => selectedCols.includes(c.key));
+  const currentData = getFilteredData();
+
   const exportCSV = () => {
     const sep = ';';
-    const header = COLS.map(c => c.label).join(sep);
-    const rows = data.map(r =>
-      COLS.map(c => {
+    const header = activeCols.map(c => c.label).join(sep);
+    const rows = currentData.map(r =>
+      activeCols.map(c => {
         const v = fmt(c, r[c.key]);
         return v === '—' ? '' : `"${String(v).replace(/"/g, '""')}"`;
       }).join(sep)
     ).join('\n');
-    // UTF-8 BOM so Excel opens with correct encoding
-    const bom = '﻿';
+    const bom = '\uFEFF';
     const blob = new Blob([bom + header + '\n' + rows], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = Object.assign(document.createElement('a'), {
       href: url,
-      download: `inscricoes_30anos_${new Date().toISOString().slice(0, 10)}.csv`,
+      download: `inscricoes_30anos_${filterType.toLowerCase()}_${new Date().toISOString().slice(0, 10)}.csv`,
     });
     a.click();
     URL.revokeObjectURL(url);
@@ -90,21 +109,19 @@ export default function AdminPanel({ onBack }) {
 
   const exportPDF = () => {
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(14);
     doc.setTextColor(197, 160, 89);
-    doc.text('Visão Cristã — Inscrições 30 Anos', 14, 16);
-
+    doc.text(`Visão Cristã — Inscrições 30 Anos (${filterType})`, 14, 16);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(150, 150, 150);
-    doc.text(`Gerado em ${new Date().toLocaleDateString('pt-MZ')} · ${data.length} registos`, 14, 22);
+    doc.text(`Gerado em ${new Date().toLocaleDateString('pt-MZ')} · ${currentData.length} registos`, 14, 22);
 
     autoTable(doc, {
       startY: 28,
-      head: [COLS.map(c => c.label)],
-      body: data.map(r => COLS.map(c => {
+      head: [activeCols.map(c => c.label)],
+      body: currentData.map(r => activeCols.map(c => {
         const v = fmt(c, r[c.key]);
         return v === '—' ? '' : String(v);
       })),
@@ -115,26 +132,26 @@ export default function AdminPanel({ onBack }) {
       margin: { left: 14, right: 14 },
     });
 
-    doc.save(`inscricoes_30anos_${new Date().toISOString().slice(0, 10)}.pdf`);
+    doc.save(`inscricoes_30anos_${filterType.toLowerCase()}_${new Date().toISOString().slice(0, 10)}.pdf`);
   };
 
   const exportXLSX = () => {
-    const header = COLS.map(c => c.label);
-    const rows = data.map(r => COLS.map(c => {
+    const header = activeCols.map(c => c.label);
+    const rows = currentData.map(r => activeCols.map(c => {
       const v = fmt(c, r[c.key]);
       return v === '—' ? '' : v;
     }));
     const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Inscrições');
-    XLSX.writeFile(wb, `inscricoes_30anos_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws, filterType);
+    XLSX.writeFile(wb, `inscricoes_30anos_${filterType.toLowerCase()}_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
   const exportDOC = () => {
-    const headerRow = `<tr>${COLS.map(c => `<th style="background:#1e1e32;color:#c5a059;padding:6px 10px;border:1px solid #333;white-space:nowrap">${c.label}</th>`).join('')}</tr>`;
-    const bodyRows = data.map((r, idx) => {
+    const headerRow = `<tr>${activeCols.map(c => `<th style="background:#1e1e32;color:#c5a059;padding:6px 10px;border:1px solid #333;white-space:nowrap">${c.label}</th>`).join('')}</tr>`;
+    const bodyRows = currentData.map((r, idx) => {
       const bg = idx % 2 === 0 ? '#0f0f19' : '#141428';
-      return `<tr style="background:${bg}">${COLS.map(c => {
+      return `<tr style="background:${bg}">${activeCols.map(c => {
         const v = fmt(c, r[c.key]);
         return `<td style="padding:5px 10px;border:1px solid #333;color:#ddd;white-space:nowrap">${v === '—' ? '' : v}</td>`;
       }).join('')}</tr>`;
@@ -150,8 +167,8 @@ export default function AdminPanel({ onBack }) {
 </style>
 </head>
 <body>
-<h2>Visão Cristã — Inscrições 30 Anos</h2>
-<p style="color:#999">Gerado em ${new Date().toLocaleDateString('pt-MZ')} · ${data.length} registos</p>
+<h2>Visão Cristã — Inscrições 30 Anos (${filterType})</h2>
+<p style="color:#999">Gerado em ${new Date().toLocaleDateString('pt-MZ')} · ${currentData.length} registos</p>
 <table>
   <thead>${headerRow}</thead>
   <tbody>${bodyRows}</tbody>
@@ -162,7 +179,7 @@ export default function AdminPanel({ onBack }) {
     const url = URL.createObjectURL(blob);
     const a = Object.assign(document.createElement('a'), {
       href: url,
-      download: `inscricoes_30anos_${new Date().toISOString().slice(0, 10)}.doc`,
+      download: `inscricoes_30anos_${filterType.toLowerCase()}_${new Date().toISOString().slice(0, 10)}.doc`,
     });
     a.click();
     URL.revokeObjectURL(url);
@@ -199,12 +216,47 @@ export default function AdminPanel({ onBack }) {
 
   return (
     <div className="admin-page">
-      <div className="admin-bar">
-        <h2 className="admin-title">
+      <div className="admin-bar" style={{ flexWrap: 'wrap', gap: '15px' }}>
+        <h2 className="admin-title" style={{ margin: 0, padding: 0 }}>
           Inscrições · 30 Anos
-          <span className="admin-count">{data.length} registos</span>
+          <span className="admin-count">{currentData.length} registos</span>
         </h2>
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+          <select 
+            value={filterType} 
+            onChange={e => setFilterType(e.target.value)} 
+            style={{ padding: '8px', borderRadius: '4px', background: '#1e1e2d', color: '#fff', border: '1px solid #333', fontSize: '0.9rem' }}
+          >
+            <option value="Geral">Geral</option>
+            <option value="Ordenados">Ordenados</option>
+            <option value="Departamentos">Departamentos</option>
+            <option value="Faixas Etárias">Faixas Etárias</option>
+          </select>
+
+          <div style={{ position: 'relative' }}>
+            <button className="btn-export" onClick={() => setShowColPicker(!showColPicker)} title="Escolher Colunas">
+              <Columns size={15} /> Colunas
+            </button>
+            {showColPicker && (
+              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 8, background: '#1a1a24', border: '1px solid #333', borderRadius: '8px', padding: '12px', zIndex: 100, width: '220px', maxHeight: '300px', overflowY: 'auto', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+                <div style={{ marginBottom: '8px', fontWeight: 'bold', color: '#c5a059', fontSize: '0.9rem' }}>Colunas a Exportar</div>
+                {COLS.map(c => (
+                  <label key={c.key} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0', fontSize: '0.85rem', cursor: 'pointer', color: '#ddd' }}>
+                    <input 
+                      type="checkbox" 
+                      checked={selectedCols.includes(c.key)}
+                      onChange={(e) => {
+                        if (e.target.checked) setSelectedCols([...selectedCols, c.key]);
+                        else setSelectedCols(selectedCols.filter(k => k !== c.key));
+                      }}
+                    />
+                    {c.label}
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+
           <button className="btn-export" onClick={exportXLSX} title="Exportar Excel (.xlsx)">
             <Table size={15} /> Excel
           </button>
@@ -230,12 +282,12 @@ export default function AdminPanel({ onBack }) {
         <div className="admin-table-wrap">
           <table className="admin-table">
             <thead>
-              <tr>{COLS.map(c => <th key={c.key}>{c.label}</th>)}</tr>
+              <tr>{activeCols.map(c => <th key={c.key}>{c.label}</th>)}</tr>
             </thead>
             <tbody>
-              {data.map((r, i) => (
+              {currentData.map((r, i) => (
                 <tr key={r.id || i}>
-                  {COLS.map(c => <td key={c.key}>{fmt(c, r[c.key])}</td>)}
+                  {activeCols.map(c => <td key={c.key}>{fmt(c, r[c.key])}</td>)}
                 </tr>
               ))}
             </tbody>

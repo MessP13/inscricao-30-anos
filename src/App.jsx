@@ -1,18 +1,71 @@
 // ✏️  LOG: após qualquer alteração neste ficheiro, execute "npm run logs"
 import { useState } from 'react';
-import { User, Phone, Church, Award, Home, CheckCircle2, ChevronRight, AlertCircle, Plus, Minus } from 'lucide-react';
+import { User, Phone, Church, Award, Home, CheckCircle2, ChevronRight, AlertCircle, Plus, Minus, X } from 'lucide-react';
 import { supabase } from './lib/supabaseClient';
 import AdminPanel from './AdminPanel';
 
 const DISTRITOS = ['Chimoio', 'Gondola', 'Guro (Mungari)', 'Macossa', 'Sussundenga', 'Vanduzi'];
 const LOCALIZACOES = ['3 de Fevereiro', '7 de Setembro', '25 de Junho', 'Muotoe', 'Bela Vista', 'Chichira', 'Samora Machel', '7 de Abril'];
 const IDADES = ['Até 11 anos', '12 - 17', '18 - 34', '35 - 54', '55+'];
-const FUNCOES = [
-  'Pastor', 'Evangelista', 'Diácono', 'Secretário da igreja', 'Tesoureiro da igreja',
-  'Líder de Crianças', 'Líder de Adolescentes', 'Líder de Jovens', 'Líder de Mulheres',
-  'Líder de Homens', 'Líder de Terceira idade',
-  'Líder de Célula', 'Líder de Missões', 'Líder de Igreja', 'Outro (indicar)',
-];
+
+const getFuncoes = (sexo) => {
+  const isFem = sexo === 'Feminino';
+  return [
+    isFem ? 'Pastora' : 'Pastor',
+    'Evangelista',
+    isFem ? 'Diaconisa' : 'Diácono',
+    isFem ? 'Secretária da Igreja' : 'Secretário da Igreja',
+    isFem ? 'Tesoureira da Igreja' : 'Tesoureiro da Igreja',
+    'Líder de Crianças',
+    'Líder de Adolescentes',
+    'Líder de Jovens',
+    'Líder de Mulheres',
+    'Líder de Homens',
+    'Líder de Terceira Idade',
+    'Líder de Célula',
+    'Líder de Missões',
+    'Líder da Igreja',
+    'Vice-Líder do Departamento',
+    'Vice-Líder da Igreja',
+    'Outro (indicar)'
+  ];
+};
+
+const DateSelector = ({ value, onChange, name, required }) => {
+  const parts = (value || '').split('-');
+  const year = parts[0] || '';
+  const month = parts[1] || '';
+  const day = parts[2] || '';
+
+  const update = (y, m, d) => {
+    if (!y) return onChange({ target: { name, value: '' } });
+    if (!m) return onChange({ target: { name, value: y } });
+    if (!d) return onChange({ target: { name, value: `${y}-${m}` } });
+    return onChange({ target: { name, value: `${y}-${m}-${d}` } });
+  };
+
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({length: 100}, (_, i) => currentYear - i);
+  const months = Array.from({length: 12}, (_, i) => String(i + 1).padStart(2, '0'));
+  const days = Array.from({length: 31}, (_, i) => String(i + 1).padStart(2, '0'));
+
+  return (
+    <div className="date-selector" style={{ display: 'flex', gap: '8px' }}>
+      <select value={year} onChange={e => update(e.target.value, month, day)} required={required} style={{ flex: 1 }}>
+        <option value="">Ano</option>
+        {years.map(y => <option key={y} value={y}>{y}</option>)}
+      </select>
+      <select value={month} onChange={e => update(year, e.target.value, day)} disabled={!year} style={{ flex: 1 }}>
+        <option value="">Mês (Opc)</option>
+        {months.map(m => <option key={m} value={m}>{m}</option>)}
+      </select>
+      <select value={day} onChange={e => update(year, month, e.target.value)} disabled={!month} style={{ flex: 1 }}>
+        <option value="">Dia (Opc)</option>
+        {days.map(d => <option key={d} value={d}>{d}</option>)}
+      </select>
+    </div>
+  );
+};
 
 const INITIAL_FORM = {
   nome: '',
@@ -40,6 +93,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [adminView, setAdminView] = useState(false);
+  const [duplicateModal, setDuplicateModal] = useState({ show: false, existingId: null });
 
   if (adminView) return <AdminPanel onBack={() => setAdminView(false)} />;
 
@@ -74,6 +128,26 @@ function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!duplicateModal.existingId && !duplicateModal.show) {
+      setLoading(true);
+      setError(null);
+      const { data } = await supabase
+        .from('inscricoes_30_anos')
+        .select('id, nome')
+        .ilike('nome', formData.nome.trim());
+      setLoading(false);
+
+      if (data && data.length > 0) {
+        setDuplicateModal({ show: true, existingId: data[0].id });
+        return;
+      }
+    }
+
+    await saveRegistration(duplicateModal.existingId);
+  };
+
+  const saveRegistration = async (idToUpdate) => {
     setLoading(true);
     setError(null);
 
@@ -90,7 +164,7 @@ function App() {
       .filter(Boolean)
       .join(', ');
 
-    const { error: sbError } = await supabase.from('inscricoes_30_anos').insert([{
+    const payload = {
       nome: formData.nome,
       sexo: formData.sexo,
       contacto,
@@ -107,7 +181,16 @@ function App() {
       hospedagem: formData.hospedagem,
       contribuicao: formData.contribuicao,
       valor_contribuicao: formData.contribuicao === 'Sim' ? (formData.valorContribuicao || null) : null,
-    }]);
+    };
+
+    let sbError;
+    if (idToUpdate) {
+      const { error } = await supabase.from('inscricoes_30_anos').update(payload).eq('id', idToUpdate);
+      sbError = error;
+    } else {
+      const { error } = await supabase.from('inscricoes_30_anos').insert([payload]);
+      sbError = error;
+    }
 
     setLoading(false);
 
@@ -116,8 +199,19 @@ function App() {
       return;
     }
 
+    setDuplicateModal({ show: false, existingId: null });
     setSubmitted(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleUpdateExisting = () => {
+    saveRegistration(duplicateModal.existingId);
+  };
+  const handleDifferentPerson = () => {
+    saveRegistration(null);
+  };
+  const handleCancel = () => {
+    setDuplicateModal({ show: false, existingId: null });
   };
 
   if (submitted) {
@@ -249,7 +343,7 @@ function App() {
               {formData.batizadoAgua && (
                 <div className="baptism-date">
                   <label>Data do Baptismo nas Águas <span className="label-optional">(opcional)</span></label>
-                  <input type="date" name="dataBatizadoAgua" value={formData.dataBatizadoAgua} onChange={handleChange} />
+                  <DateSelector name="dataBatizadoAgua" value={formData.dataBatizadoAgua} onChange={handleChange} required={false} />
                 </div>
               )}
               <label className="check-label">
@@ -259,14 +353,14 @@ function App() {
               {formData.batizadoEspirito && (
                 <div className="baptism-date">
                   <label>Data do Baptismo no Espírito Santo <span className="label-optional">(opcional)</span></label>
-                  <input type="date" name="dataBatizadoEspirito" value={formData.dataBatizadoEspirito} onChange={handleChange} />
+                  <DateSelector name="dataBatizadoEspirito" value={formData.dataBatizadoEspirito} onChange={handleChange} required={false} />
                 </div>
               )}
             </div>
             <div className="field">
               <label>Função na Igreja <span className="label-optional">(selecione uma ou mais)</span></label>
               <div className="funcao-group">
-                {FUNCOES.map(f => (
+                {getFuncoes(formData.sexo).map(f => (
                   <label key={f} className="check-label">
                     <input
                       type="checkbox"
@@ -356,6 +450,34 @@ function App() {
 
         </form>
       </div>
+
+      {duplicateModal.show && (
+        <div className="modal-overlay" style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+          padding: '20px'
+        }}>
+          <div className="modal-content" style={{
+            backgroundColor: '#1a1a24', padding: '30px', borderRadius: '12px', maxWidth: '400px', width: '100%', textAlign: 'center', border: '1px solid #333', boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
+          }}>
+            <h3 style={{ marginBottom: 16, color: '#c5a059', fontSize: '1.2rem' }}>Inscrição Encontrada</h3>
+            <p style={{ marginBottom: 24, fontSize: '0.95rem', color: '#ccc', lineHeight: '1.5' }}>
+              Já existe uma inscrição com o nome <strong>{formData.nome}</strong>. O que deseja fazer?
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <button type="button" className="btn-primary" onClick={handleUpdateExisting}>
+                Sim, sou eu. Atualizar meus dados
+              </button>
+              <button type="button" className="btn-secondary" onClick={handleDifferentPerson}>
+                Não, somos pessoas diferentes
+              </button>
+              <button type="button" className="btn-secondary" style={{ background: 'transparent', border: '1px solid #444', color: '#999' }} onClick={handleCancel}>
+                Cancelar (Já estou inscrito)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <footer className="page-footer">
         &copy; 2026 Visão Cristã · Celebração de 30 Anos de Impacto
