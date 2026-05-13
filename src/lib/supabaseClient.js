@@ -1,3 +1,4 @@
+// ✏️  LOG: após qualquer alteração neste ficheiro, execute "npm run logs"
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL

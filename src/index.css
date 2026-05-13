@@ -1,3 +1,5 @@
+/* ✏️  LOG: após qualquer alteração neste ficheiro, execute "npm run logs" */
+
 :root {
   font-family: 'Outfit', system-ui, -apple-system, sans-serif;
   line-height: 1.5;
@@ -494,6 +496,15 @@ select option {
   border-color: var(--primary);
 }
 
+/* ── Função multi-select ─────────────────────── */
+
+.funcao-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 20px;
+  padding: 4px 0;
+}
+
 /* ── Responsive ───────────────────────────── */
 
 @media (max-width: 640px) {
@@ -516,5 +527,9 @@ select option {
   .checkbox-group {
     flex-direction: column;
     gap: 12px;
+  }
+
+  .funcao-group {
+    grid-template-columns: 1fr;
   }
 }

@@ -1,3 +1,4 @@
+// ✏️  LOG: após qualquer alteração neste ficheiro, execute "npm run logs"
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 

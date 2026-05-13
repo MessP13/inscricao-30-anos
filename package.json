@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "logs": "node scripts/update-logs.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.7",
@@ -15,7 +16,8 @@
     "jspdf-autotable": "^5.0.7",
     "lucide-react": "^0.344.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",

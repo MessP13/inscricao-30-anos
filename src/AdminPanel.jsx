@@ -1,8 +1,10 @@
+// ✏️  LOG: após qualquer alteração neste ficheiro, execute "npm run logs"
 import { useState } from 'react';
 import { supabase } from './lib/supabaseClient';
-import { LogOut, Download, FileText, FileSpreadsheet } from 'lucide-react';
+import { LogOut, Download, FileText, FileSpreadsheet, Table } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
 
@@ -116,6 +118,18 @@ export default function AdminPanel({ onBack }) {
     doc.save(`inscricoes_30anos_${new Date().toISOString().slice(0, 10)}.pdf`);
   };
 
+  const exportXLSX = () => {
+    const header = COLS.map(c => c.label);
+    const rows = data.map(r => COLS.map(c => {
+      const v = fmt(c, r[c.key]);
+      return v === '—' ? '' : v;
+    }));
+    const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Inscrições');
+    XLSX.writeFile(wb, `inscricoes_30anos_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+
   const exportDOC = () => {
     const headerRow = `<tr>${COLS.map(c => `<th style="background:#1e1e32;color:#c5a059;padding:6px 10px;border:1px solid #333;white-space:nowrap">${c.label}</th>`).join('')}</tr>`;
     const bodyRows = data.map((r, idx) => {
@@ -191,7 +205,10 @@ export default function AdminPanel({ onBack }) {
           <span className="admin-count">{data.length} registos</span>
         </h2>
         <div style={{ display: 'flex', gap: 10 }}>
-          <button className="btn-export" onClick={exportCSV} title="Exportar CSV (Excel)">
+          <button className="btn-export" onClick={exportXLSX} title="Exportar Excel (.xlsx)">
+            <Table size={15} /> Excel
+          </button>
+          <button className="btn-export" onClick={exportCSV} title="Exportar CSV">
             <FileSpreadsheet size={15} /> CSV
           </button>
           <button className="btn-export" onClick={exportPDF} title="Exportar PDF">

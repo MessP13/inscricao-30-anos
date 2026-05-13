@@ -1,3 +1,4 @@
+// ✏️  LOG: após qualquer alteração neste ficheiro, execute "npm run logs"
 import { useState } from 'react';
 import { User, Phone, Church, Award, Home, CheckCircle2, ChevronRight, AlertCircle, Plus, Minus } from 'lucide-react';
 import { supabase } from './lib/supabaseClient';
@@ -26,7 +27,7 @@ const INITIAL_FORM = {
   dataBatizadoAgua: '',
   batizadoEspirito: false,
   dataBatizadoEspirito: '',
-  funcao: '',
+  funcoes: [],
   outraFuncao: '',
   hospedagem: '',
   contribuicao: '',
@@ -78,6 +79,17 @@ function App() {
 
     const contacto = formData.telephones.filter(t => t.trim()).join(', ') || null;
 
+    if (formData.funcoes.length === 0) {
+      setError('Selecione pelo menos uma função na Igreja.');
+      setLoading(false);
+      return;
+    }
+
+    const funcao = formData.funcoes
+      .map(f => f === 'Outro (indicar)' ? formData.outraFuncao : f)
+      .filter(Boolean)
+      .join(', ');
+
     const { error: sbError } = await supabase.from('inscricoes_30_anos').insert([{
       nome: formData.nome,
       sexo: formData.sexo,
@@ -91,7 +103,7 @@ function App() {
       data_batizado_agua: formData.batizadoAgua && formData.dataBatizadoAgua ? formData.dataBatizadoAgua : null,
       batizado_espirito: formData.batizadoEspirito,
       data_batizado_espirito: formData.batizadoEspirito && formData.dataBatizadoEspirito ? formData.dataBatizadoEspirito : null,
-      funcao: formData.funcao === 'Outro (indicar)' ? formData.outraFuncao : formData.funcao,
+      funcao,
       hospedagem: formData.hospedagem,
       contribuicao: formData.contribuicao,
       valor_contribuicao: formData.contribuicao === 'Sim' ? (formData.valorContribuicao || null) : null,
@@ -252,13 +264,28 @@ function App() {
               )}
             </div>
             <div className="field">
-              <label>Função na Igreja</label>
-              <select required name="funcao" value={formData.funcao} onChange={handleChange}>
-                <option value="">Selecione sua função</option>
-                {FUNCOES.map(f => <option key={f} value={f}>{f}</option>)}
-              </select>
+              <label>Função na Igreja <span className="label-optional">(selecione uma ou mais)</span></label>
+              <div className="funcao-group">
+                {FUNCOES.map(f => (
+                  <label key={f} className="check-label">
+                    <input
+                      type="checkbox"
+                      checked={formData.funcoes.includes(f)}
+                      onChange={e => {
+                        const checked = e.target.checked;
+                        setFormData(prev => ({
+                          ...prev,
+                          funcoes: checked ? [...prev.funcoes, f] : prev.funcoes.filter(x => x !== f),
+                          outraFuncao: !checked && f === 'Outro (indicar)' ? '' : prev.outraFuncao,
+                        }));
+                      }}
+                    />
+                    <span>{f}</span>
+                  </label>
+                ))}
+              </div>
             </div>
-            {formData.funcao === 'Outro (indicar)' && (
+            {formData.funcoes.includes('Outro (indicar)') && (
               <div className="field">
                 <input required name="outraFuncao" value={formData.outraFuncao} onChange={handleChange} placeholder="Especifique sua função" />
               </div>
