@@ -41,9 +41,9 @@ const DateSelector = ({ value, onChange, name, required }) => {
   };
 
   const currentYear = new Date().getFullYear();
-  const years = Array.from({length: 100}, (_, i) => currentYear - i);
-  const months = Array.from({length: 12}, (_, i) => String(i + 1).padStart(2, '0'));
-  const days = Array.from({length: 31}, (_, i) => String(i + 1).padStart(2, '0'));
+  const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
+  const months = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
+  const days = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0'));
 
   return (
     <div className="date-selector" style={{ display: 'flex', gap: '8px' }}>
@@ -255,9 +255,9 @@ function App() {
   return (
     <div className="container">
       <header className="page-header">
-        <p className="header-eyebrow">Celebração 30 Anos</p>
-        <h1 className="header-title">Visão Cristã</h1>
-        <p className="header-sub">Formulário de Inscrição Oficial</p>
+        <p className="header-eyebrow" style={{ fontSize: '1.2rem', color: '#c5a059', fontWeight: 'bold' }}>Celebração de 30 Anos</p>
+        <h1 className="header-title" style={{ fontSize: '2.5rem' }}>IEVC Manica</h1>
+        <p className="header-sub">Formulário de Inscrição Local - 01</p>
       </header>
 
       <div className="card">
@@ -385,18 +385,18 @@ function App() {
                           const checked = e.target.checked;
                           setFormData(prev => {
                             let nextFuncoes = checked ? [...prev.funcoes, f] : prev.funcoes.filter(x => x !== f);
-                            
+
                             if (checked && f === 'Nenhum') {
                               nextFuncoes = ['Nenhum'];
                             } else if (checked && f !== 'Nenhum') {
                               nextFuncoes = nextFuncoes.filter(x => x !== 'Nenhum');
                             }
-                            
+
                             let nextLider = prev.liderDeptos;
                             let nextVice = prev.viceLiderDeptos;
                             if (!nextFuncoes.includes('Líder de Departamento')) nextLider = [];
                             if (!nextFuncoes.includes('Vice-Líder de Departamento')) nextVice = [];
-                            
+
                             return {
                               ...prev,
                               funcoes: nextFuncoes,
@@ -475,7 +475,6 @@ function App() {
                 </label>
               </div>
             </div>
-
             <div className="field">
               <label>Já fez a Contribuição para o Evento?</label>
               <div className="radio-group">
