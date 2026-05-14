@@ -49,6 +49,7 @@ export default function AdminPanel({ onBack }) {
   const [filterType, setFilterType] = useState('Geral');
   const [selectedCols, setSelectedCols] = useState(COLS.map(c => c.key));
   const [showColPicker, setShowColPicker] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -91,11 +92,35 @@ export default function AdminPanel({ onBack }) {
     } else if (filterType === 'Faixas Etárias') {
       filtered.sort((a, b) => (a.idade || '').localeCompare(b.idade || ''));
     }
+    
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(r => 
+        (r.nome && r.nome.toLowerCase().includes(q)) ||
+        (r.funcao && r.funcao.toLowerCase().includes(q)) ||
+        (r.departamento && r.departamento.toLowerCase().includes(q)) ||
+        (r.localizacao && r.localizacao.toLowerCase().includes(q))
+      );
+    }
+    
     return filtered;
   };
 
   const activeCols = COLS.filter(c => selectedCols.includes(c.key));
   const currentData = getFilteredData();
+
+  const stats = {
+    total: currentData.length,
+    homens: currentData.filter(r => r.sexo === 'Masculino').length,
+    mulheres: currentData.filter(r => r.sexo === 'Feminino').length,
+    ordenados: currentData.filter(r => {
+      const cargos = ['Pastor', 'Pastora', 'Evangelista', 'Diácono', 'Diaconisa', 'Líder de Diáconos'];
+      const funcoes = (r.funcao || '').split(',').map(f => f.trim());
+      return funcoes.some(f => cargos.includes(f));
+    }).length,
+    batizadosAgua: currentData.filter(r => r.batizado_agua).length,
+    batizadosEspirito: currentData.filter(r => r.batizado_espirito).length
+  };
 
   const exportCSV = () => {
     const sep = ';';
@@ -226,12 +251,19 @@ export default function AdminPanel({ onBack }) {
 
   return (
     <div className="admin-page">
-      <div className="admin-bar" style={{ flexWrap: 'wrap', gap: '15px' }}>
+      <div className="admin-bar" style={{ flexWrap: 'wrap', gap: '15px', alignItems: 'center' }}>
         <h2 className="admin-title" style={{ margin: 0, padding: 0 }}>
           Inscrições · 30 Anos
-          <span className="admin-count">{currentData.length} registos</span>
         </h2>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', flex: 1, justifyContent: 'flex-end' }}>
+          
+          <input
+            type="text"
+            placeholder="Pesquisar (Nome, Função, etc)..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            style={{ padding: '8px 12px', borderRadius: '8px', background: '#1a1a24', border: '1px solid #333', color: '#fff', fontSize: '0.9rem', maxWidth: '250px' }}
+          />
           <select
             value={filterType}
             onChange={e => setFilterType(e.target.value)}
@@ -285,6 +317,36 @@ export default function AdminPanel({ onBack }) {
           </button>
         </div>
       </div>
+
+      {!loading && !fetchError && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '15px', marginBottom: '24px' }}>
+          <div style={{ background: 'rgba(255,255,255,0.03)', padding: '15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
+            <div style={{ fontSize: '0.85rem', color: '#a1a1aa' }}>Total</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#c5a059' }}>{stats.total}</div>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.03)', padding: '15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
+            <div style={{ fontSize: '0.85rem', color: '#a1a1aa' }}>Homens</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff' }}>{stats.homens}</div>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.03)', padding: '15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
+            <div style={{ fontSize: '0.85rem', color: '#a1a1aa' }}>Mulheres</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff' }}>{stats.mulheres}</div>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.03)', padding: '15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
+            <div style={{ fontSize: '0.85rem', color: '#a1a1aa' }}>Ordenados</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff' }}>{stats.ordenados}</div>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.03)', padding: '15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
+            <div style={{ fontSize: '0.85rem', color: '#a1a1aa' }}>Bat. Águas</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff' }}>{stats.batizadosAgua}</div>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.03)', padding: '15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
+            <div style={{ fontSize: '0.85rem', color: '#a1a1aa' }}>Bat. Espírito</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff' }}>{stats.batizadosEspirito}</div>
+          </div>
+        </div>
+      )}
+
 
       {loading && <p className="admin-status">A carregar...</p>}
       {fetchError && <p className="admin-status" style={{ color: '#f87171' }}>{fetchError}</p>}
