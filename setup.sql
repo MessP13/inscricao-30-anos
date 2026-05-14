@@ -14,6 +14,7 @@ CREATE TABLE public.inscricoes (
   batizado_espirito boolean    NOT NULL DEFAULT false,
   funcao           text        NOT NULL,
   hospedagem       text        NOT NULL,
+  inscrito_por     text        NOT NULL,
   created_at       timestamptz NOT NULL DEFAULT now()
 );
 

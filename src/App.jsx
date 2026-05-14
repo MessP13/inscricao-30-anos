@@ -52,11 +52,11 @@ const DateSelector = ({ value, onChange, name, required }) => {
         {years.map(y => <option key={y} value={y}>{y}</option>)}
       </select>
       <select value={month} onChange={e => update(year, e.target.value, day)} disabled={!year} style={{ flex: 1 }}>
-        <option value="">Mês (Opc)</option>
+        <option value="">Mês</option>
         {months.map(m => <option key={m} value={m}>{m}</option>)}
       </select>
       <select value={day} onChange={e => update(year, month, e.target.value)} disabled={!month} style={{ flex: 1 }}>
-        <option value="">Dia (Opc)</option>
+        <option value="">Dia</option>
         {days.map(d => <option key={d} value={d}>{d}</option>)}
       </select>
     </div>
@@ -82,6 +82,7 @@ const INITIAL_FORM = {
   hospedagem: '',
   contribuicao: '',
   valorContribuicao: '',
+  inscritoPor: '',
 };
 
 function App() {
@@ -196,6 +197,7 @@ function App() {
       hospedagem: formData.hospedagem,
       contribuicao: formData.contribuicao,
       valor_contribuicao: formData.contribuicao === 'Sim' ? (formData.valorContribuicao || null) : null,
+      inscrito_por: formData.inscritoPor,
     };
 
     let sbError;
@@ -294,7 +296,7 @@ function App() {
             <h3 className="section-title"><Phone size={18} /> Contactos</h3>
             <div className="field">
               <label>
-                Telefone <span className="label-optional">(opcional)</span>
+                Telefone
               </label>
               {formData.telephones.map((tel, i) => (
                 <div key={i} className="phone-row">
@@ -317,7 +319,7 @@ function App() {
               ))}
             </div>
             <div className="field">
-              <label>WhatsApp <span className="label-optional">(opcional)</span></label>
+              <label>WhatsApp</label>
               <input name="whatsapp" value={formData.whatsapp} onChange={handleChange} placeholder="+258 8X XXX XXXX" />
             </div>
           </section>
@@ -342,7 +344,7 @@ function App() {
               </div>
             </div>
             <div className="field">
-              <label>Departamento <span className="label-optional">(opcional)</span></label>
+              <label>Departamento</label>
               <input name="departamento" value={formData.departamento} onChange={handleChange} placeholder="Ex: Louvor, Crianças, Jovens..." />
             </div>
           </section>
@@ -357,7 +359,7 @@ function App() {
               </label>
               {formData.batizadoAgua && (
                 <div className="baptism-date">
-                  <label>Data do Baptismo nas Águas <span className="label-optional">(opcional)</span></label>
+                  <label>Data do Baptismo nas Águas</label>
                   <DateSelector name="dataBatizadoAgua" value={formData.dataBatizadoAgua} onChange={handleChange} required={false} />
                 </div>
               )}
@@ -367,13 +369,13 @@ function App() {
               </label>
               {formData.batizadoEspirito && (
                 <div className="baptism-date">
-                  <label>Data do Baptismo no Espírito Santo <span className="label-optional">(opcional)</span></label>
+                  <label>Data do Baptismo no Espírito Santo</label>
                   <DateSelector name="dataBatizadoEspirito" value={formData.dataBatizadoEspirito} onChange={handleChange} required={false} />
                 </div>
               )}
             </div>
             <div className="field">
-              <label>Função na Igreja <span className="label-optional">(selecione uma ou mais)</span></label>
+              <label>Função na Igreja</label>
               <div className="funcao-group">
                 {getFuncoes(formData.sexo).map(f => (
                   <div key={f} className="funcao-item-container">
@@ -490,7 +492,7 @@ function App() {
             </div>
             {formData.contribuicao === 'Sim' && (
               <div className="field">
-                <label>Valor da contribuição <span className="label-optional">(opcional)</span></label>
+                <label>Valor da contribuição</label>
                 <input
                   name="valorContribuicao"
                   value={formData.valorContribuicao}
@@ -499,6 +501,15 @@ function App() {
                 />
               </div>
             )}
+          </section>
+
+          {/* Responsável pelo Registo */}
+          <section className="form-section">
+            <h3 className="section-title"><User size={18} /> Responsável pelo Registo</h3>
+            <div className="field">
+              <label>Quem está a preencher este formulário?</label>
+              <input required name="inscritoPor" value={formData.inscritoPor} onChange={handleChange} placeholder="Nome do responsável pelo registo" />
+            </div>
           </section>
 
           {error && (

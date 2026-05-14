@@ -27,7 +27,44 @@ const COLS = [
   { key: 'hospedagem', label: 'Hospedagem' },
   { key: 'contribuicao', label: 'Contribuição' },
   { key: 'valor_contribuicao', label: 'Valor' },
+  { key: 'inscrito_por', label: 'Inscrito por' },
 ];
+
+const DateSelector = ({ value, onChange, name, required }) => {
+  const parts = (value || '').split('-');
+  const year = parts[0] || '';
+  const month = parts[1] || '';
+  const day = parts[2] || '';
+
+  const update = (y, m, d) => {
+    if (!y) return onChange(name, '');
+    if (!m) return onChange(name, y);
+    if (!d) return onChange(name, `${y}-${m}`);
+    return onChange(name, `${y}-${m}-${d}`);
+  };
+
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
+  const months = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
+  const days = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0'));
+
+  return (
+    <div className="date-selector" style={{ display: 'flex', gap: '8px' }}>
+      <select value={year} onChange={e => update(e.target.value, month, day)} required={required} style={{ flex: 1 }}>
+        <option value="">Ano</option>
+        {years.map(y => <option key={y} value={y}>{y}</option>)}
+      </select>
+      <select value={month} onChange={e => update(year, e.target.value, day)} disabled={!year} style={{ flex: 1 }}>
+        <option value="">Mês</option>
+        {months.map(m => <option key={m} value={m}>{m}</option>)}
+      </select>
+      <select value={day} onChange={e => update(year, month, e.target.value)} disabled={!month} style={{ flex: 1 }}>
+        <option value="">Dia</option>
+        {days.map(d => <option key={d} value={d}>{d}</option>)}
+      </select>
+    </div>
+  );
+};
 
 function fmt(col, val) {
   if (val === null || val === undefined) return '—';
@@ -504,6 +541,11 @@ export default function AdminPanel({ onBack }) {
                   </div>
                 )}
                 
+                <div className="field" style={{ marginTop: '10px' }}>
+                  <label>Responsável pelo Registo</label>
+                  <input value={editingRow.inscrito_por || ''} onChange={e => setEditingRow({...editingRow, inscrito_por: e.target.value})} required />
+                </div>
+                
                 <div className="grid-2" style={{ marginTop: '10px' }}>
                   <div className="field">
                     <label className="check-label">
@@ -511,7 +553,12 @@ export default function AdminPanel({ onBack }) {
                       <span>Bat. Água</span>
                     </label>
                     {editingRow.batizado_agua && (
-                      <input type="date" value={editingRow.data_batizado_agua || ''} onChange={e => setEditingRow({...editingRow, data_batizado_agua: e.target.value})} style={{ marginTop: '5px' }} />
+                      <DateSelector 
+                        value={editingRow.data_batizado_agua} 
+                        onChange={(name, val) => setEditingRow({...editingRow, [name]: val})} 
+                        name="data_batizado_agua" 
+                        required={false} 
+                      />
                     )}
                   </div>
                   <div className="field">
@@ -520,7 +567,12 @@ export default function AdminPanel({ onBack }) {
                       <span>Bat. Espírito</span>
                     </label>
                     {editingRow.batizado_espirito && (
-                      <input type="date" value={editingRow.data_batizado_espirito || ''} onChange={e => setEditingRow({...editingRow, data_batizado_espirito: e.target.value})} style={{ marginTop: '5px' }} />
+                      <DateSelector 
+                        value={editingRow.data_batizado_espirito} 
+                        onChange={(name, val) => setEditingRow({...editingRow, [name]: val})} 
+                        name="data_batizado_espirito" 
+                        required={false} 
+                      />
                     )}
                   </div>
                 </div>
