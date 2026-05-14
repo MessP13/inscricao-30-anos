@@ -499,10 +499,10 @@ select option {
 /* ── Função multi-select ─────────────────────── */
 
 .funcao-group {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px 20px;
-  padding: 4px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 0;
 }
 
 /* ── Responsive ───────────────────────────── */
@@ -527,10 +527,6 @@ select option {
   .checkbox-group {
     flex-direction: column;
     gap: 12px;
-  }
-
-  .funcao-group {
-    grid-template-columns: 1fr;
   }
 }
 
