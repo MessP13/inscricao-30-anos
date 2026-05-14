@@ -10,23 +10,23 @@ import * as XLSX from 'xlsx';
 const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
 
 const COLS = [
-  { key: 'created_at',            label: 'Data Inscrição' },
-  { key: 'nome',                  label: 'Nome' },
-  { key: 'sexo',                  label: 'Sexo' },
-  { key: 'idade',                 label: 'Faixa Etária' },
-  { key: 'distrito',              label: 'Distrito' },
-  { key: 'localizacao',           label: 'Localização' },
-  { key: 'funcao',                label: 'Função' },
-  { key: 'departamento',          label: 'Departamento' },
-  { key: 'contacto',              label: 'Telefone' },
-  { key: 'whatsapp',              label: 'WhatsApp' },
-  { key: 'batizado_agua',         label: 'Bat. Água' },
-  { key: 'data_batizado_agua',    label: 'Data Bat. Água' },
-  { key: 'batizado_espirito',     label: 'Bat. Espírito' },
-  { key: 'data_batizado_espirito',label: 'Data Bat. Espírito' },
-  { key: 'hospedagem',            label: 'Hospedagem' },
-  { key: 'contribuicao',          label: 'Contribuição' },
-  { key: 'valor_contribuicao',    label: 'Valor' },
+  { key: 'created_at', label: 'Data Inscrição' },
+  { key: 'nome', label: 'Nome' },
+  { key: 'sexo', label: 'Sexo' },
+  { key: 'idade', label: 'Faixa Etária' },
+  { key: 'distrito', label: 'Distrito' },
+  { key: 'localizacao', label: 'Localização' },
+  { key: 'funcao', label: 'Função' },
+  { key: 'departamento', label: 'Departamento' },
+  { key: 'contacto', label: 'Telefone' },
+  { key: 'whatsapp', label: 'WhatsApp' },
+  { key: 'batizado_agua', label: 'Bat. Água' },
+  { key: 'data_batizado_agua', label: 'Data Bat. Água' },
+  { key: 'batizado_espirito', label: 'Bat. Espírito' },
+  { key: 'data_batizado_espirito', label: 'Data Bat. Espírito' },
+  { key: 'hospedagem', label: 'Hospedagem' },
+  { key: 'contribuicao', label: 'Contribuição' },
+  { key: 'valor_contribuicao', label: 'Valor' },
 ];
 
 function fmt(col, val) {
@@ -40,11 +40,11 @@ function fmt(col, val) {
 }
 
 export default function AdminPanel({ onBack }) {
-  const [authed, setAuthed]         = useState(false);
-  const [password, setPassword]     = useState('');
+  const [authed, setAuthed] = useState(false);
+  const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  const [data, setData]             = useState([]);
-  const [loading, setLoading]       = useState(false);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState('');
   const [filterType, setFilterType] = useState('Geral');
   const [selectedCols, setSelectedCols] = useState(COLS.map(c => c.key));
@@ -81,8 +81,8 @@ export default function AdminPanel({ onBack }) {
       });
       filtered.sort((a, b) => (a.funcao || '').localeCompare(b.funcao || ''));
     } else if (filterType === 'Dep. Mulheres') {
-      filtered = filtered.filter(r => 
-        (r.sexo === 'Feminino') && 
+      filtered = filtered.filter(r =>
+        (r.sexo === 'Feminino') &&
         ((r.departamento || '').toLowerCase().includes('mulher') || (r.departamento || '').toLowerCase().includes('senhora'))
       );
     } else if (filterType === 'Departamentos') {
@@ -232,9 +232,9 @@ export default function AdminPanel({ onBack }) {
           <span className="admin-count">{currentData.length} registos</span>
         </h2>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-          <select 
-            value={filterType} 
-            onChange={e => setFilterType(e.target.value)} 
+          <select
+            value={filterType}
+            onChange={e => setFilterType(e.target.value)}
             style={{ padding: '8px', borderRadius: '4px', background: '#1e1e2d', color: '#fff', border: '1px solid #333', fontSize: '0.9rem' }}
           >
             <option value="Geral">Geral</option>
@@ -253,8 +253,8 @@ export default function AdminPanel({ onBack }) {
                 <div style={{ marginBottom: '8px', fontWeight: 'bold', color: '#c5a059', fontSize: '0.9rem' }}>Colunas a Exportar</div>
                 {COLS.map(c => (
                   <label key={c.key} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0', fontSize: '0.85rem', cursor: 'pointer', color: '#ddd' }}>
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={selectedCols.includes(c.key)}
                       onChange={(e) => {
                         if (e.target.checked) setSelectedCols([...selectedCols, c.key]);
@@ -286,7 +286,7 @@ export default function AdminPanel({ onBack }) {
         </div>
       </div>
 
-      {loading   && <p className="admin-status">A carregar...</p>}
+      {loading && <p className="admin-status">A carregar...</p>}
       {fetchError && <p className="admin-status" style={{ color: '#f87171' }}>{fetchError}</p>}
 
       {!loading && !fetchError && (

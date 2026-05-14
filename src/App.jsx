@@ -475,8 +475,9 @@ function App() {
                 </label>
               </div>
             </div>
+
             <div className="field">
-              <label>Já fez a Contribuição para o Evento ou para a Celebração?</label>
+              <label>Já fez a Contribuição para o Evento?</label>
               <div className="radio-group">
                 <label className="check-label">
                   <input type="radio" name="contribuicao" value="Sim" checked={formData.contribuicao === 'Sim'} onChange={handleChange} required />
