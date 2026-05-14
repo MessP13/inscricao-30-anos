@@ -256,7 +256,7 @@ function App() {
     <div className="container">
       <header className="page-header">
         <p className="header-eyebrow" style={{ fontSize: '1.2rem', color: '#c5a059', fontWeight: 'bold' }}>Celebração de 30 Anos</p>
-        <h1 className="header-title" style={{ fontSize: '2.5rem' }}>IEVC Manica</h1>
+        <h1 className="header-title" style={{ fontSize: '2.5rem' }}>Visão Cristã - Manica</h1>
         <p className="header-sub">Formulário de Inscrição Local - 01</p>
       </header>
 

@@ -6,11 +6,16 @@
 
 ## 📝 RESUMO DO ESTADO ATUAL
 
-O sistema está funcional com funções dinâmicas por género, gestão de duplicados via modal, seletor de data estruturado e painel administrativo com exportação customizada.
+O sistema está funcional com funções dinâmicas por género, gestão de duplicados via modal, seletor de data estruturado e painel administrativo avançado com funcionalidade de **edição e eliminação direta de registos**.
 
 ---
 
-## 🚀 NOVAS IMPLEMENTAÇÕES & AJUSTES (REVISADO v5)
+## 🚀 NOVAS IMPLEMENTAÇÕES & AJUSTES (REVISADO v6)
+
+### 1. Gestão Administrativa (CRUD)
+- **Edição de Dados:** Adicionada capacidade de editar qualquer campo de uma inscrição diretamente no painel admin via modal dedicado.
+- **Eliminação:** Adicionada funcionalidade para remover inscrições com confirmação de segurança.
+- **Interface Premium:** Melhoria visual do painel com modais animados e feedback em tempo real.
 
 ### 1. Refinamento de Funções e Anti-Duplicação
 - **Novas Funções:** Adicionar "Nenhum" e "Membro" à lista de funções.

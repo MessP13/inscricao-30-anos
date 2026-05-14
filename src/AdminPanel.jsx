@@ -2,7 +2,7 @@
 // ✏️  LOG: após qualquer alteração neste ficheiro, execute "npm run logs"
 import { useState } from 'react';
 import { supabase } from './lib/supabaseClient';
-import { LogOut, Download, FileText, FileSpreadsheet, Table, Columns } from 'lucide-react';
+import { LogOut, Download, FileText, FileSpreadsheet, Table, Columns, Edit2, Trash2, X, Save } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
@@ -50,6 +50,7 @@ export default function AdminPanel({ onBack }) {
   const [selectedCols, setSelectedCols] = useState(COLS.map(c => c.key));
   const [showColPicker, setShowColPicker] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [editingRow, setEditingRow] = useState(null);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -70,6 +71,41 @@ export default function AdminPanel({ onBack }) {
     setLoading(false);
     if (error) { setFetchError('Erro ao carregar dados.'); return; }
     setData(rows);
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Tem a certeza que deseja eliminar esta inscrição permanentemente?')) return;
+    setLoading(true);
+    const { error } = await supabase.from('inscricoes_30_anos').delete().eq('id', id);
+    setLoading(false);
+    if (error) { alert('Erro ao eliminar registo.'); return; }
+    setData(data.filter(r => r.id !== id));
+  };
+
+  const handleEdit = (row) => {
+    setEditingRow({ ...row });
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    // Preparar dados (remover created_at se existir para não dar erro no update)
+    const { created_at, ...payload } = editingRow;
+    
+    const { error } = await supabase
+      .from('inscricoes_30_anos')
+      .update(payload)
+      .eq('id', editingRow.id);
+    
+    setLoading(false);
+    if (error) {
+      alert('Erro ao atualizar dados: ' + error.message);
+      return;
+    }
+    
+    setData(data.map(r => r.id === editingRow.id ? editingRow : r));
+    setEditingRow(null);
   };
 
   const getFilteredData = () => {
@@ -355,16 +391,149 @@ export default function AdminPanel({ onBack }) {
         <div className="admin-table-wrap">
           <table className="admin-table">
             <thead>
-              <tr>{activeCols.map(c => <th key={c.key}>{c.label}</th>)}</tr>
+              <tr>
+                {activeCols.map(c => <th key={c.key}>{c.label}</th>)}
+                <th style={{ width: '80px', textAlign: 'center' }}>Ações</th>
+              </tr>
             </thead>
             <tbody>
               {currentData.map((r, i) => (
                 <tr key={r.id || i}>
                   {activeCols.map(c => <td key={c.key}>{fmt(c, r[c.key])}</td>)}
+                  <td style={{ textAlign: 'center' }}>
+                    <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
+                      <button className="btn-action btn-action-edit" onClick={() => handleEdit(r)} title="Editar">
+                        <Edit2 size={15} />
+                      </button>
+                      <button className="btn-action btn-action-delete" onClick={() => handleDelete(r.id)} title="Eliminar">
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {editingRow && (
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ maxWidth: '800px' }}>
+            <div className="modal-header">
+              <h3 className="modal-title">Editar Inscrição</h3>
+              <button className="modal-close" onClick={() => setEditingRow(null)}><X size={20} /></button>
+            </div>
+            
+            <form onSubmit={handleUpdate}>
+              <div className="form-section" style={{ marginBottom: '24px' }}>
+                <h4 style={{ color: 'var(--primary)', marginBottom: '12px', fontSize: '0.9rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '8px' }}>Informação Pessoal</h4>
+                <div className="field">
+                  <label>Nome Completo</label>
+                  <input value={editingRow.nome} onChange={e => setEditingRow({...editingRow, nome: e.target.value})} required />
+                </div>
+                <div className="grid-2">
+                  <div className="field">
+                    <label>Sexo</label>
+                    <select value={editingRow.sexo} onChange={e => setEditingRow({...editingRow, sexo: e.target.value})} required>
+                      <option value="Masculino">Masculino</option>
+                      <option value="Feminino">Feminino</option>
+                    </select>
+                  </div>
+                  <div className="field">
+                    <label>Faixa Etária</label>
+                    <input value={editingRow.idade} onChange={e => setEditingRow({...editingRow, idade: e.target.value})} required />
+                  </div>
+                </div>
+                <div className="grid-2">
+                  <div className="field">
+                    <label>Telefone</label>
+                    <input value={editingRow.contacto || ''} onChange={e => setEditingRow({...editingRow, contacto: e.target.value})} />
+                  </div>
+                  <div className="field">
+                    <label>WhatsApp</label>
+                    <input value={editingRow.whatsapp || ''} onChange={e => setEditingRow({...editingRow, whatsapp: e.target.value})} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-section" style={{ marginBottom: '24px' }}>
+                <h4 style={{ color: 'var(--primary)', marginBottom: '12px', fontSize: '0.9rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '8px' }}>Igreja e Função</h4>
+                <div className="grid-2">
+                  <div className="field">
+                    <label>Distrito</label>
+                    <input value={editingRow.distrito} onChange={e => setEditingRow({...editingRow, distrito: e.target.value})} required />
+                  </div>
+                  <div className="field">
+                    <label>Localização</label>
+                    <input value={editingRow.localizacao} onChange={e => setEditingRow({...editingRow, localizacao: e.target.value})} required />
+                  </div>
+                </div>
+                <div className="field">
+                  <label>Função (Cargos)</label>
+                  <input value={editingRow.funcao} onChange={e => setEditingRow({...editingRow, funcao: e.target.value})} required />
+                </div>
+                <div className="field">
+                  <label>Departamento</label>
+                  <input value={editingRow.departamento || ''} onChange={e => setEditingRow({...editingRow, departamento: e.target.value})} />
+                </div>
+              </div>
+
+              <div className="form-section" style={{ marginBottom: '24px' }}>
+                <h4 style={{ color: 'var(--primary)', marginBottom: '12px', fontSize: '0.9rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '8px' }}>Logística e Baptismo</h4>
+                <div className="grid-2">
+                  <div className="field">
+                    <label>Hospedagem</label>
+                    <select value={editingRow.hospedagem} onChange={e => setEditingRow({...editingRow, hospedagem: e.target.value})} required>
+                      <option value="Sim">Sim</option>
+                      <option value="Não">Não</option>
+                    </select>
+                  </div>
+                  <div className="field">
+                    <label>Contribuição</label>
+                    <select value={editingRow.contribuicao} onChange={e => setEditingRow({...editingRow, contribuicao: e.target.value})} required>
+                      <option value="Sim">Sim</option>
+                      <option value="Não">Não</option>
+                    </select>
+                  </div>
+                </div>
+                {editingRow.contribuicao === 'Sim' && (
+                  <div className="field">
+                    <label>Valor Contribuição</label>
+                    <input value={editingRow.valor_contribuicao || ''} onChange={e => setEditingRow({...editingRow, valor_contribuicao: e.target.value})} />
+                  </div>
+                )}
+                
+                <div className="grid-2" style={{ marginTop: '10px' }}>
+                  <div className="field">
+                    <label className="check-label">
+                      <input type="checkbox" checked={editingRow.batizado_agua} onChange={e => setEditingRow({...editingRow, batizado_agua: e.target.checked})} />
+                      <span>Bat. Água</span>
+                    </label>
+                    {editingRow.batizado_agua && (
+                      <input type="date" value={editingRow.data_batizado_agua || ''} onChange={e => setEditingRow({...editingRow, data_batizado_agua: e.target.value})} style={{ marginTop: '5px' }} />
+                    )}
+                  </div>
+                  <div className="field">
+                    <label className="check-label">
+                      <input type="checkbox" checked={editingRow.batizado_espirito} onChange={e => setEditingRow({...editingRow, batizado_espirito: e.target.checked})} />
+                      <span>Bat. Espírito</span>
+                    </label>
+                    {editingRow.batizado_espirito && (
+                      <input type="date" value={editingRow.data_batizado_espirito || ''} onChange={e => setEditingRow({...editingRow, data_batizado_espirito: e.target.value})} style={{ marginTop: '5px' }} />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="btn-row">
+                <button type="button" className="btn-secondary btn-grow" onClick={() => setEditingRow(null)}>Cancelar</button>
+                <button type="submit" className="btn-primary btn-grow" disabled={loading}>
+                  <Save size={18} /> {loading ? 'A gravar...' : 'Gravar Alterações'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>
