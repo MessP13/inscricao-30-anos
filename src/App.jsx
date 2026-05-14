@@ -8,29 +8,22 @@ import AdminPanel from './AdminPanel';
 const DISTRITOS = ['Chimoio', 'Gondola', 'Guro (Mungari)', 'Macossa', 'Sussundenga', 'Vanduzi'];
 const LOCALIZACOES = ['3 de Fevereiro', '7 de Setembro', '25 de Junho', 'Muotoe', 'Bela Vista', 'Chichira', 'Samora Machel', '7 de Abril'];
 const IDADES = ['Até 11 anos', '12 - 17', '18 - 34', '35 - 54', '55+'];
+const DEPARTAMENTOS = ['Crianças', 'Adolescentes', 'Jovens', 'Mulheres', 'Homens', 'Terceira Idade', 'Célula', 'Missões'];
 
 const getFuncoes = (sexo) => {
   const isFem = sexo === 'Feminino';
   return [
     'Nenhum',
-    'Membro',
     isFem ? 'Pastora' : 'Pastor',
     'Evangelista',
     isFem ? 'Diaconisa' : 'Diácono',
+    'Líder de Diáconos',
+    'Superintendente da Escola Dominical',
     isFem ? 'Secretária da Igreja' : 'Secretário da Igreja',
     isFem ? 'Tesoureira da Igreja' : 'Tesoureiro da Igreja',
-    'Líder de Crianças',
-    'Líder de Adolescentes',
-    'Líder de Jovens',
-    'Líder de Mulheres',
-    'Líder de Homens',
-    'Líder de Terceira Idade',
-    'Líder de Célula',
-    'Líder de Missões',
     'Líder da Igreja',
-    'Vice-Líder do Departamento',
-    'Vice-Líder da Igreja',
-    'Outro (indicar)'
+    'Líder de Departamento',
+    'Vice-Líder de Departamento'
   ];
 };
 
@@ -84,7 +77,8 @@ const INITIAL_FORM = {
   batizadoEspirito: false,
   dataBatizadoEspirito: '',
   funcoes: [],
-  outraFuncao: '',
+  liderDeptos: [],
+  viceLiderDeptos: [],
   hospedagem: '',
   contribuicao: '',
   valorContribuicao: '',
@@ -164,10 +158,24 @@ function App() {
       return;
     }
 
-    const funcao = formData.funcoes
-      .map(f => f === 'Outro (indicar)' ? formData.outraFuncao : f)
-      .filter(Boolean)
-      .join(', ');
+    if (formData.funcoes.includes('Líder de Departamento') && formData.liderDeptos.length === 0) {
+      setError('Por favor, selecione pelo menos um departamento onde é Líder.');
+      setLoading(false);
+      return;
+    }
+
+    if (formData.funcoes.includes('Vice-Líder de Departamento') && formData.viceLiderDeptos.length === 0) {
+      setError('Por favor, selecione pelo menos um departamento onde é Vice-Líder.');
+      setLoading(false);
+      return;
+    }
+
+    const allFuncoes = [
+      ...formData.funcoes.filter(f => f !== 'Líder de Departamento' && f !== 'Vice-Líder de Departamento'),
+      ...formData.liderDeptos.map(d => `Líder de ${d}`),
+      ...formData.viceLiderDeptos.map(d => `Vice-Líder de ${d}`)
+    ].filter(Boolean);
+    const funcao = allFuncoes.join(', ');
 
     const nomeNormalizado = formData.nome.trim().replace(/\s+/g, ' ');
 
@@ -368,29 +376,87 @@ function App() {
               <label>Função na Igreja <span className="label-optional">(selecione uma ou mais)</span></label>
               <div className="funcao-group">
                 {getFuncoes(formData.sexo).map(f => (
-                  <label key={f} className="check-label">
-                    <input
-                      type="checkbox"
-                      checked={formData.funcoes.includes(f)}
-                      onChange={e => {
-                        const checked = e.target.checked;
-                        setFormData(prev => ({
-                          ...prev,
-                          funcoes: checked ? [...prev.funcoes, f] : prev.funcoes.filter(x => x !== f),
-                          outraFuncao: !checked && f === 'Outro (indicar)' ? '' : prev.outraFuncao,
-                        }));
-                      }}
-                    />
-                    <span>{f}</span>
-                  </label>
+                  <div key={f} className="funcao-item-container">
+                    <label className="check-label">
+                      <input
+                        type="checkbox"
+                        checked={formData.funcoes.includes(f)}
+                        onChange={e => {
+                          const checked = e.target.checked;
+                          setFormData(prev => {
+                            let nextFuncoes = checked ? [...prev.funcoes, f] : prev.funcoes.filter(x => x !== f);
+                            
+                            if (checked && f === 'Nenhum') {
+                              nextFuncoes = ['Nenhum'];
+                            } else if (checked && f !== 'Nenhum') {
+                              nextFuncoes = nextFuncoes.filter(x => x !== 'Nenhum');
+                            }
+                            
+                            let nextLider = prev.liderDeptos;
+                            let nextVice = prev.viceLiderDeptos;
+                            if (!nextFuncoes.includes('Líder de Departamento')) nextLider = [];
+                            if (!nextFuncoes.includes('Vice-Líder de Departamento')) nextVice = [];
+                            
+                            return {
+                              ...prev,
+                              funcoes: nextFuncoes,
+                              liderDeptos: nextLider,
+                              viceLiderDeptos: nextVice
+                            };
+                          });
+                        }}
+                      />
+                      <span>{f}</span>
+                    </label>
+
+                    {f === 'Líder de Departamento' && formData.funcoes.includes(f) && (
+                      <div className="sub-funcao-group">
+                        {DEPARTAMENTOS.map(d => (
+                          <label key={d} className="check-label sub-label">
+                            <input
+                              type="checkbox"
+                              checked={formData.liderDeptos.includes(d)}
+                              onChange={e => {
+                                const checked = e.target.checked;
+                                setFormData(prev => ({
+                                  ...prev,
+                                  liderDeptos: checked ? [...prev.liderDeptos, d] : prev.liderDeptos.filter(x => x !== d)
+                                }));
+                              }}
+                            />
+                            <span>Líder de {d}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+
+                    {f === 'Vice-Líder de Departamento' && formData.funcoes.includes(f) && (
+                      <div className="sub-funcao-group">
+                        {DEPARTAMENTOS.map(d => (
+                          <label key={d} className="check-label sub-label">
+                            <input
+                              type="checkbox"
+                              checked={formData.viceLiderDeptos.includes(d)}
+                              onChange={e => {
+                                const checked = e.target.checked;
+                                setFormData(prev => ({
+                                  ...prev,
+                                  viceLiderDeptos: checked ? [...prev.viceLiderDeptos, d] : prev.viceLiderDeptos.filter(x => x !== d)
+                                }));
+                              }}
+                            />
+                            <span>Vice-Líder de {d}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
-            {formData.funcoes.includes('Outro (indicar)') && (
-              <div className="field">
-                <input required name="outraFuncao" value={formData.outraFuncao} onChange={handleChange} placeholder="Especifique sua função" />
-              </div>
-            )}
+
+
+
           </section>
 
           {/* Logística */}
