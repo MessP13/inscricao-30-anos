@@ -13,11 +13,13 @@ O sistema está funcional com funções dinâmicas por género, gestão de dupli
 ## 🚀 NOVAS IMPLEMENTAÇÕES & AJUSTES (REVISADO v7)
 
 ### 1. Gestão Administrativa e Campos (CRUD+)
+
 - **Edição de Dados:** Adicionada capacidade de editar qualquer campo de uma inscrição diretamente no painel admin.
 - **Seletor de Data na Edição:** Substituído o seletor padrão por um seletor de datas parciais (Ano obrigatório, Mês/Dia opcionais) para manter consistência com o formulário principal.
 - **Campo "Inscrito por":** Adicionado campo obrigatório para identificar quem preencheu o formulário, tanto na inscrição quanto na edição.
 
 ### 2. Interface de Utilizador (UI Cleanup)
+
 - **Remoção de Etiquetas:** Removidas todas as menções textuais a "(opcional)", "(obrigatório)" e instruções de seleção para uma interface mais limpa e profissional.
 
 ### 1. Refinamento de Funções e Anti-Duplicação
@@ -64,3 +66,4 @@ O sistema está funcional com funções dinâmicas por género, gestão de dupli
 1. **Duplicados:** O sistema não deve permitir duplicados acidentais e o modal deve ser infalível.
 2. **Filtros:** Ao selecionar "Ordenados", a lista deve conter *apenas* oficiais da igreja.
 3. **Exportação:** O PDF gerado deve ser visualmente limpo e sem cores vibrantes.
+

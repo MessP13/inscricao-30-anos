@@ -1,0 +1,19 @@
+{
+  "format": "todo4vcode-shared-tasks",
+  "version": "1.0.0",
+  "tasks": [
+    {
+      "id": "l48k870vg",
+      "text": "Resolver erro ao realizar inscricao",
+      "description": "\"Mensagem original: \\\"Erro ao realizar inscricao. Verifique a ligacao e tente novamente.\\\"\"",
+      "tags": [
+        "Code"
+      ],
+      "priority": "Must",
+      "status": "Testing",
+      "completed": false,
+      "createdAt": 1778828183979,
+      "order": 5000
+    }
+  ]
+}

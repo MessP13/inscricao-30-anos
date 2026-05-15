@@ -5,6 +5,7 @@ import { User, Phone, Church, Award, Home, CheckCircle2, ChevronRight, AlertCirc
 import { supabase } from './lib/supabaseClient';
 import AdminPanel from './AdminPanel';
 
+const REGISTRATIONS_TABLE = 'inscricoes_30_anos';
 const DISTRITOS = ['Chimoio', 'Gondola', 'Guro (Mungari)', 'Macossa', 'Sussundenga', 'Vanduzi'];
 const LOCALIZACOES = ['3 de Fevereiro', '7 de Setembro', '25 de Junho', 'Muotoe', 'Bela Vista', 'Chichira', 'Samora Machel', '7 de Abril'];
 const IDADES = ['Até 11 anos', '12 - 17', '18 - 34', '35 - 54', '55+'];
@@ -25,6 +26,24 @@ const getFuncoes = (sexo) => {
     'Líder de Departamento',
     'Vice-Líder de Departamento'
   ];
+};
+
+const getRegistrationErrorMessage = (error) => {
+  const message = error?.message || '';
+
+  if (message.includes('Could not find the table')) {
+    return 'A tabela de inscrições não foi encontrada no Supabase. Confirme se o setup.sql atualizado foi executado.';
+  }
+
+  if (message.includes('Could not find') && message.includes('column')) {
+    return 'A tabela de inscrições está desatualizada no Supabase. Execute o setup.sql atualizado.';
+  }
+
+  if (error?.code === '42501' || message.toLowerCase().includes('row-level security')) {
+    return 'Sem permissão para gravar no Supabase. Verifique as políticas RLS da tabela de inscrições.';
+  }
+
+  return 'Erro ao realizar inscrição. Verifique a ligação e tente novamente.';
 };
 
 const DateSelector = ({ value, onChange, name, required }) => {
@@ -132,11 +151,18 @@ function App() {
     if (!duplicateModal.existingId && !duplicateModal.show) {
       setLoading(true);
       setError(null);
-      const { data } = await supabase
-        .from('inscricoes_30_anos')
+      const { data, error: duplicateError } = await supabase
+        .from(REGISTRATIONS_TABLE)
         .select('id, nome')
-        .ilike('nome', nomeNormalizado);
+        .ilike('nome', nomeNormalizado)
+        .limit(1);
       setLoading(false);
+
+      if (duplicateError) {
+        console.error('Erro Supabase ao verificar duplicados:', duplicateError);
+        setError(getRegistrationErrorMessage(duplicateError));
+        return;
+      }
 
       if (data && data.length > 0) {
         setDuplicateModal({ show: true, existingId: data[0].id });
@@ -151,7 +177,11 @@ function App() {
     setLoading(true);
     setError(null);
 
-    const contacto = formData.telephones.filter(t => t.trim()).join(', ') || null;
+    const contacto = formData.telephones
+      .map(t => t.trim())
+      .filter(Boolean)
+      .join(', ');
+    const whatsapp = formData.whatsapp.trim();
 
     if (formData.funcoes.length === 0) {
       setError('Selecione pelo menos uma função na Igreja.');
@@ -184,11 +214,11 @@ function App() {
       nome: nomeNormalizado,
       sexo: formData.sexo,
       contacto,
-      whatsapp: formData.whatsapp || null,
+      whatsapp,
       distrito: formData.distrito,
       localizacao: formData.localizacao,
       idade: formData.idade,
-      departamento: formData.departamento || null,
+      departamento: formData.departamento || '',
       batizado_agua: formData.batizadoAgua,
       data_batizado_agua: formData.batizadoAgua && formData.dataBatizadoAgua ? formData.dataBatizadoAgua : null,
       batizado_espirito: formData.batizadoEspirito,
@@ -196,23 +226,24 @@ function App() {
       funcao,
       hospedagem: formData.hospedagem,
       contribuicao: formData.contribuicao,
-      valor_contribuicao: formData.contribuicao === 'Sim' ? (formData.valorContribuicao || null) : null,
+      valor_contribuicao: formData.contribuicao === 'Sim' ? (formData.valorContribuicao || '') : '',
       inscrito_por: formData.inscritoPor,
     };
 
     let sbError;
     if (idToUpdate) {
-      const { error } = await supabase.from('inscricoes_30_anos').update(payload).eq('id', idToUpdate);
+      const { error } = await supabase.from(REGISTRATIONS_TABLE).update(payload).eq('id', idToUpdate);
       sbError = error;
     } else {
-      const { error } = await supabase.from('inscricoes_30_anos').insert([payload]);
+      const { error } = await supabase.from(REGISTRATIONS_TABLE).insert([payload]);
       sbError = error;
     }
 
     setLoading(false);
 
     if (sbError) {
-      setError('Erro ao realizar inscrição. Verifique a ligação e tente novamente.');
+      console.error('Erro Supabase:', sbError);
+      setError(getRegistrationErrorMessage(sbError));
       return;
     }
 

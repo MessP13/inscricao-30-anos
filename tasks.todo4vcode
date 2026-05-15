@@ -1,0 +1,24 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "text": "Resolver \"Erro ao realizar inscrição. Verifique a ligação e tente novamente.\"",
+      "completed": true
+    },
+    {
+      "id": 2,
+      "text": "Remover faixa etária \"Até aos 11 anos\"",
+      "completed": false
+    },
+    {
+      "id": 3,
+      "text": "Mudar função de \"nenhum\" para \"nenhuma\"",
+      "completed": false
+    },
+    {
+      "id": 4,
+      "text": "Adicionar pra logística \"Vai participar na Celebração?\"",
+      "completed": false
+    }
+  ]
+}
