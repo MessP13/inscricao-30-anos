@@ -10,10 +10,90 @@
         "Code"
       ],
       "priority": "Must",
-      "status": "Testing",
-      "completed": false,
+      "status": "Done",
+      "completed": true,
       "createdAt": 1778828183979,
       "order": 5000
+    },
+    {
+      "id": "l4c_logs_cloud",
+      "text": "Verificar sistema de logs Cloud (Vercel/Supabase)",
+      "description": "Vercel token: OK | Supabase service role: MISSING | Updated: 2026-05-15T08:14:33.349Z",
+      "tags": [
+        "Infra",
+        "Code"
+      ],
+      "priority": "Should",
+      "status": "Doing",
+      "completed": false,
+      "createdAt": 1778829700000,
+      "order": 5001
+    },
+    {
+      "id": "l4c_remove_faixa_11",
+      "text": "Remover faixa etaria \"Ate aos 11 anos\"",
+      "description": "",
+      "tags": [
+        "Code"
+      ],
+      "priority": "Should",
+      "status": "Done",
+      "completed": true,
+      "createdAt": 1778830800000,
+      "order": 5002
+    },
+    {
+      "id": "l4c_funcao_nenhuma",
+      "text": "Mudar funcao de \"nenhum\" para \"nenhuma\"",
+      "description": "",
+      "tags": [
+        "Code"
+      ],
+      "priority": "Should",
+      "status": "Done",
+      "completed": true,
+      "createdAt": 1778830801000,
+      "order": 5003
+    },
+    {
+      "id": "l4c_participa_celebracao",
+      "text": "Adicionar na logistica: \"Vai participar na Celebracao?\"",
+      "description": "",
+      "tags": [
+        "Code"
+      ],
+      "priority": "Should",
+      "status": "Done",
+      "completed": true,
+      "createdAt": 1778830802000,
+      "order": 5004
+    },
+    {
+      "id": "l4c_report_errors",
+      "text": "Adicionar sistema de report de erros da inscricao",
+      "description": "Fluxo criado no frontend e tabela dedicada incluida no setup.sql. Executar setup.sql no Supabase para ativar a persistencia.",
+      "tags": [
+        "Code",
+        "Infra"
+      ],
+      "priority": "Must",
+      "status": "Done",
+      "completed": true,
+      "createdAt": 1778830803000,
+      "order": 5005
+    },
+    {
+      "id": "l4c_enable_mcp_tools",
+      "text": "Ativar e validar MCPs GitHub/Supabase/Vercel nesta sessao",
+      "description": "Tentativas feitas: list_mcp_resources global vazio; github-mcp-server, supabase, memory e sequential-thinking retornaram unknown MCP server. Aguardar sessao com MCPs anexados.",
+      "tags": [
+        "Infra"
+      ],
+      "priority": "Should",
+      "status": "Blocked",
+      "completed": false,
+      "createdAt": 1778831200000,
+      "order": 5006
     }
   ]
 }

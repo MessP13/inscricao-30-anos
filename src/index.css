@@ -335,6 +335,71 @@ select option {
   font-size: 0.9rem;
 }
 
+.error-msg-stack {
+  align-items: stretch;
+  flex-direction: column;
+}
+
+.error-msg-line,
+.error-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.error-actions {
+  flex-wrap: wrap;
+  padding-left: 28px;
+}
+
+.btn-small {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+
+.report-status {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.82rem;
+}
+
+.duplicate-score-box {
+  background: rgba(197, 160, 89, 0.08);
+  border: 1px solid rgba(197, 160, 89, 0.25);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.duplicate-score {
+  color: var(--primary);
+  font-weight: 800;
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+.duplicate-name {
+  color: white;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.duplicate-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.duplicate-fields span {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.78rem;
+  padding: 4px 8px;
+}
+
 /* ── Success screen ───────────────────────── */
 
 .success-card {

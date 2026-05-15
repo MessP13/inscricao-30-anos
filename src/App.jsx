@@ -6,15 +6,17 @@ import { supabase } from './lib/supabaseClient';
 import AdminPanel from './AdminPanel';
 
 const REGISTRATIONS_TABLE = 'inscricoes_30_anos';
+const ERROR_REPORTS_TABLE = 'inscricoes_30_anos_erros';
+const DUPLICATE_THRESHOLD = 50;
 const DISTRITOS = ['Chimoio', 'Gondola', 'Guro (Mungari)', 'Macossa', 'Sussundenga', 'Vanduzi'];
 const LOCALIZACOES = ['3 de Fevereiro', '7 de Setembro', '25 de Junho', 'Muotoe', 'Bela Vista', 'Chichira', 'Samora Machel', '7 de Abril'];
-const IDADES = ['Até 11 anos', '12 - 17', '18 - 34', '35 - 54', '55+'];
+const IDADES = ['12 - 17', '18 - 34', '35 - 54', '55+'];
 const DEPARTAMENTOS = ['Crianças', 'Adolescentes', 'Jovens', 'Mulheres', 'Homens', 'Terceira Idade', 'Célula', 'Missões'];
 
 const getFuncoes = (sexo) => {
   const isFem = sexo === 'Feminino';
   return [
-    'Nenhum',
+    'Nenhuma',
     isFem ? 'Pastora' : 'Pastor',
     'Evangelista',
     isFem ? 'Diaconisa' : 'Diácono',
@@ -27,6 +29,34 @@ const getFuncoes = (sexo) => {
     'Vice-Líder de Departamento'
   ];
 };
+
+const browserLogBuffer = [];
+if (typeof window !== 'undefined' && !window.__inscricaoLogCaptureReady) {
+  window.__inscricaoLogCaptureReady = true;
+  const pushLog = (level, args) => {
+    browserLogBuffer.push({
+      level,
+      at: new Date().toISOString(),
+      message: args.map(item => {
+        if (item instanceof Error) return item.stack || item.message;
+        if (typeof item === 'string') return item;
+        try { return JSON.stringify(item); } catch { return String(item); }
+      }).join(' '),
+    });
+    if (browserLogBuffer.length > 40) browserLogBuffer.shift();
+  };
+
+  ['error', 'warn', 'log'].forEach(level => {
+    const original = console[level];
+    console[level] = (...args) => {
+      pushLog(level, args);
+      original.apply(console, args);
+    };
+  });
+
+  window.addEventListener('error', event => pushLog('window.error', [event.message, event.filename, event.lineno]));
+  window.addEventListener('unhandledrejection', event => pushLog('promise.rejection', [event.reason]));
+}
 
 const getRegistrationErrorMessage = (error) => {
   const message = error?.message || '';
@@ -44,6 +74,94 @@ const getRegistrationErrorMessage = (error) => {
   }
 
   return 'Erro ao realizar inscrição. Verifique a ligação e tente novamente.';
+};
+
+const isMissingSchemaError = (error) => {
+  const message = error?.message || '';
+  return message.includes('Could not find') && (message.includes('column') || message.includes('table'));
+};
+
+const normalizeText = (value) => String(value || '')
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase()
+  .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+  .replace(/\s+/g, ' ')
+  .trim();
+
+const normalizePhone = (value) => String(value || '').replace(/\D/g, '');
+
+const levenshtein = (a, b) => {
+  if (a === b) return 0;
+  if (!a) return b.length;
+  if (!b) return a.length;
+
+  const prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  const curr = Array(b.length + 1);
+
+  for (let i = 1; i <= a.length; i += 1) {
+    curr[0] = i;
+    for (let j = 1; j <= b.length; j += 1) {
+      curr[j] = Math.min(
+        curr[j - 1] + 1,
+        prev[j] + 1,
+        prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+      );
+    }
+    prev.splice(0, prev.length, ...curr);
+  }
+
+  return prev[b.length];
+};
+
+const textSimilarity = (a, b) => {
+  const left = normalizeText(a);
+  const right = normalizeText(b);
+  if (!left && !right) return null;
+  if (!left || !right) return 0;
+  const distance = levenshtein(left, right);
+  return Math.max(0, 1 - distance / Math.max(left.length, right.length));
+};
+
+const exactSimilarity = (a, b) => {
+  const left = normalizeText(a);
+  const right = normalizeText(b);
+  if (!left && !right) return null;
+  if (!left || !right) return 0;
+  return left === right ? 1 : 0;
+};
+
+const phoneSimilarity = (a, b) => {
+  const left = normalizePhone(a);
+  const right = normalizePhone(b);
+  if (!left && !right) return null;
+  if (!left || !right) return 0;
+  return left.includes(right) || right.includes(left) ? 1 : textSimilarity(left, right);
+};
+
+const calculateDuplicateMatch = (candidate, existing) => {
+  const checks = [
+    { label: 'Nome', weight: 30, score: textSimilarity(candidate.nome, existing.nome) },
+    { label: 'Telefone', weight: 15, score: phoneSimilarity(candidate.contacto, existing.contacto) },
+    { label: 'WhatsApp', weight: 10, score: phoneSimilarity(candidate.whatsapp, existing.whatsapp) },
+    { label: 'Sexo', weight: 8, score: exactSimilarity(candidate.sexo, existing.sexo) },
+    { label: 'Faixa etária', weight: 8, score: exactSimilarity(candidate.idade, existing.idade) },
+    { label: 'Distrito', weight: 8, score: exactSimilarity(candidate.distrito, existing.distrito) },
+    { label: 'Localização', weight: 12, score: exactSimilarity(candidate.localizacao, existing.localizacao) },
+    { label: 'Departamento', weight: 8, score: textSimilarity(candidate.departamento, existing.departamento) },
+    { label: 'Função', weight: 8, score: textSimilarity(candidate.funcao, existing.funcao) },
+    { label: 'Hospedagem', weight: 5, score: exactSimilarity(candidate.hospedagem, existing.hospedagem) },
+    { label: 'Participação', weight: 8, score: exactSimilarity(candidate.participa_celebracao, existing.participa_celebracao) },
+  ].filter(item => item.score !== null);
+
+  const totalWeight = checks.reduce((sum, item) => sum + item.weight, 0) || 1;
+  const weightedScore = checks.reduce((sum, item) => sum + (item.score * item.weight), 0);
+  const score = Math.round((weightedScore / totalWeight) * 100);
+  const matchedFields = checks
+    .filter(item => item.score >= 0.75)
+    .map(item => `${item.label} (${Math.round(item.score * 100)}%)`);
+
+  return { score, matchedFields };
 };
 
 const DateSelector = ({ value, onChange, name, required }) => {
@@ -101,6 +219,7 @@ const INITIAL_FORM = {
   hospedagem: '',
   contribuicao: '',
   valorContribuicao: '',
+  participaCelebracao: '',
   inscritoPor: '',
 };
 
@@ -109,10 +228,13 @@ function App() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [adminView, setAdminView] = useState(false);
-  const [duplicateModal, setDuplicateModal] = useState({ show: false, existingId: null });
+  const [lastErrorReport, setLastErrorReport] = useState(null);
+  const [reportingError, setReportingError] = useState(false);
+  const [duplicateModal, setDuplicateModal] = useState({ show: false, existingId: null, match: null });
 
-  if (adminView) return <AdminPanel onBack={() => setAdminView(false)} />;
+  if (window.location.pathname === '/admin') {
+    return <AdminPanel onBack={() => { window.location.href = '/'; }} />;
+  }
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -143,40 +265,7 @@ function App() {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const nomeNormalizado = formData.nome.trim().replace(/\s+/g, ' ');
-
-    if (!duplicateModal.existingId && !duplicateModal.show) {
-      setLoading(true);
-      setError(null);
-      const { data, error: duplicateError } = await supabase
-        .from(REGISTRATIONS_TABLE)
-        .select('id, nome')
-        .ilike('nome', nomeNormalizado)
-        .limit(1);
-      setLoading(false);
-
-      if (duplicateError) {
-        console.error('Erro Supabase ao verificar duplicados:', duplicateError);
-        setError(getRegistrationErrorMessage(duplicateError));
-        return;
-      }
-
-      if (data && data.length > 0) {
-        setDuplicateModal({ show: true, existingId: data[0].id });
-        return;
-      }
-    }
-
-    await saveRegistration(duplicateModal.existingId);
-  };
-
-  const saveRegistration = async (idToUpdate) => {
-    setLoading(true);
-    setError(null);
-
+  const buildPayload = () => {
     const contacto = formData.telephones
       .map(t => t.trim())
       .filter(Boolean)
@@ -184,21 +273,15 @@ function App() {
     const whatsapp = formData.whatsapp.trim();
 
     if (formData.funcoes.length === 0) {
-      setError('Selecione pelo menos uma função na Igreja.');
-      setLoading(false);
-      return;
+      return { error: 'Selecione pelo menos uma função na Igreja.' };
     }
 
     if (formData.funcoes.includes('Líder de Departamento') && formData.liderDeptos.length === 0) {
-      setError('Por favor, selecione pelo menos um departamento onde é Líder.');
-      setLoading(false);
-      return;
+      return { error: 'Por favor, selecione pelo menos um departamento onde é Líder.' };
     }
 
     if (formData.funcoes.includes('Vice-Líder de Departamento') && formData.viceLiderDeptos.length === 0) {
-      setError('Por favor, selecione pelo menos um departamento onde é Vice-Líder.');
-      setLoading(false);
-      return;
+      return { error: 'Por favor, selecione pelo menos um departamento onde é Vice-Líder.' };
     }
 
     const allFuncoes = [
@@ -206,29 +289,93 @@ function App() {
       ...formData.liderDeptos.map(d => `Líder de ${d}`),
       ...formData.viceLiderDeptos.map(d => `Vice-Líder de ${d}`)
     ].filter(Boolean);
-    const funcao = allFuncoes.join(', ');
 
-    const nomeNormalizado = formData.nome.trim().replace(/\s+/g, ' ');
-
-    const payload = {
-      nome: nomeNormalizado,
-      sexo: formData.sexo,
-      contacto,
-      whatsapp,
-      distrito: formData.distrito,
-      localizacao: formData.localizacao,
-      idade: formData.idade,
-      departamento: formData.departamento || '',
-      batizado_agua: formData.batizadoAgua,
-      data_batizado_agua: formData.batizadoAgua && formData.dataBatizadoAgua ? formData.dataBatizadoAgua : null,
-      batizado_espirito: formData.batizadoEspirito,
-      data_batizado_espirito: formData.batizadoEspirito && formData.dataBatizadoEspirito ? formData.dataBatizadoEspirito : null,
-      funcao,
-      hospedagem: formData.hospedagem,
-      contribuicao: formData.contribuicao,
-      valor_contribuicao: formData.contribuicao === 'Sim' ? (formData.valorContribuicao || '') : '',
-      inscrito_por: formData.inscritoPor,
+    return {
+      payload: {
+        nome: formData.nome.trim().replace(/\s+/g, ' '),
+        sexo: formData.sexo,
+        contacto,
+        whatsapp,
+        distrito: formData.distrito,
+        localizacao: formData.localizacao,
+        idade: formData.idade,
+        departamento: formData.departamento || '',
+        batizado_agua: formData.batizadoAgua,
+        data_batizado_agua: formData.batizadoAgua && formData.dataBatizadoAgua ? formData.dataBatizadoAgua : null,
+        batizado_espirito: formData.batizadoEspirito,
+        data_batizado_espirito: formData.batizadoEspirito && formData.dataBatizadoEspirito ? formData.dataBatizadoEspirito : null,
+        funcao: allFuncoes.join(', '),
+        hospedagem: formData.hospedagem,
+        participa_celebracao: formData.participaCelebracao,
+        contribuicao: formData.contribuicao,
+        valor_contribuicao: formData.contribuicao === 'Sim' ? (formData.valorContribuicao || '') : '',
+        inscrito_por: formData.inscritoPor,
+      }
     };
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const { payload, error: validationError } = buildPayload();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    if (!duplicateModal.existingId && !duplicateModal.show) {
+      setLoading(true);
+      setError(null);
+      const { data, error: duplicateError } = await supabase
+        .from(REGISTRATIONS_TABLE)
+        .select('id, nome, contacto, whatsapp, sexo, idade, distrito, localizacao, departamento, funcao, hospedagem, participa_celebracao')
+        .limit(500);
+      setLoading(false);
+
+      if (duplicateError) {
+        if (isMissingSchemaError(duplicateError)) {
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from(REGISTRATIONS_TABLE)
+            .select('id, nome, contacto, whatsapp, sexo, idade, distrito, localizacao, departamento, funcao, hospedagem')
+            .limit(500);
+
+          if (!fallbackError) {
+            const bestMatch = (fallbackData || [])
+              .map(row => ({ ...calculateDuplicateMatch(payload, row), row }))
+              .sort((a, b) => b.score - a.score)[0];
+
+            if (bestMatch && bestMatch.score >= DUPLICATE_THRESHOLD) {
+              setDuplicateModal({ show: true, existingId: bestMatch.row.id, match: bestMatch });
+              return;
+            }
+
+            await saveRegistration(null, payload);
+            return;
+          }
+        }
+        console.error('Erro Supabase ao verificar duplicados:', duplicateError);
+        setError(getRegistrationErrorMessage(duplicateError));
+        return;
+      }
+
+      const bestMatch = (data || [])
+        .map(row => ({ ...calculateDuplicateMatch(payload, row), row }))
+        .sort((a, b) => b.score - a.score)[0];
+
+      if (bestMatch && bestMatch.score >= DUPLICATE_THRESHOLD) {
+        setDuplicateModal({ show: true, existingId: bestMatch.row.id, match: bestMatch });
+        return;
+      }
+    }
+
+    await saveRegistration(duplicateModal.existingId, payload);
+  };
+
+  const saveRegistration = async (idToUpdate, readyPayload) => {
+    setLoading(true);
+    setError(null);
+
+    const payload = readyPayload || buildPayload().payload;
 
     let sbError;
     if (idToUpdate) {
@@ -239,6 +386,18 @@ function App() {
       sbError = error;
     }
 
+    if (sbError && isMissingSchemaError(sbError) && 'participa_celebracao' in payload) {
+      const fallbackPayload = { ...payload };
+      delete fallbackPayload.participa_celebracao;
+      if (idToUpdate) {
+        const { error } = await supabase.from(REGISTRATIONS_TABLE).update(fallbackPayload).eq('id', idToUpdate);
+        sbError = error;
+      } else {
+        const { error } = await supabase.from(REGISTRATIONS_TABLE).insert([fallbackPayload]);
+        sbError = error;
+      }
+    }
+
     setLoading(false);
 
     if (sbError) {
@@ -247,19 +406,65 @@ function App() {
       return;
     }
 
-    setDuplicateModal({ show: false, existingId: null });
+    setDuplicateModal({ show: false, existingId: null, match: null });
     setSubmitted(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleUpdateExisting = () => {
-    saveRegistration(duplicateModal.existingId);
+    const { payload, error: validationError } = buildPayload();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    saveRegistration(duplicateModal.existingId, payload);
   };
   const handleDifferentPerson = () => {
-    saveRegistration(null);
+    const { payload, error: validationError } = buildPayload();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    saveRegistration(null, payload);
   };
   const handleCancel = () => {
-    setDuplicateModal({ show: false, existingId: null });
+    setDuplicateModal({ show: false, existingId: null, match: null });
+  };
+
+  const handleReportError = async () => {
+    if (!error) return;
+    setReportingError(true);
+    setLastErrorReport(null);
+
+    const report = {
+      mensagem: error,
+      formulario: {
+        nome: formData.nome,
+        sexo: formData.sexo,
+        contacto: formData.telephones.map(t => t.trim()).filter(Boolean).join(', '),
+        whatsapp: formData.whatsapp.trim(),
+        distrito: formData.distrito,
+        localizacao: formData.localizacao,
+        idade: formData.idade,
+        funcao: formData.funcoes.join(', '),
+      },
+      browser_logs: browserLogBuffer,
+      user_agent: navigator.userAgent,
+      url: window.location.href,
+    };
+
+    const { error: reportError } = await supabase
+      .from(ERROR_REPORTS_TABLE)
+      .insert([report]);
+
+    setReportingError(false);
+    if (reportError) {
+      console.error('Erro ao enviar report:', reportError);
+      setLastErrorReport('Não foi possível enviar o report agora.');
+      return;
+    }
+
+    setLastErrorReport('Erro enviado para análise do administrador.');
   };
 
   if (submitted) {
@@ -419,10 +624,10 @@ function App() {
                           setFormData(prev => {
                             let nextFuncoes = checked ? [...prev.funcoes, f] : prev.funcoes.filter(x => x !== f);
 
-                            if (checked && f === 'Nenhum') {
-                              nextFuncoes = ['Nenhum'];
-                            } else if (checked && f !== 'Nenhum') {
-                              nextFuncoes = nextFuncoes.filter(x => x !== 'Nenhum');
+                            if (checked && f === 'Nenhuma') {
+                              nextFuncoes = ['Nenhuma'];
+                            } else if (checked && f !== 'Nenhuma') {
+                              nextFuncoes = nextFuncoes.filter(x => x !== 'Nenhuma');
                             }
 
                             let nextLider = prev.liderDeptos;
@@ -496,6 +701,19 @@ function App() {
           <section className="form-section">
             <h3 className="section-title"><Home size={18} /> Logística</h3>
             <div className="field">
+              <label>Vai participar na Celebração?</label>
+              <div className="radio-group">
+                <label className="check-label">
+                  <input type="radio" name="participaCelebracao" value="Sim" checked={formData.participaCelebracao === 'Sim'} onChange={handleChange} required />
+                  <span>Sim</span>
+                </label>
+                <label className="check-label">
+                  <input type="radio" name="participaCelebracao" value="Não" checked={formData.participaCelebracao === 'Não'} onChange={handleChange} />
+                  <span>Não</span>
+                </label>
+              </div>
+            </div>
+            <div className="field">
               <label>Tem lugar de hospedagem durante a celebração?</label>
               <div className="radio-group">
                 <label className="check-label">
@@ -544,9 +762,17 @@ function App() {
           </section>
 
           {error && (
-            <div className="error-msg">
-              <AlertCircle size={18} />
-              <span>{error}</span>
+            <div className="error-msg error-msg-stack">
+              <div className="error-msg-line">
+                <AlertCircle size={18} />
+                <span>{error}</span>
+              </div>
+              <div className="error-actions">
+                <button type="button" className="btn-secondary btn-small" onClick={handleReportError} disabled={reportingError}>
+                  {reportingError ? 'A enviar...' : 'Reportar erro'}
+                </button>
+                {lastErrorReport && <span className="report-status">{lastErrorReport}</span>}
+              </div>
             </div>
           )}
 
@@ -577,7 +803,21 @@ function App() {
           }}>
             <h3 style={{ marginBottom: 16, color: '#c5a059', fontSize: '1.2rem' }}>Inscrição Encontrada</h3>
             <p style={{ marginBottom: 24, fontSize: '0.95rem', color: '#ccc', lineHeight: '1.5' }}>
-              Já existe uma inscrição com o nome <strong>{formData.nome}</strong>. O que deseja fazer?
+              Encontramos uma inscrição parecida com <strong>{formData.nome}</strong>.
+            </p>
+            {duplicateModal.match && (
+              <div className="duplicate-score-box">
+                <div className="duplicate-score">{duplicateModal.match.score}% de semelhança</div>
+                <div className="duplicate-name">{duplicateModal.match.row.nome}</div>
+                {duplicateModal.match.matchedFields.length > 0 && (
+                  <div className="duplicate-fields">
+                    {duplicateModal.match.matchedFields.map(field => <span key={field}>{field}</span>)}
+                  </div>
+                )}
+              </div>
+            )}
+            <p style={{ marginBottom: 24, fontSize: '0.95rem', color: '#ccc', lineHeight: '1.5' }}>
+              O limite de alerta é {DUPLICATE_THRESHOLD}%. Confirme se deseja atualizar a inscrição existente ou continuar como pessoa diferente.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <button type="button" className="btn-primary" onClick={handleUpdateExisting}>
@@ -596,7 +836,7 @@ function App() {
 
       <footer className="page-footer">
         &copy; 2026 Visão Cristã · Celebração de 30 Anos de Impacto
-        <button className="admin-link" onClick={() => setAdminView(true)}>·</button>
+        <button className="admin-link" onClick={() => { window.location.href = '/admin'; }}>·</button>
       </footer>
     </div>
   );

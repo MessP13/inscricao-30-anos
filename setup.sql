@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS public.inscricoes_30_anos (
   funcao                text        NOT NULL,
   outra_funcao          text        NOT NULL DEFAULT '',
   hospedagem            text        NOT NULL,
+  participa_celebracao  text        NOT NULL DEFAULT '',
   contribuicao          text        NOT NULL DEFAULT '',
   valor_contribuicao    text        NOT NULL DEFAULT '',
   inscrito_por          text        NOT NULL,
@@ -35,6 +36,7 @@ ALTER TABLE public.inscricoes_30_anos
   ADD COLUMN IF NOT EXISTS data_batizado_agua text,
   ADD COLUMN IF NOT EXISTS data_batizado_espirito text,
   ADD COLUMN IF NOT EXISTS outra_funcao text NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS participa_celebracao text NOT NULL DEFAULT '',
   ADD COLUMN IF NOT EXISTS contribuicao text NOT NULL DEFAULT '',
   ADD COLUMN IF NOT EXISTS valor_contribuicao text NOT NULL DEFAULT '';
 
@@ -59,3 +61,23 @@ CREATE POLICY "update_public_for_duplicate_resolution" ON public.inscricoes_30_a
 DROP POLICY IF EXISTS "delete_authenticated" ON public.inscricoes_30_anos;
 CREATE POLICY "delete_authenticated" ON public.inscricoes_30_anos
   FOR DELETE TO authenticated USING (true);
+
+CREATE TABLE IF NOT EXISTS public.inscricoes_30_anos_erros (
+  id            uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  mensagem      text        NOT NULL,
+  formulario    jsonb       NOT NULL DEFAULT '{}'::jsonb,
+  browser_logs  jsonb       NOT NULL DEFAULT '[]'::jsonb,
+  user_agent    text        NOT NULL DEFAULT '',
+  url           text        NOT NULL DEFAULT '',
+  created_at    timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.inscricoes_30_anos_erros ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "insert_error_reports_public" ON public.inscricoes_30_anos_erros;
+CREATE POLICY "insert_error_reports_public" ON public.inscricoes_30_anos_erros
+  FOR INSERT TO anon WITH CHECK (true);
+
+DROP POLICY IF EXISTS "select_error_reports_authenticated" ON public.inscricoes_30_anos_erros;
+CREATE POLICY "select_error_reports_authenticated" ON public.inscricoes_30_anos_erros
+  FOR SELECT TO authenticated USING (true);

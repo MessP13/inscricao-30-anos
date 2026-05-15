@@ -1,69 +1,57 @@
-# Architecture & Implementation Plan: Sistema de Inscrições (30 Anos Visão Cristã)
+# Architecture & Implementation Plan: Sistema de Inscricoes (30 Anos Visao Crista)
 
-> Última atualização: 2026-05-13 (v5)
-
----
-
-## 📝 RESUMO DO ESTADO ATUAL
-
-O sistema está funcional com funções dinâmicas por género, gestão de duplicados via modal, seletor de data estruturado e painel administrativo avançado com funcionalidade de **edição e eliminação direta de registos**.
+> Ultima atualizacao: 2026-05-15 (v8)
 
 ---
 
-## 🚀 NOVAS IMPLEMENTAÇÕES & AJUSTES (REVISADO v7)
+## Resumo Atual
 
-### 1. Gestão Administrativa e Campos (CRUD+)
-
-- **Edição de Dados:** Adicionada capacidade de editar qualquer campo de uma inscrição diretamente no painel admin.
-- **Seletor de Data na Edição:** Substituído o seletor padrão por um seletor de datas parciais (Ano obrigatório, Mês/Dia opcionais) para manter consistência com o formulário principal.
-- **Campo "Inscrito por":** Adicionado campo obrigatório para identificar quem preencheu o formulário, tanto na inscrição quanto na edição.
-
-### 2. Interface de Utilizador (UI Cleanup)
-
-- **Remoção de Etiquetas:** Removidas todas as menções textuais a "(opcional)", "(obrigatório)" e instruções de seleção para uma interface mais limpa e profissional.
-
-### 1. Refinamento de Funções e Anti-Duplicação
-
-- **Novas Funções:** Adicionar "Nenhum" e "Membro" à lista de funções.
-- **Rótulos Unificados:** Garantir a presença de "Pastor/Pastora" e "Diácono/Diaconisa" conforme solicitado.
-- **Verificação Anti-Duplicação:** Revisar a lógica para garantir que a comparação seja robusta (insensível a maiúsculas/minúsculas e espaços extras).
-
-### 2. Painel Admin: Filtros Estritos (Presets)
-
-- **Filtros de Especialidade:** Os botões/filtros devem ser excludentes e precisos:
-  - **Ordenados:** Apenas quem tem cargo ministerial (Pastor, Diácono, Evangelista).
-  - **Dep. Senhoras:** Apenas mulheres vinculadas ao departamento de Mulheres.
-  - **Outros Presets:** Conforme a necessidade (Jovens, Crianças, etc.).
-
-### 3. Exportação em Preto e Branco
-
-- **PDF B&W:** Ajustar a geração de PDF para remover cores (tons de cinza/preto) para economia de impressão.
-
-### 4. Otimização de Tokens (Lazy Reader)
-
-- **Header de Código:** Adicionar comentário instrucional no início dos arquivos principais para orientar modelos de IA a processarem o conteúdo de forma eficiente (resumo/cópia).
+O sistema esta operacional com formulario publico, prevencao de duplicados, painel admin com edicao/remoção, e geracao de logs locais por periodo (`today/week/month/year`).
 
 ---
 
-## 🛠️ PRÓXIMOS PASSOS TÉCNICOS
+## Ja Implementado (Resumo)
 
-### [App.jsx]
-
-- Atualizar `getFuncoes` com "Nenhum", "Membro" e os rótulos solicitados.
-- Revisar `handleSubmit` para garantir busca `ilike` e `trim()` no nome.
-- Adicionar o comentário "Lazy Reader" no topo.
-
-### [AdminPanel.jsx]
-
-- Refinar `getFilteredData` para aplicar filtros estritos por preset.
-- Modificar `exportPDF` para usar cores de cabeçalho e texto em preto/cinza.
-- Adicionar o comentário "Lazy Reader" no topo.
+1. Formulario e admin alinhados com a tabela `inscricoes_30_anos`.
+2. Campo obrigatorio `inscrito_por` no cadastro e na edicao.
+3. Tratamento de erro de inscricao melhorado no frontend para diagnostico mais claro.
+4. Ajuste para enviar `contacto` e `whatsapp` sempre como texto (sem `null`).
+5. Setup SQL atualizado com migracao basica de `inscricoes` -> `inscricoes_30_anos` e politicas RLS.
+6. Lista de tarefas migrada para `.todo4vcode/shared-tasks.json`.
+7. Vinculo inicial logs <-> todo4vcode: `npm run logs` atualiza estado da task `l4c_logs_cloud`.
+8. Anti-duplicacao refeita com pontuacao de semelhanca e limite de alerta de 50%.
+9. Faixa etaria "Ate aos 11 anos" removida do formulario.
+10. Funcao "Nenhum" ajustada para "Nenhuma".
+11. Logistica passou a perguntar "Vai participar na Celebracao?".
+12. Sistema de report de erros implementado no frontend e previsto no `setup.sql` com tabela dedicada.
 
 ---
 
-## ✅ CRITÉRIOS DE ACEITAÇÃO
+## Pendencias Prioritarias (Concluidas)
 
-1. **Duplicados:** O sistema não deve permitir duplicados acidentais e o modal deve ser infalível.
-2. **Filtros:** Ao selecionar "Ordenados", a lista deve conter *apenas* oficiais da igreja.
-3. **Exportação:** O PDF gerado deve ser visualmente limpo e sem cores vibrantes.
+1. Executar `setup.sql` no Supabase para ativar a coluna `participa_celebracao` e a tabela `inscricoes_30_anos_erros`. [OK - 2026-05-15]
+2. Validar report de erro em producao depois da migracao SQL.
+3. Melhorar leitura segura dos reports pelo admin sem expor logs via `anon select`.
+4. Concluir logs cloud reais (Vercel/Supabase) quando `SUPABASE_SERVICE_ROLE_KEY` estiver disponivel.
 
+---
+
+## Logs e Cloud
+
+Estado atual dos logs:
+- Vercel e Supabase ainda estao em modo "placeholder" no arquivo de log.
+- O script atual nao baixa logs reais da Vercel/Supabase; ele apenas gera arquivos estruturados.
+
+Plano de evolucao:
+1. Integrar Vercel API com `VERCEL_TOKEN` para salvar ultimo deploy e status real.
+2. Integrar consulta segura de logs Supabase com credencial apropriada de servico.
+3. Atualizar automaticamente a task `l4c_logs_cloud` para `Done` quando ambos os canais estiverem ativos.
+
+---
+
+## Criterios de Aceitacao
+
+1. Cadastro sem telefone/whatsapp nao deve falhar por tipo de dado.
+2. Lista de TODO deve refletir estado real de trabalho no `todo4vcode`.
+3. Logs devem indicar claramente se sao reais (cloud) ou placeholders locais.
+4. Sistema de report de erros deve registrar falhas com contexto suficiente para diagnostico.

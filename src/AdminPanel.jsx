@@ -25,6 +25,7 @@ const COLS = [
   { key: 'batizado_espirito', label: 'Bat. Espírito' },
   { key: 'data_batizado_espirito', label: 'Data Bat. Espírito' },
   { key: 'hospedagem', label: 'Hospedagem' },
+  { key: 'participa_celebracao', label: 'Participa' },
   { key: 'contribuicao', label: 'Contribuição' },
   { key: 'valor_contribuicao', label: 'Valor' },
   { key: 'inscrito_por', label: 'Inscrito por' },
@@ -526,6 +527,16 @@ export default function AdminPanel({ onBack }) {
                       <option value="Não">Não</option>
                     </select>
                   </div>
+                  <div className="field">
+                    <label>Participa na Celebração</label>
+                    <select value={editingRow.participa_celebracao || ''} onChange={e => setEditingRow({...editingRow, participa_celebracao: e.target.value})} required>
+                      <option value="">Selecione</option>
+                      <option value="Sim">Sim</option>
+                      <option value="Não">Não</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="grid-2">
                   <div className="field">
                     <label>Contribuição</label>
                     <select value={editingRow.contribuicao} onChange={e => setEditingRow({...editingRow, contribuicao: e.target.value})} required>

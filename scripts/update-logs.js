@@ -7,13 +7,14 @@
  */
 
 import { execSync } from 'child_process';
-import { writeFileSync, mkdirSync, readdirSync, unlinkSync, existsSync } from 'fs';
+import { writeFileSync, readFileSync, mkdirSync, readdirSync, unlinkSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const LOGS = join(ROOT, 'logs');
+const TODO_SHARED = join(ROOT, '.todo4vcode', 'shared-tasks.json');
 const now = new Date();
 
 // ── Helpers de data ───────────────────────────────────────────────────────────
@@ -80,6 +81,41 @@ function writeLog(dir, filename, content) {
   }
   writeFileSync(join(dir, filename), content, 'utf8');
   console.log(`  ✅ ${join(dir, filename).replace(ROOT + '\\', '').replace(ROOT + '/', '')}`);
+}
+
+function readEnvVar(name) {
+  try {
+    const raw = readFileSync(join(ROOT, '.env'), 'utf8');
+    const line = raw.split(/\r?\n/).find(l => l.startsWith(`${name}=`));
+    if (!line) return '';
+    return line.slice(name.length + 1).trim();
+  } catch {
+    return '';
+  }
+}
+
+function syncLogsTask({ vercelEnabled, supabaseEnabled }) {
+  if (!existsSync(TODO_SHARED)) return;
+
+  try {
+    const data = JSON.parse(readFileSync(TODO_SHARED, 'utf8'));
+    if (!Array.isArray(data.tasks)) return;
+
+    const task = data.tasks.find(t => t.id === 'l4c_logs_cloud');
+    if (!task) return;
+
+    const stateText = `Vercel token: ${vercelEnabled ? 'OK' : 'MISSING'} | Supabase service role: ${supabaseEnabled ? 'OK' : 'MISSING'} | Updated: ${new Date().toISOString()}`;
+    const allReady = vercelEnabled && supabaseEnabled;
+    task.description = stateText;
+    task.status = allReady ? 'Done' : 'Doing';
+    task.completed = allReady;
+    task.tags = Array.isArray(task.tags) ? task.tags : ['Infra'];
+
+    writeFileSync(TODO_SHARED, JSON.stringify(data, null, 2) + '\n', 'utf8');
+    console.log(`  ✅ .todo4vcode/shared-tasks.json (logs cloud: ${task.status})`);
+  } catch {
+    console.log('  ⚠️ Falha ao sincronizar task de logs cloud no todo4vcode.');
+  }
 }
 
 // ── CODING LOGS ───────────────────────────────────────────────────────────────
@@ -168,3 +204,7 @@ for (const [folder, label] of [
 }
 
 console.log('\n🎉 Todos os logs actualizados!\n');
+
+const hasVercelToken = Boolean(readEnvVar('VERCEL_TOKEN'));
+const hasSupabaseServiceRole = Boolean(readEnvVar('SUPABASE_SERVICE_ROLE_KEY'));
+syncLogsTask({ vercelEnabled: hasVercelToken, supabaseEnabled: hasSupabaseServiceRole });

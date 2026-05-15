@@ -2,22 +2,37 @@
   "tasks": [
     {
       "id": 1,
-      "text": "Resolver \"Erro ao realizar inscrição. Verifique a ligação e tente novamente.\"",
+      "text": "Resolver \"Erro ao realizar inscricao. Verifique a ligacao e tente novamente.\"",
       "completed": true
     },
     {
       "id": 2,
-      "text": "Remover faixa etária \"Até aos 11 anos\"",
+      "text": "Verificar sistema de logs Cloud (Vercel/Supabase)",
       "completed": false
     },
     {
       "id": 3,
-      "text": "Mudar função de \"nenhum\" para \"nenhuma\"",
-      "completed": false
+      "text": "Remover faixa etaria \"Ate aos 11 anos\"",
+      "completed": true
     },
     {
       "id": 4,
-      "text": "Adicionar pra logística \"Vai participar na Celebração?\"",
+      "text": "Mudar funcao de \"nenhum\" para \"nenhuma\"",
+      "completed": true
+    },
+    {
+      "id": 5,
+      "text": "Adicionar pra logistica \"Vai participar na Celebracao?\"",
+      "completed": true
+    },
+    {
+      "id": 6,
+      "text": "Adicionar sistema de report de erros da inscricao",
+      "completed": true
+    },
+    {
+      "id": 7,
+      "text": "Ativar e validar MCPs GitHub/Supabase/Vercel nesta sessao",
       "completed": false
     }
   ]
