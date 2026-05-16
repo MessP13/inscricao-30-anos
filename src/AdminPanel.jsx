@@ -149,7 +149,7 @@ export default function AdminPanel({ onBack }) {
   const getFilteredData = () => {
     let filtered = [...data];
     if (filterType === 'Ordenados') {
-      const cargosOrdenados = ['Pastor', 'Pastora', 'Evangelista', 'Diácono', 'Diaconisa'];
+      const cargosOrdenados = ['Pastor', 'Pastora', 'Evangelista', 'Diácono', 'Diaconisa', 'Obreiro', 'Obreira'];
       filtered = filtered.filter(r => {
         const funcoes = (r.funcao || '').split(',').map(f => f.trim());
         return funcoes.some(f => cargosOrdenados.includes(f));
@@ -188,7 +188,7 @@ export default function AdminPanel({ onBack }) {
     homens: currentData.filter(r => r.sexo === 'Masculino').length,
     mulheres: currentData.filter(r => r.sexo === 'Feminino').length,
     ordenados: currentData.filter(r => {
-      const cargos = ['Pastor', 'Pastora', 'Evangelista', 'Diácono', 'Diaconisa', 'Líder de Diáconos'];
+      const cargos = ['Pastor', 'Pastora', 'Evangelista', 'Diácono', 'Diaconisa', 'Líder de Diáconos', 'Obreiro', 'Obreira'];
       const funcoes = (r.funcao || '').split(',').map(f => f.trim());
       return funcoes.some(f => cargos.includes(f));
     }).length,

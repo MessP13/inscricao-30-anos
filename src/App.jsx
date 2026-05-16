@@ -21,6 +21,8 @@ const getFuncoes = (sexo) => {
     'Evangelista',
     isFem ? 'Diaconisa' : 'Diácono',
     'Líder de Diáconos',
+    isFem ? 'Obreira' : 'Obreiro',
+    'Ministério de Louvor',
     'Superintendente da Escola Dominical',
     isFem ? 'Secretária da Igreja' : 'Secretário da Igreja',
     isFem ? 'Tesoureira da Igreja' : 'Tesoureiro da Igreja',
