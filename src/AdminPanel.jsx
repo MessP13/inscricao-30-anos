@@ -201,6 +201,14 @@ export default function AdminPanel({ onBack }) {
       filtered.sort((a, b) => (a.idade || '').localeCompare(b.idade || ''));
     } else if (filterType === 'Flagged') {
       filtered = filtered.filter(r => flaggedIds.has(r.id));
+    } else if (filterType.startsWith('dept:')) {
+      const dept = filterType.slice(5);
+      filtered = filtered.filter(r => (r.departamento || '').toLowerCase().includes(dept.toLowerCase()));
+      filtered.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+    } else if (filterType.startsWith('dist:')) {
+      const dist = filterType.slice(5);
+      filtered = filtered.filter(r => r.distrito === dist);
+      filtered.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
     }
     
     if (searchQuery.trim()) {
@@ -384,7 +392,13 @@ export default function AdminPanel({ onBack }) {
             <option value="Dep. Mulheres">Dep. Mulheres</option>
             <option value="Departamentos">Todos Departamentos</option>
             <option value="Faixas Etárias">Faixas Etárias</option>
-            <option value="Flagged">🚩 Marcados p/ Revisão ({flaggedIds.size})</option>
+            <option value="Flagged">🚩 Marcados ({flaggedIds.size})</option>
+            <optgroup label="── Por Departamento ──">
+              {DEPARTAMENTOS.map(d => <option key={`dept:${d}`} value={`dept:${d}`}>{d}</option>)}
+            </optgroup>
+            <optgroup label="── Por Distrito ──">
+              {DISTRITOS.map(d => <option key={`dist:${d}`} value={`dist:${d}`}>{d}</option>)}
+            </optgroup>
           </select>
 
           <div style={{ position: 'relative' }}>
@@ -594,7 +608,8 @@ export default function AdminPanel({ onBack }) {
                 <div className="grid-2">
                   <div className="field">
                     <label>Hospedagem</label>
-                    <select value={editingRow.hospedagem} onChange={e => setEditingRow({...editingRow, hospedagem: e.target.value})} required>
+                    <select value={editingRow.hospedagem || ''} onChange={e => setEditingRow({...editingRow, hospedagem: e.target.value})} required>
+                      <option value="">Selecione</option>
                       <option value="Sim">Sim</option>
                       <option value="Não">Não</option>
                     </select>
@@ -611,7 +626,8 @@ export default function AdminPanel({ onBack }) {
                 <div className="grid-2">
                   <div className="field">
                     <label>Contribuição</label>
-                    <select value={editingRow.contribuicao} onChange={e => setEditingRow({...editingRow, contribuicao: e.target.value})} required>
+                    <select value={editingRow.contribuicao || ''} onChange={e => setEditingRow({...editingRow, contribuicao: e.target.value})} required>
+                      <option value="">Selecione</option>
                       <option value="Sim">Sim</option>
                       <option value="Não">Não</option>
                     </select>

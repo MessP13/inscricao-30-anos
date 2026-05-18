@@ -34,6 +34,61 @@
       "id": 7,
       "text": "Ativar e validar MCPs GitHub/Supabase/Vercel nesta sessao",
       "completed": false
+    },
+    {
+      "id": 8,
+      "text": "[FLAG] Adriela da Sádia José Alberto Monteiro — Função desactualizada (\"Nenhum\") (id: 011ef11d)",
+      "completed": false
+    },
+    {
+      "id": 9,
+      "text": "[FLAG] David Aníbal David Bande — Função desactualizada (\"Nenhum\") (id: ead24ac9)",
+      "completed": false
+    },
+    {
+      "id": 10,
+      "text": "[FLAG] Teste de Inserção 1778790114699 — Nome começa com \"Teste\"; Função desactualizada (\"Nenhum\") (id: 15ea3c2c)",
+      "completed": false
+    },
+    {
+      "id": 11,
+      "text": "[FLAG] TESTE CODEX REMOVER 2026-05-15T06:11:23.285Z — Nome começa com \"Teste\"; Função desactualizada (\"Nenhum\") (id: 39e91a30)",
+      "completed": false
+    },
+    {
+      "id": 12,
+      "text": "[FLAG] TESTE CODEX REMOVER 2026-05-15T06:19:48.490Z — Nome começa com \"Teste\"; Função desactualizada (\"Nenhum\") (id: 9d19c405)",
+      "completed": false
+    },
+    {
+      "id": 13,
+      "text": "[FLAG] Messias da Piedade Rui António Pindula — Função desactualizada (\"Nenhum\") (id: c22ff7e6)",
+      "completed": false
+    },
+    {
+      "id": 14,
+      "text": "[FLAG] Teste Himano — Nome começa com \"Teste\"; Função desactualizada (\"Nenhum\") (id: 7fb1bb31)",
+      "completed": false
+    },
+    {
+      "id": 15,
+      "text": "[FLAG] jjjjjjjjjjjjjjjjj — Nome repetido (jjjj...); Função desactualizada (\"Nenhum\") (id: e8b28a92)",
+      "completed": false
+    },
+    {
+      "id": 16,
+      "text": "[FLAG] jjjjjjjjjjjjjjjjjjjj — Nome repetido (jjjj...); Função desactualizada (\"Nenhum\") (id: 79ad1270)",
+      "completed": false
+    },
+    {
+      "id": 17,
+      "text": "[FLAG] Ebenézer da Aida Aníbal Bande — Função desactualizada (\"Nenhum\") (id: 9fb43926)",
+      "completed": false
+    },
+    {
+      "id": 18,
+      "text": "[FLAG] Cândida da Anela Joaquim — Função desactualizada (\"Nenhum\") (id: 91f148bd)",
+      "completed": false
     }
   ]
 }

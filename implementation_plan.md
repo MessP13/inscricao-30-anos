@@ -39,10 +39,12 @@ O sistema esta operacional com formulario publico, prevencao de duplicados, pain
 ## Logs e Cloud
 
 Estado atual dos logs:
+
 - Vercel e Supabase ainda estao em modo "placeholder" no arquivo de log.
 - O script atual nao baixa logs reais da Vercel/Supabase; ele apenas gera arquivos estruturados.
 
 Plano de evolucao:
+
 1. Integrar Vercel API com `VERCEL_TOKEN` para salvar ultimo deploy e status real.
 2. Integrar consulta segura de logs Supabase com credencial apropriada de servico.
 3. Atualizar automaticamente a task `l4c_logs_cloud` para `Done` quando ambos os canais estiverem ativos.
@@ -55,3 +57,15 @@ Plano de evolucao:
 2. Lista de TODO deve refletir estado real de trabalho no `todo4vcode`.
 3. Logs devem indicar claramente se sao reais (cloud) ou placeholders locais.
 4. Sistema de report de erros deve registrar falhas com contexto suficiente para diagnostico.
+
+## To do
+
+Verifique as tabelas no Supabase e veja:
+-Regularização dos nomes, quanto a Maiúsculas e minúsculas
+
+- Verificar repetições, inconsistências e ou semelhanças, para verificação manual(no chat atual)
+- Adicionar todos os departamentos nos presets;
+- Adicionar todos distritos e localizações nos presets
+- Otimizar a UI, para uso mais entendível e fácil
+- Melhorar o sistema anti-duplicação, para ele docar,1amente, em coias como nome, nú
+meros, daras, coisas mais específicas para a pessoa em pessoa
