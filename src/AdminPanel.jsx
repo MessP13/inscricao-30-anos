@@ -142,7 +142,7 @@ export default function AdminPanel({ onBack }) {
     setLoading(true);
     
     // Preparar dados (remover created_at se existir para não dar erro no update)
-    const { created_at, ...payload } = editingRow;
+    const { created_at, id, ...payload } = editingRow;
     
     const { error } = await supabase
       .from('inscricoes_30_anos')

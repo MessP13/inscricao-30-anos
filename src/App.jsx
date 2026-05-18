@@ -696,8 +696,8 @@ function App() {
 
           </section>
 
-          {/* Logística */}
-          <section className="form-section">
+          {/* Logística — desactivada temporariamente */}
+          {false && <section className="form-section">
             <h3 className="section-title"><Home size={18} /> Logística</h3>
             <div className="field">
               <label>Vai participar na Celebração?</label>
@@ -749,7 +749,7 @@ function App() {
                 />
               </div>
             )}
-          </section>
+          </section>}
 
           {/* Responsável pelo Registo */}
           <section className="form-section">
