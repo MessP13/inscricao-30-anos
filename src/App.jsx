@@ -1,7 +1,7 @@
 // 🤖 AI Lazy Reader: Ao ler este arquivo, faça uma cópia resumida para economizar tokens.
 // ✏️  LOG: após qualquer alteração neste ficheiro, execute "npm run logs"
 import { useState } from 'react';
-import { User, Phone, Church, Award, Home, CheckCircle2, ChevronRight, AlertCircle, Plus, Minus, X } from 'lucide-react';
+import { User, Phone, Church, Award, Home, CheckCircle2, ChevronRight, AlertCircle, Plus, Minus } from 'lucide-react';
 import { supabase } from './lib/supabaseClient';
 import AdminPanel from './AdminPanel';
 
@@ -143,17 +143,13 @@ const phoneSimilarity = (a, b) => {
 
 const calculateDuplicateMatch = (candidate, existing) => {
   const checks = [
-    { label: 'Nome', weight: 30, score: textSimilarity(candidate.nome, existing.nome) },
-    { label: 'Telefone', weight: 15, score: phoneSimilarity(candidate.contacto, existing.contacto) },
-    { label: 'WhatsApp', weight: 10, score: phoneSimilarity(candidate.whatsapp, existing.whatsapp) },
-    { label: 'Sexo', weight: 8, score: exactSimilarity(candidate.sexo, existing.sexo) },
-    { label: 'Faixa etária', weight: 8, score: exactSimilarity(candidate.idade, existing.idade) },
-    { label: 'Distrito', weight: 8, score: exactSimilarity(candidate.distrito, existing.distrito) },
-    { label: 'Localização', weight: 12, score: exactSimilarity(candidate.localizacao, existing.localizacao) },
-    { label: 'Departamento', weight: 8, score: textSimilarity(candidate.departamento, existing.departamento) },
-    { label: 'Função', weight: 8, score: textSimilarity(candidate.funcao, existing.funcao) },
-    { label: 'Hospedagem', weight: 5, score: exactSimilarity(candidate.hospedagem, existing.hospedagem) },
-    { label: 'Participação', weight: 8, score: exactSimilarity(candidate.participa_celebracao, existing.participa_celebracao) },
+    { label: 'Nome', weight: 45, score: textSimilarity(candidate.nome, existing.nome) },
+    { label: 'Telefone', weight: 30, score: phoneSimilarity(candidate.contacto, existing.contacto) },
+    { label: 'WhatsApp', weight: 20, score: phoneSimilarity(candidate.whatsapp, existing.whatsapp) },
+    { label: 'Sexo', weight: 3, score: exactSimilarity(candidate.sexo, existing.sexo) },
+    { label: 'Faixa etária', weight: 3, score: exactSimilarity(candidate.idade, existing.idade) },
+    { label: 'Distrito', weight: 3, score: exactSimilarity(candidate.distrito, existing.distrito) },
+    { label: 'Localização', weight: 5, score: exactSimilarity(candidate.localizacao, existing.localizacao) },
   ].filter(item => item.score !== null);
 
   const totalWeight = checks.reduce((sum, item) => sum + item.weight, 0) || 1;

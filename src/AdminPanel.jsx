@@ -9,6 +9,18 @@ import * as XLSX from 'xlsx';
 
 const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'admin000609';
 
+const DISTRITOS = ['Chimoio', 'Gondola', 'Guro (Mungari)', 'Macossa', 'Mutoe', 'Sussundenga', 'Vanduzi'];
+const LOCALIZACOES_POR_DISTRITO = {
+  'Chimoio':        ['3 de Fevereiro', '7 de Setembro', '25 de Junho', 'Bela Vista', 'Samora Machel', '7 de Abril'],
+  'Gondola':        [],
+  'Guro (Mungari)': [],
+  'Macossa':        [],
+  'Mutoe':          ['Mutoe'],
+  'Sussundenga':    ['Chichira', 'Inhamezara'],
+  'Vanduzi':        [],
+};
+const DEPARTAMENTOS = ['Crianças', 'Adolescentes', 'Jovens', 'Mulheres', 'Homens', 'Terceira Idade', 'Célula', 'Missões', 'Ministério de Louvor'];
+
 const COLS = [
   { key: 'created_at', label: 'Data Inscrição' },
   { key: 'nome', label: 'Nome' },
@@ -500,11 +512,21 @@ export default function AdminPanel({ onBack }) {
                 <div className="grid-2">
                   <div className="field">
                     <label>Distrito</label>
-                    <input value={editingRow.distrito} onChange={e => setEditingRow({...editingRow, distrito: e.target.value})} required />
+                    <select value={editingRow.distrito} onChange={e => setEditingRow({...editingRow, distrito: e.target.value, localizacao: ''})} required>
+                      <option value="">Selecione</option>
+                      {DISTRITOS.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
                   </div>
                   <div className="field">
                     <label>Localização</label>
-                    <input value={editingRow.localizacao} onChange={e => setEditingRow({...editingRow, localizacao: e.target.value})} required />
+                    {(LOCALIZACOES_POR_DISTRITO[editingRow.distrito] || []).length > 0 ? (
+                      <select value={editingRow.localizacao} onChange={e => setEditingRow({...editingRow, localizacao: e.target.value})} required>
+                        <option value="">Selecione</option>
+                        {LOCALIZACOES_POR_DISTRITO[editingRow.distrito].map(l => <option key={l} value={l}>{l}</option>)}
+                      </select>
+                    ) : (
+                      <input value={editingRow.localizacao} onChange={e => setEditingRow({...editingRow, localizacao: e.target.value})} required placeholder="Nome do bairro / localidade" />
+                    )}
                   </div>
                 </div>
                 <div className="field">
@@ -513,7 +535,10 @@ export default function AdminPanel({ onBack }) {
                 </div>
                 <div className="field">
                   <label>Departamento</label>
-                  <input value={editingRow.departamento || ''} onChange={e => setEditingRow({...editingRow, departamento: e.target.value})} />
+                  <input value={editingRow.departamento || ''} onChange={e => setEditingRow({...editingRow, departamento: e.target.value})} list="admin-departamentos-list" autoComplete="off" />
+                  <datalist id="admin-departamentos-list">
+                    {DEPARTAMENTOS.map(d => <option key={d} value={d} />)}
+                  </datalist>
                 </div>
               </div>
 
