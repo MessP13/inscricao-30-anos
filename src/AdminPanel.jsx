@@ -10,15 +10,7 @@ import * as XLSX from 'xlsx';
 const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'admin000609';
 
 const DISTRITOS = ['Chimoio', 'Gondola', 'Guro (Mungari)', 'Macossa', 'Mutoe', 'Sussundenga', 'Vanduzi'];
-const LOCALIZACOES_POR_DISTRITO = {
-  'Chimoio':        ['3 de Fevereiro', '7 de Setembro', '25 de Junho', 'Bela Vista', 'Samora Machel', '7 de Abril'],
-  'Gondola':        [],
-  'Guro (Mungari)': [],
-  'Macossa':        [],
-  'Mutoe':          ['Mutoe'],
-  'Sussundenga':    ['Chichira', 'Inhamezara'],
-  'Vanduzi':        [],
-};
+const LOCALIZACOES = ['3 de Fevereiro', '7 de Setembro', '25 de Junho', 'Mutoe', 'Bela Vista', 'Chichira', 'Inhamezara', 'Samora Machel', '7 de Abril'];
 const DEPARTAMENTOS = ['Crianças', 'Adolescentes', 'Jovens', 'Mulheres', 'Homens', 'Terceira Idade', 'Célula', 'Missões', 'Ministério de Louvor'];
 
 const COLS = [
@@ -519,14 +511,10 @@ export default function AdminPanel({ onBack }) {
                   </div>
                   <div className="field">
                     <label>Localização</label>
-                    {(LOCALIZACOES_POR_DISTRITO[editingRow.distrito] || []).length > 0 ? (
-                      <select value={editingRow.localizacao} onChange={e => setEditingRow({...editingRow, localizacao: e.target.value})} required>
-                        <option value="">Selecione</option>
-                        {LOCALIZACOES_POR_DISTRITO[editingRow.distrito].map(l => <option key={l} value={l}>{l}</option>)}
-                      </select>
-                    ) : (
-                      <input value={editingRow.localizacao} onChange={e => setEditingRow({...editingRow, localizacao: e.target.value})} required placeholder="Nome do bairro / localidade" />
-                    )}
+                    <input value={editingRow.localizacao} onChange={e => setEditingRow({...editingRow, localizacao: e.target.value})} required list="admin-localizacoes-list" autoComplete="off" placeholder="Bairro / localidade" />
+                    <datalist id="admin-localizacoes-list">
+                      {LOCALIZACOES.map(l => <option key={l} value={l} />)}
+                    </datalist>
                   </div>
                 </div>
                 <div className="field">

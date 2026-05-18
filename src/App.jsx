@@ -146,6 +146,7 @@ const calculateDuplicateMatch = (candidate, existing) => {
     { label: 'Nome', weight: 45, score: textSimilarity(candidate.nome, existing.nome) },
     { label: 'Telefone', weight: 30, score: phoneSimilarity(candidate.contacto, existing.contacto) },
     { label: 'WhatsApp', weight: 20, score: phoneSimilarity(candidate.whatsapp, existing.whatsapp) },
+    { label: 'Função', weight: 10, score: textSimilarity(candidate.funcao, existing.funcao) },
     { label: 'Sexo', weight: 3, score: exactSimilarity(candidate.sexo, existing.sexo) },
     { label: 'Faixa etária', weight: 3, score: exactSimilarity(candidate.idade, existing.idade) },
     { label: 'Distrito', weight: 3, score: exactSimilarity(candidate.distrito, existing.distrito) },
