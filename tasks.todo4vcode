@@ -61,6 +61,16 @@
       "completed": false
     },
     {
+      "id": 24,
+      "text": "[PERMANENTE] Após cada push: verificar inscricoes_30_anos_erros, resolver erros, eliminar ou arquivar ocorrências",
+      "completed": false
+    },
+    {
+      "id": 25,
+      "text": "[URGENTE] Contactar para re-inscrição: Lucas Bernardo, Maria de Fátima Pedro, Jamila Jhone Machava, Julieta da Lígia Domingos, Teófilo Micas Tenesse (falharam por constraint hospedagem)",
+      "completed": false
+    },
+    {
       "id": 8,
       "text": "[FLAG] Adriela da Sádia José Alberto Monteiro — Função desactualizada (\"Nenhum\") (id: 011ef11d)",
       "completed": false

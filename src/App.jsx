@@ -304,9 +304,9 @@ function App() {
         batizado_espirito: formData.batizadoEspirito,
         data_batizado_espirito: formData.batizadoEspirito && formData.dataBatizadoEspirito ? formData.dataBatizadoEspirito : null,
         funcao: allFuncoes.join(', '),
-        hospedagem: formData.hospedagem,
-        participa_celebracao: formData.participaCelebracao,
-        contribuicao: formData.contribuicao,
+        hospedagem: formData.hospedagem || 'Não',
+        participa_celebracao: formData.participaCelebracao || '',
+        contribuicao: formData.contribuicao || '',
         valor_contribuicao: formData.contribuicao === 'Sim' ? (formData.valorContribuicao || '') : '',
         inscrito_por: formData.inscritoPor,
       }
