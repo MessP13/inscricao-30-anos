@@ -1,8 +1,8 @@
 // 🤖 AI Lazy Reader: Ao ler este arquivo, faça uma cópia resumida para economizar tokens.
 // ✏️  LOG: após qualquer alteração neste ficheiro, execute "npm run logs"
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from './lib/supabaseClient';
-import { LogOut, Download, FileText, FileSpreadsheet, Table, Columns, Edit2, Trash2, X, Save } from 'lucide-react';
+import { LogOut, Download, FileText, FileSpreadsheet, Table, Columns, Edit2, Trash2, X, Save, Flag } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
@@ -93,6 +93,15 @@ export default function AdminPanel({ onBack }) {
   const [showColPicker, setShowColPicker] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingRow, setEditingRow] = useState(null);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [flaggedIds, setFlaggedIds] = useState(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('admin_flagged_ids') || '[]')); }
+    catch { return new Set(); }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('admin_flagged_ids', JSON.stringify([...flaggedIds]));
+  }, [flaggedIds]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -150,6 +159,27 @@ export default function AdminPanel({ onBack }) {
     setEditingRow(null);
   };
 
+  const toggleSelect = (id) => setSelectedIds(prev => {
+    const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next;
+  });
+
+  const toggleFlag = (id) => setFlaggedIds(prev => {
+    const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next;
+  });
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Eliminar permanentemente ${selectedIds.size} inscrição(ões) seleccionada(s)?`)) return;
+    setLoading(true);
+    for (const id of selectedIds) {
+      await supabase.from('inscricoes_30_anos').delete().eq('id', id);
+    }
+    setLoading(false);
+    setData(prev => prev.filter(r => !selectedIds.has(r.id)));
+    setFlaggedIds(prev => { const next = new Set(prev); selectedIds.forEach(id => next.delete(id)); return next; });
+    setSelectedIds(new Set());
+  };
+
   const getFilteredData = () => {
     let filtered = [...data];
     if (filterType === 'Ordenados') {
@@ -169,6 +199,8 @@ export default function AdminPanel({ onBack }) {
       filtered.sort((a, b) => (a.departamento || '').localeCompare(b.departamento || ''));
     } else if (filterType === 'Faixas Etárias') {
       filtered.sort((a, b) => (a.idade || '').localeCompare(b.idade || ''));
+    } else if (filterType === 'Flagged') {
+      filtered = filtered.filter(r => flaggedIds.has(r.id));
     }
     
     if (searchQuery.trim()) {
@@ -352,6 +384,7 @@ export default function AdminPanel({ onBack }) {
             <option value="Dep. Mulheres">Dep. Mulheres</option>
             <option value="Departamentos">Todos Departamentos</option>
             <option value="Faixas Etárias">Faixas Etárias</option>
+            <option value="Flagged">🚩 Marcados p/ Revisão ({flaggedIds.size})</option>
           </select>
 
           <div style={{ position: 'relative' }}>
@@ -426,6 +459,19 @@ export default function AdminPanel({ onBack }) {
       )}
 
 
+      {selectedIds.size > 0 && (
+        <div style={{ display:'flex', gap:'10px', alignItems:'center', marginBottom:'16px', padding:'10px 16px', background:'rgba(197,160,89,0.1)', borderRadius:'8px', border:'1px solid rgba(197,160,89,0.3)' }}>
+          <span style={{ color:'#c5a059', fontWeight:'bold', fontSize:'0.9rem' }}>{selectedIds.size} seleccionado(s)</span>
+          <button className="btn-export" onClick={() => setFlaggedIds(prev => { const n=new Set(prev); selectedIds.forEach(id=>n.add(id)); return n; })}>
+            <Flag size={13}/> Marcar
+          </button>
+          <button className="btn-export" style={{ color:'#f87171', borderColor:'rgba(248,113,113,0.4)' }} onClick={handleBulkDelete}>
+            <Trash2 size={13}/> Eliminar seleccionados
+          </button>
+          <button className="btn-export" onClick={() => setSelectedIds(new Set())}><X size={13}/> Limpar</button>
+        </div>
+      )}
+
       {loading && <p className="admin-status">A carregar...</p>}
       {fetchError && <p className="admin-status" style={{ color: '#f87171' }}>{fetchError}</p>}
 
@@ -434,13 +480,26 @@ export default function AdminPanel({ onBack }) {
           <table className="admin-table">
             <thead>
               <tr>
+                <th style={{ width:'36px', textAlign:'center' }}>
+                  <input type="checkbox"
+                    checked={currentData.length > 0 && currentData.every(r => selectedIds.has(r.id))}
+                    onChange={e => setSelectedIds(e.target.checked ? new Set(currentData.map(r => r.id)) : new Set())}
+                  />
+                </th>
+                <th style={{ width:'28px' }} />
                 {activeCols.map(c => <th key={c.key}>{c.label}</th>)}
                 <th style={{ width: '80px', textAlign: 'center' }}>Ações</th>
               </tr>
             </thead>
             <tbody>
               {currentData.map((r, i) => (
-                <tr key={r.id || i}>
+                <tr key={r.id || i} style={flaggedIds.has(r.id) ? { background:'rgba(197,160,89,0.06)' } : {}}>
+                  <td style={{ textAlign:'center' }}>
+                    <input type="checkbox" checked={selectedIds.has(r.id)} onChange={() => toggleSelect(r.id)} />
+                  </td>
+                  <td style={{ textAlign:'center' }}>
+                    <Flag size={13} style={{ cursor:'pointer', color: flaggedIds.has(r.id) ? '#c5a059' : '#444' }} onClick={() => toggleFlag(r.id)} title={flaggedIds.has(r.id) ? 'Desmarcar' : 'Marcar para revisão'} />
+                  </td>
                   {activeCols.map(c => <td key={c.key}>{fmt(c, r[c.key])}</td>)}
                   <td style={{ textAlign: 'center' }}>
                     <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>

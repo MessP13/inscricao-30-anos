@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives",
     "preview": "vite preview",
-    "logs": "node scripts/update-logs.js"
+    "logs": "node scripts/update-logs.js",
+    "daily-flag": "node scripts/daily-flag.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.7",

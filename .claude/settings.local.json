@@ -5,7 +5,17 @@
       "Bash(git push *)",
       "Bash(npm install *)",
       "Bash(npm run *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(curl -s 'https://wyynplryfcbosnoqtydh.supabase.co/rest/v1/inscricoes_30_anos?select=distrito,localizacao,funcao,departamento&limit=1000' -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5eW5wbHJ5ZmNib3Nub3F0eWRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MzU2MzMsImV4cCI6MjA5MjUxMTYzM30.pnqZZJNNbvPGTUPKbM7rivN0PKPb61e6K7Ah6fVr7zQ' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5eW5wbHJ5ZmNib3Nub3F0eWRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MzU2MzMsImV4cCI6MjA5MjUxMTYzM30.pnqZZJNNbvPGTUPKbM7rivN0PKPb61e6K7Ah6fVr7zQ' -o '%TEMP%\\\\sb_data.json')",
+      "Bash(node -e ' *)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "",
+        "hooks": [{"type": "command", "command": "node scripts/daily-flag.mjs"}]
+      }
     ]
   }
 }

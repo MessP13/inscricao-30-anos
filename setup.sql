@@ -62,6 +62,10 @@ DROP POLICY IF EXISTS "delete_authenticated" ON public.inscricoes_30_anos;
 CREATE POLICY "delete_authenticated" ON public.inscricoes_30_anos
   FOR DELETE TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "delete_anon" ON public.inscricoes_30_anos;
+CREATE POLICY "delete_anon" ON public.inscricoes_30_anos
+  FOR DELETE TO anon USING (true);
+
 CREATE TABLE IF NOT EXISTS public.inscricoes_30_anos_erros (
   id            uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
   mensagem      text        NOT NULL,
