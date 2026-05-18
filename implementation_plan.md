@@ -1,6 +1,6 @@
 # Architecture & Implementation Plan: Sistema de Inscricoes (30 Anos Visao Crista)
 
-> Ultima atualizacao: 2026-05-15 (v8)
+> Ultima atualizacao: 2026-05-18 (v9)
 
 ---
 
@@ -24,6 +24,13 @@ O sistema esta operacional com formulario publico, prevencao de duplicados, pain
 10. Funcao "Nenhum" ajustada para "Nenhuma".
 11. Logistica passou a perguntar "Vai participar na Celebracao?".
 12. Sistema de report de erros implementado no frontend e previsto no `setup.sql` com tabela dedicada.
+13. Painel admin: checkboxes de selecção, flags por registo, filtro "Marcados p/ Revisão", eliminação em massa.
+14. Script `scripts/daily-flag.mjs` detecta registos suspeitos 1x/dia e escreve em `tasks.todo4vcode`.
+15. Políticas RLS `delete_anon` e `update_anon` executadas no Supabase — admin pode editar e apagar.
+16. Modal de edição do admin corrigido (selects sem opção vazia bloqueavam submissão silenciosamente).
+17. Filtros por departamento e por distrito adicionados ao dropdown do admin.
+18. Secção de Logística desactivada temporariamente no formulário público.
+19. Distritos Mutoe e Sussundenga (bairros Inhamezara, Chichira) e Ministério de Louvor adicionados.
 
 ---
 
@@ -60,12 +67,7 @@ Plano de evolucao:
 
 ## To do
 
-Verifique as tabelas no Supabase e veja:
--Regularização dos nomes, quanto a Maiúsculas e minúsculas
-
-- Verificar repetições, inconsistências e ou semelhanças, para verificação manual(no chat atual)
-- Adicionar todos os departamentos nos presets;
-- Adicionar todos distritos e localizações nos presets
-- Otimizar a UI, para uso mais entendível e fácil
-- Melhorar o sistema anti-duplicação, para ele docar,1amente, em coias como nome, nú
-meros, daras, coisas mais específicas para a pessoa em pessoa
+- [ ] Normalizar registos na BD: nomes (maiúsculas/minúsculas), funcao="Nenhum" → "Nenhuma", departamentos com valores sujos
+- [ ] Apagar registos de teste da BD (TESTE CODEX, jjjjj, Teste Himano, etc.) — ver [FLAG] no tasks.todo4vcode
+- [ ] Verificar logs Cloud reais (Vercel/Supabase) quando SUPABASE_SERVICE_ROLE_KEY estiver disponível
+- [ ] Reactivar secção de Logística quando necessário (mudar `false` para `true` em App.jsx:700)

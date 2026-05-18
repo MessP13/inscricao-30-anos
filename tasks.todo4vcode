@@ -36,6 +36,31 @@
       "completed": false
     },
     {
+      "id": 19,
+      "text": "Corrigir RLS: executar delete_anon e update_anon no Supabase SQL Editor",
+      "completed": true
+    },
+    {
+      "id": 20,
+      "text": "Corrigir modal de edição admin (selects sem opção vazia bloqueavam formulário)",
+      "completed": true
+    },
+    {
+      "id": 21,
+      "text": "Adicionar filtros por departamento e por distrito no dropdown do admin",
+      "completed": true
+    },
+    {
+      "id": 22,
+      "text": "Desactivar secção de Logística no formulário público (temporariamente)",
+      "completed": true
+    },
+    {
+      "id": 23,
+      "text": "Normalizar registos com funcao='Nenhum' e apagar registos de teste da BD",
+      "completed": false
+    },
+    {
       "id": 8,
       "text": "[FLAG] Adriela da Sádia José Alberto Monteiro — Função desactualizada (\"Nenhum\") (id: 011ef11d)",
       "completed": false
