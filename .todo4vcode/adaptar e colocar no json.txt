@@ -89,6 +89,3 @@
       "id": 29,
       "text": "[FLAG] David Aníbal David Bande — Função desactualizada (\"Nenhum\") (id: ead24ac9)",
       "completed": false
-    }
-  ]
-}
