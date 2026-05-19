@@ -10,7 +10,7 @@ import * as XLSX from 'xlsx';
 const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'admin000609';
 
 const DISTRITOS = ['Chimoio', 'Gondola', 'Guro (Mungari)', 'Macossa', 'Mutoe', 'Sussundenga', 'Vanduzi'];
-const LOCALIZACOES = ['3 de Fevereiro', '7 de Setembro', '25 de Junho', 'Mutoe', 'Bela Vista', 'Chichira', 'Inhamezara', 'Samora Machel', '7 de Abril'];
+const LOCALIZACOES = ['3 de Fevereiro', '7 de Setembro', '25 de Junho', 'A luta continua', 'Mutoe', 'Bela Vista', 'Chichira', 'Inhamezara', 'Samora Machel', '7 de Abril'];
 const DEPARTAMENTOS = ['Crianças', 'Adolescentes', 'Jovens', 'Mulheres', 'Homens', 'Terceira Idade', 'Célula', 'Missões', 'Ministério de Louvor'];
 
 const COLS = [

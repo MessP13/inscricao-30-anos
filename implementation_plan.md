@@ -71,3 +71,4 @@ Plano de evolucao:
 - [ ] Apagar registos de teste da BD (TESTE CODEX, jjjjj, Teste Himano, etc.) — ver [FLAG] no tasks.todo4vcode
 - [ ] Verificar logs Cloud reais (Vercel/Supabase) quando SUPABASE_SERVICE_ROLE_KEY estiver disponível
 - [ ] Reactivar secção de Logística quando necessário (mudar `false` para `true` em App.jsx:700)
+

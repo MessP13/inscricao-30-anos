@@ -9,7 +9,7 @@ const REGISTRATIONS_TABLE = 'inscricoes_30_anos';
 const ERROR_REPORTS_TABLE = 'inscricoes_30_anos_erros';
 const DUPLICATE_THRESHOLD = 50;
 const DISTRITOS = ['Chimoio', 'Gondola', 'Guro (Mungari)', 'Macossa', 'Mutoe', 'Sussundenga', 'Vanduzi'];
-const LOCALIZACOES = ['3 de Fevereiro', '7 de Setembro', '25 de Junho', 'Mutoe', 'Bela Vista', 'Chichira', 'Inhamezara', 'Samora Machel', '7 de Abril'];
+const LOCALIZACOES = ['3 de Fevereiro', '7 de Setembro', '25 de Junho', 'A luta continua', 'Mutoe', 'Bela Vista', 'Chichira', 'Inhamezara', 'Samora Machel', '7 de Abril'];
 const IDADES = ['12 - 17', '18 - 34', '35 - 54', '55+'];
 const DEPARTAMENTOS = ['Crianças', 'Adolescentes', 'Jovens', 'Mulheres', 'Homens', 'Terceira Idade', 'Célula', 'Missões', 'Ministério de Louvor'];
 
