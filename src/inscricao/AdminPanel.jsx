@@ -1,8 +1,9 @@
 // 🤖 AI Lazy Reader: Ao ler este arquivo, faça uma cópia resumida para economizar tokens.
 // ✏️  LOG: após qualquer alteração neste ficheiro, execute "npm run logs"
 import { useState, useEffect } from 'react';
-import { supabase } from './lib/supabaseClient';
+import { supabase } from '../lib/supabaseClient';
 import { LogOut, Download, FileText, FileSpreadsheet, Table, Columns, Edit2, Trash2, X, Save, Flag } from 'lucide-react';
+import HistoricoAdminTab from '../historico/HistoricoAdminTab';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
@@ -10,7 +11,7 @@ import * as XLSX from 'xlsx';
 const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'admin000609';
 
 const DISTRITOS = ['Chimoio', 'Gondola', 'Guro (Mungari)', 'Macossa', 'Mutoe', 'Sussundenga', 'Vanduzi'];
-const LOCALIZACOES = ['3 de Fevereiro', '7 de Setembro', '25 de Junho', 'A luta continua', 'Mutoe', 'Bela Vista', 'Chichira', 'Inhamezara', 'Samora Machel', '7 de Abril'];
+const LOCALIZACOES = ['3 de Fevereiro', '7 de Setembro', '25 de Junho', 'A Luta Continua', 'Mutoe', 'Bela Vista', 'Chichira', 'Nhamezara', 'Samora Machel', '7 de Abril'];
 const DEPARTAMENTOS = ['Crianças', 'Adolescentes', 'Jovens', 'Mulheres', 'Homens', 'Terceira Idade', 'Célula', 'Missões', 'Ministério de Louvor'];
 
 const COLS = [
@@ -20,6 +21,7 @@ const COLS = [
   { key: 'idade', label: 'Faixa Etária' },
   { key: 'distrito', label: 'Distrito' },
   { key: 'localizacao', label: 'Localização' },
+  { key: 'bairro', label: 'Bairro' },
   { key: 'funcao', label: 'Função' },
   { key: 'departamento', label: 'Departamento' },
   { key: 'contacto', label: 'Telefone' },
@@ -82,6 +84,7 @@ function fmt(col, val) {
 }
 
 export default function AdminPanel({ onBack }) {
+  const [activeTab, setActiveTab] = useState('inscricao');
   const [authed, setAuthed] = useState(false);
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -371,7 +374,7 @@ export default function AdminPanel({ onBack }) {
     <div className="admin-page">
       <div className="admin-bar" style={{ flexWrap: 'wrap', gap: '15px', alignItems: 'center' }}>
         <h2 className="admin-title" style={{ margin: 0, padding: 0 }}>
-          Inscrições · 30 Anos
+          {activeTab === 'inscricao' ? 'Inscrições · 30 Anos' : 'Levantamento Histórico'}
         </h2>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', flex: 1, justifyContent: 'flex-end' }}>
           
@@ -443,7 +446,37 @@ export default function AdminPanel({ onBack }) {
         </div>
       </div>
 
-      {!loading && !fetchError && (
+      {/* ── Tabs ── */}
+      <div style={{ display: 'flex', gap: 4, marginBottom: 24, borderBottom: '1px solid #222', paddingBottom: 0 }}>
+        {[
+          { key: 'inscricao', label: 'Inscrições 30 Anos' },
+          { key: 'historico', label: 'Levantamento Histórico' },
+        ].map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setActiveTab(key)}
+            style={{
+              padding: '10px 20px',
+              fontSize: '0.88rem',
+              fontWeight: 600,
+              border: 'none',
+              borderRadius: '8px 8px 0 0',
+              cursor: 'pointer',
+              background: activeTab === key ? '#c5a059' : '#1a1a24',
+              color: activeTab === key ? '#0a0a0f' : '#888',
+              borderBottom: activeTab === key ? '2px solid #c5a059' : '2px solid transparent',
+              transition: 'all 0.15s',
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'historico' && <HistoricoAdminTab />}
+
+      {activeTab === 'inscricao' && !loading && !fetchError && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '15px', marginBottom: '24px' }}>
           <div style={{ background: 'rgba(255,255,255,0.03)', padding: '15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
             <div style={{ fontSize: '0.85rem', color: '#a1a1aa' }}>Total</div>
@@ -473,7 +506,7 @@ export default function AdminPanel({ onBack }) {
       )}
 
 
-      {selectedIds.size > 0 && (
+      {activeTab === 'inscricao' && selectedIds.size > 0 && (
         <div style={{ display:'flex', gap:'10px', alignItems:'center', marginBottom:'16px', padding:'10px 16px', background:'rgba(197,160,89,0.1)', borderRadius:'8px', border:'1px solid rgba(197,160,89,0.3)' }}>
           <span style={{ color:'#c5a059', fontWeight:'bold', fontSize:'0.9rem' }}>{selectedIds.size} seleccionado(s)</span>
           <button className="btn-export" onClick={() => setFlaggedIds(prev => { const n=new Set(prev); selectedIds.forEach(id=>n.add(id)); return n; })}>
@@ -486,10 +519,10 @@ export default function AdminPanel({ onBack }) {
         </div>
       )}
 
-      {loading && <p className="admin-status">A carregar...</p>}
-      {fetchError && <p className="admin-status" style={{ color: '#f87171' }}>{fetchError}</p>}
+      {activeTab === 'inscricao' && loading && <p className="admin-status">A carregar...</p>}
+      {activeTab === 'inscricao' && fetchError && <p className="admin-status" style={{ color: '#f87171' }}>{fetchError}</p>}
 
-      {!loading && !fetchError && (
+      {activeTab === 'inscricao' && !loading && !fetchError && (
         <div className="admin-table-wrap">
           <table className="admin-table">
             <thead>

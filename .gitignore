@@ -31,4 +31,8 @@ teste123.md
 *.sw?
 
 .vercel
-"/.claude/" 
+"/.claude/"
+
+# local project keys
+projects_keys.txt
+check_names.mjs

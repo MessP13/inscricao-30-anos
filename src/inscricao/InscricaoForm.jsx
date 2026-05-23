@@ -2,14 +2,13 @@
 // ✏️  LOG: após qualquer alteração neste ficheiro, execute "npm run logs"
 import { useState } from 'react';
 import { User, Phone, Church, Award, Home, CheckCircle2, ChevronRight, AlertCircle, Plus, Minus } from 'lucide-react';
-import { supabase } from './lib/supabaseClient';
-import AdminPanel from './AdminPanel';
+import { supabase } from '../lib/supabaseClient';
 
 const REGISTRATIONS_TABLE = 'inscricoes_30_anos';
 const ERROR_REPORTS_TABLE = 'inscricoes_30_anos_erros';
 const DUPLICATE_THRESHOLD = 50;
 const DISTRITOS = ['Chimoio', 'Gondola', 'Guro (Mungari)', 'Macossa', 'Mutoe', 'Sussundenga', 'Vanduzi'];
-const LOCALIZACOES = ['3 de Fevereiro', '7 de Abril', '7 de Setembro', '25 de Junho', 'A Luta Continua', 'Mutoe', 'Bela Vista', 'Chichira', 'Inhamezara', 'Samora Machel'];
+const LOCALIZACOES = ['3 de Fevereiro', '7 de Abril', '7 de Setembro', '25 de Junho', 'A Luta Continua', 'Mutoe', 'Bela Vista', 'Chichira', 'Nhamezara', 'Samora Machel'];
 const IDADES = ['12 - 17', '18 - 34', '35 - 54', '55+'];
 const DEPARTAMENTOS = ['Crianças', 'Adolescentes', 'Jovens', 'Mulheres', 'Homens', 'Terceira Idade', 'Célula', 'Missões', 'Ministério de Louvor'];
 
@@ -222,7 +221,7 @@ const INITIAL_FORM = {
   inscritoPor: '',
 };
 
-function App() {
+function InscricaoForm() {
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -230,10 +229,6 @@ function App() {
   const [lastErrorReport, setLastErrorReport] = useState(null);
   const [reportingError, setReportingError] = useState(false);
   const [duplicateModal, setDuplicateModal] = useState({ show: false, existingId: null, match: null });
-
-  if (window.location.pathname === '/admin') {
-    return <AdminPanel onBack={() => { window.location.href = '/'; }} />;
-  }
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -841,4 +836,4 @@ function App() {
   );
 }
 
-export default App;
+export default InscricaoForm;
