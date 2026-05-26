@@ -850,7 +850,7 @@ export default function HistoricoForm() {
             <h3 style={{ color: G, marginBottom: 16 }}>Adicionar informação</h3>
             <textarea value={noteText} onChange={e => setNoteText(e.target.value)}
               placeholder="Escreva aqui as informações adicionais..."
-              style={{ ...sTa, width: '100%', marginBottom: 12 }} autoFocus />
+              className="hf-textarea" style={{ width: '100%', marginBottom: 12 }} autoFocus />
             <FileUploadSection
               label="Anexar ficheiro (opcional)"
               category={`notas/${submissionId}`}
@@ -1141,9 +1141,9 @@ export default function HistoricoForm() {
             <input className="hf-input" value={formData.primeira_congregacao} onChange={e => set('primeira_congregacao', e.target.value)} placeholder="Nome da primeira igreja" />
           </div>
 
-          <div style={{ ...sFld, marginBottom: 20 }}>
+          <div className="hf-field" style={{ marginBottom: 20 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <label style={{ ...sLbl, marginBottom: 0 }}>Igrejas/Congregações na Província</label>
+              <label className="hf-label" style={{ marginBottom: 0 }}>Igrejas/Congregações na Província</label>
               <button type="button" onClick={() => set('congregacoes', [...formData.congregacoes, emptyCongregacao()])}
                 style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 12px', borderRadius: '6px', background: G, color: '#000', border: 'none', cursor: 'pointer', fontSize: '0.97rem', fontWeight: 600 }}>
                 <Plus size={14} /> Adicionar
@@ -1161,7 +1161,7 @@ export default function HistoricoForm() {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
                   <div>
-                    <label style={{ ...sLbl, fontSize: '1.12rem' }}>Distrito</label>
+                    <label className="hf-label-sm">Distrito</label>
                     <select className="hf-input hf-input-sm" value={c.distrito}
                       onChange={e => set('congregacoes', formData.congregacoes.map(x => x.id === c.id ? { ...x, distrito: e.target.value } : x))}>
                       <option value="">— Seleccione —</option>
@@ -1169,14 +1169,14 @@ export default function HistoricoForm() {
                     </select>
                   </div>
                   <div>
-                    <label style={{ ...sLbl, fontSize: '1.12rem' }}>Bairro/Localidade</label>
+                    <label className="hf-label-sm">Bairro/Localidade</label>
                     <input className="hf-input hf-input-sm" value={c.localidade}
                       onChange={e => set('congregacoes', formData.congregacoes.map(x => x.id === c.id ? { ...x, localidade: e.target.value } : x))}
                       placeholder="Nome do bairro/localidade" />
                   </div>
                 </div>
                 <div>
-                  <label style={{ ...sLbl, fontSize: '1.12rem' }}>Data de inauguração</label>
+                  <label className="hf-label-sm">Data de inauguração</label>
                   <DateFlex value={c.data}
                     onChange={d => set('congregacoes', formData.congregacoes.map(x => x.id === c.id ? { ...x, data: d } : x))} />
                 </div>
@@ -1262,7 +1262,7 @@ export default function HistoricoForm() {
 
           <div style={{ marginBottom: 16 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <label style={{ ...sLbl, marginBottom: 0 }}>Pessoas de referência</label>
+              <label className="hf-label" style={{ marginBottom: 0 }}>Pessoas de referência</label>
               <button type="button" onClick={() => set('referencias', [...formData.referencias, emptyReferencia()])}
                 style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: '6px', background: '#1a1a2e', border: `1px solid ${G}55`, color: G, cursor: 'pointer', fontSize: '1.12rem' }}>
                 <Plus size={13} /> Adicionar
@@ -1271,13 +1271,13 @@ export default function HistoricoForm() {
             {formData.referencias.map((r) => (
               <div key={r.id} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 8, marginBottom: 8, alignItems: 'end' }}>
                 <div>
-                  <label style={{ ...sLbl, fontSize: '1.12rem' }}>Nome</label>
+                  <label className="hf-label-sm">Nome</label>
                   <input className="hf-input hf-input-sm" value={r.nome}
                     onChange={e => set('referencias', formData.referencias.map(x => x.id === r.id ? { ...x, nome: e.target.value } : x))}
                     placeholder="Nome da pessoa" />
                 </div>
                 <div>
-                  <label style={{ ...sLbl, fontSize: '1.12rem' }}>Contacto</label>
+                  <label className="hf-label-sm">Contacto</label>
                   <input className="hf-input hf-input-sm" type="tel" value={r.contacto}
                     onChange={e => set('referencias', formData.referencias.map(x => x.id === r.id ? { ...x, contacto: e.target.value } : x))}
                     placeholder="Telefone" />
