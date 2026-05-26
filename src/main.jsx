@@ -13,6 +13,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/" element={<Navigate to="/inscricao" replace />} />
         <Route path="/inscricao" element={<InscricaoForm />} />
         <Route path="/historico" element={<HistoricoForm />} />
+        <Route path="/historia" element={<Navigate to="/historico" replace />} />
         <Route path="/admin" element={<AdminPanel onBack={() => { window.location.href = '/inscricao' }} />} />
       </Routes>
     </BrowserRouter>

@@ -42,8 +42,8 @@ const emptyObreiroLider = () => ({
 const EMPTY_FORM = {
   nome: '', sexo: '', provincia: '', distrito: '', igreja: '', localidade: '',
   funcao: '', quando_ingressou: '', whatsapp: '', telefone: '', email: '',
-  coordenadores_provinciais: [], outros_missionarios: [],
-  obreiros_coordenadores: [], obreiros_lideres: [],
+  coordenadores_provinciais: [emptyCoordenador()], outros_missionarios: [emptyOutroMissionario()],
+  obreiros_coordenadores: [emptyCoordenador()], obreiros_lideres: [emptyObreiroLider()],
   onde_comecou: '', onde_comecou_outro: '',
   igrejas_distrito: '', templos_concluidos_distrito: '', templos_construcao_distrito: '', templos_material_distrito: '',
   primeira_congregacao: '', congregacoes: [], data_inauguracao: { mode: 'unknown' },
@@ -60,7 +60,7 @@ function DateFlex({ value = { mode: 'unknown' }, onChange, hideUnknown = false }
   const setFrom = (patch) => onChange({ ...value, from: { ...(value.from || {}), ...patch } });
   const setTo   = (patch) => onChange({ ...value, to:   { ...(value.to   || {}), ...patch } });
 
-  const yearOpts = Array.from({ length: 80 }, (_, i) => 2026 - i);
+  const yearOpts = Array.from({ length: 31 }, (_, i) => 2026 - i);
   const months = [
     ['01','Janeiro'],['02','Fevereiro'],['03','Março'],['04','Abril'],
     ['05','Maio'],['06','Junho'],['07','Julho'],['08','Agosto'],
@@ -259,14 +259,9 @@ function CoordenadorTable({ items, onChange, title = 'Coordenadores Provinciais'
 
   return (
     <div style={{ marginBottom: 16 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+      <div style={{ marginBottom: 8 }}>
         <span style={{ color: '#ccc', fontSize: '1.02rem', fontWeight: 600 }}>{title}</span>
-        <button type="button" onClick={() => onChange([...items, emptyCoordenador()])}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: '6px', background: G, color: '#000', border: 'none', cursor: 'pointer', fontSize: '1.12rem', fontWeight: 600 }}>
-          <Plus size={13} /> Adicionar
-        </button>
       </div>
-      {items.length === 0 && <p style={{ color: '#555', fontSize: '1.0rem', fontStyle: 'italic' }}>Nenhum registo adicionado.</p>}
       {items.map((p, idx) => (
         <div key={p.id} style={{ background: '#0d0d1a', border: '1px solid #2a2a3a', borderRadius: '8px', padding: '12px', marginBottom: 8 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -300,6 +295,10 @@ function CoordenadorTable({ items, onChange, title = 'Coordenadores Provinciais'
           </div>
         </div>
       ))}
+      <button type="button" onClick={() => onChange([...items, emptyCoordenador()])}
+        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 14px', borderRadius: '6px', background: G, color: '#000', border: 'none', cursor: 'pointer', fontSize: '1.0rem', fontWeight: 600, marginTop: 4 }}>
+        <Plus size={13} /> Adicionar
+      </button>
     </div>
   );
 }
@@ -310,14 +309,9 @@ function OutroMissionarioTable({ items, onChange, provinciaAtual }) {
 
   return (
     <div style={{ marginBottom: 16 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+      <div style={{ marginBottom: 8 }}>
         <span style={{ color: '#ccc', fontSize: '1.02rem', fontWeight: 600 }}>Outros Missionários e Missionárias</span>
-        <button type="button" onClick={() => onChange([...items, emptyOutroMissionario()])}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: '6px', background: G, color: '#000', border: 'none', cursor: 'pointer', fontSize: '1.12rem', fontWeight: 600 }}>
-          <Plus size={13} /> Adicionar
-        </button>
       </div>
-      {items.length === 0 && <p style={{ color: '#555', fontSize: '1.0rem', fontStyle: 'italic' }}>Nenhum registo adicionado.</p>}
       {items.map((p, idx) => (
         <div key={p.id} style={{ background: '#0d0d1a', border: '1px solid #2a2a3a', borderRadius: '8px', padding: '12px', marginBottom: 8 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -367,6 +361,10 @@ function OutroMissionarioTable({ items, onChange, provinciaAtual }) {
           </div>
         </div>
       ))}
+      <button type="button" onClick={() => onChange([...items, emptyOutroMissionario()])}
+        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 14px', borderRadius: '6px', background: G, color: '#000', border: 'none', cursor: 'pointer', fontSize: '1.0rem', fontWeight: 600, marginTop: 4 }}>
+        <Plus size={13} /> Adicionar
+      </button>
     </div>
   );
 }
@@ -386,14 +384,9 @@ function ObreiroLiderTable({ items, onChange, provinciaAtual }) {
 
   return (
     <div style={{ marginBottom: 16 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+      <div style={{ marginBottom: 8 }}>
         <span style={{ color: '#ccc', fontSize: '1.02rem', fontWeight: 600 }}>Pastores/Líderes de Congregação</span>
-        <button type="button" onClick={() => onChange([...items, emptyObreiroLider()])}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: '6px', background: G, color: '#000', border: 'none', cursor: 'pointer', fontSize: '1.12rem', fontWeight: 600 }}>
-          <Plus size={13} /> Adicionar
-        </button>
       </div>
-      {items.length === 0 && <p style={{ color: '#555', fontSize: '1.0rem', fontStyle: 'italic' }}>Nenhum registo adicionado.</p>}
       {items.map((p, idx) => (
         <div key={p.id} className="hf-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
@@ -483,6 +476,10 @@ function ObreiroLiderTable({ items, onChange, provinciaAtual }) {
           </div>
         </div>
       ))}
+      <button type="button" onClick={() => onChange([...items, emptyObreiroLider()])}
+        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 14px', borderRadius: '6px', background: G, color: '#000', border: 'none', cursor: 'pointer', fontSize: '1.0rem', fontWeight: 600, marginTop: 4 }}>
+        <Plus size={13} /> Adicionar
+      </button>
     </div>
   );
 }
@@ -520,7 +517,7 @@ function FileUploadSection({ label, category, files, onAdd, onRemove, onUpdateNo
             className="hf-input hf-input-sm"
             value={f.nota || ''}
             onChange={e => onUpdateNota(i, e.target.value)}
-            placeholder="Nota sobre este ficheiro (opcional)"
+            placeholder="Ex: Foto da inauguração do templo, 2003; Documento de registo da congregação..."
           />
         </div>
       ))}
@@ -579,24 +576,24 @@ function buildPayload(f) {
     telefone:           f.telefone || null,
     email:              f.email || null,
     missionarios: {
-      coordenadores: f.coordenadores_provinciais.map(({ id: _id, ...c }) => ({
+      coordenadores: f.coordenadores_provinciais.filter(c => c.nome.trim()).map(({ id: _id, ...c }) => ({
         ...c,
         inicio: serializeDateFlex(c.inicio),
         cessacao: serializeDateFlex(c.cessacao),
       })),
-      outros: f.outros_missionarios.map(({ id: _id, ...o }) => ({
+      outros: f.outros_missionarios.filter(o => o.nome.trim()).map(({ id: _id, ...o }) => ({
         ...o,
         inicio: serializeDateFlex(o.inicio),
         cessacao: serializeDateFlex(o.cessacao),
       })),
     },
     obreiros_nacionais: {
-      coordenadores: f.obreiros_coordenadores.map(({ id: _id, ...c }) => ({
+      coordenadores: f.obreiros_coordenadores.filter(c => c.nome.trim()).map(({ id: _id, ...c }) => ({
         ...c,
         inicio: serializeDateFlex(c.inicio),
         cessacao: serializeDateFlex(c.cessacao),
       })),
-      lideres: f.obreiros_lideres.map(({ id: _id, periodoEvangelista, periodoPastor, ...l }) => {
+      lideres: f.obreiros_lideres.filter(l => l.nome.trim()).map(({ id: _id, periodoEvangelista, periodoPastor, ...l }) => {
         const obj = { ...l };
         if (l.categorias.length === 2) {
           obj.periodoEvangelista = {
@@ -885,7 +882,7 @@ export default function HistoricoForm() {
               <h3 style={{ color: '#f87171', marginBottom: 12 }}>Atenção</h3>
               <p style={{ color: '#ccc', marginBottom: 20, lineHeight: 1.6 }}>Use esta função APENAS se quiser preencher o formulário por outra pessoa.</p>
               <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-                <button className="btn-primary" type="button" onClick={() => setClearStep(1)}>Voltar</button>
+                <button className="btn-primary" type="button" onClick={() => setClearStep(0)}>Cancelar</button>
                 <button className="btn-secondary" type="button" onClick={() => setClearStep(3)}>Percebo, continuar</button>
               </div>
             </>}
@@ -893,7 +890,7 @@ export default function HistoricoForm() {
               <h3 style={{ color: '#f87171', marginBottom: 12 }}>Atenção</h3>
               <p style={{ color: '#ccc', marginBottom: 20, lineHeight: 1.6 }}>Não será mais possível editar essas informações, nem enviar um formulário com dados pessoais semelhantes.</p>
               <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-                <button className="btn-primary" type="button" onClick={() => setClearStep(2)}>Voltar</button>
+                <button className="btn-primary" type="button" onClick={() => setClearStep(0)}>Cancelar</button>
                 <button className="btn-secondary" type="button" onClick={() => setClearStep(4)}>Entendi, continuar</button>
               </div>
             </>}
@@ -901,7 +898,7 @@ export default function HistoricoForm() {
               <h3 style={{ color: '#f87171', marginBottom: 12 }}>Atenção</h3>
               <p style={{ color: '#ccc', marginBottom: 20, lineHeight: 1.6 }}>O seu registo ficará guardado mas não poderá ser alterado a partir deste dispositivo.</p>
               <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-                <button className="btn-primary" type="button" onClick={() => setClearStep(3)}>Voltar</button>
+                <button className="btn-primary" type="button" onClick={() => setClearStep(0)}>Cancelar</button>
                 <button className="btn-secondary" type="button" onClick={() => setClearStep(5)}>Sim, quero continuar</button>
               </div>
             </>}
@@ -909,7 +906,7 @@ export default function HistoricoForm() {
               <h3 style={{ color: '#f87171', marginBottom: 12 }}>Atenção</h3>
               <p style={{ color: '#ccc', marginBottom: 20, lineHeight: 1.6 }}>Esta acção não pode ser desfeita.</p>
               <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-                <button className="btn-primary" type="button" onClick={() => setClearStep(4)}>Não, voltar</button>
+                <button className="btn-primary" type="button" onClick={() => setClearStep(0)}>Cancelar</button>
                 <button className="btn-secondary" type="button" onClick={() => setClearStep(6)}>Tenho a certeza</button>
               </div>
             </>}
@@ -924,7 +921,7 @@ export default function HistoricoForm() {
                 </p>
               )}
               <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-                <button className="btn-primary" type="button" onClick={() => setClearStep(5)}>Não, voltar</button>
+                <button className="btn-primary" type="button" onClick={() => setClearStep(0)}>Cancelar</button>
                 <button type="button" onClick={doClear} disabled={clearCountdown > 0}
                   style={{ padding: '10px 20px', borderRadius: '8px', background: clearCountdown > 0 ? '#4a1a1a' : '#ef4444', color: clearCountdown > 0 ? '#888' : '#fff', border: 'none', cursor: clearCountdown > 0 ? 'not-allowed' : 'pointer', fontWeight: 700, fontSize: '1.02rem', transition: 'all 0.3s' }}>
                   Confirmar e apagar
@@ -958,7 +955,7 @@ export default function HistoricoForm() {
 
           <div className="hf-field">
             <label className="hf-label">Nome completo *</label>
-            <input required className="hf-input" value={formData.nome} onChange={e => set('nome', e.target.value)} placeholder="Nome e apelido" />
+            <input required className="hf-input" value={formData.nome} onChange={e => set('nome', e.target.value)} placeholder="Ex: António José Machava" />
           </div>
 
           <div className="hf-field" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -999,11 +996,11 @@ export default function HistoricoForm() {
           <div className="hf-field" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
               <label className="hf-label">Cidade/Vila</label>
-              <input className="hf-input" value={formData.igreja} onChange={e => set('igreja', e.target.value)} placeholder="Cidade ou vila" />
+              <input className="hf-input" value={formData.igreja} onChange={e => set('igreja', e.target.value)} placeholder="Ex: Beira, Chimoio, Quelimane" />
             </div>
             <div>
               <label className="hf-label">Em que localidade/Bairro se localiza a igreja?</label>
-              <input className="hf-input" value={formData.localidade} onChange={e => set('localidade', e.target.value)} placeholder="Localidade ou bairro" />
+              <input className="hf-input" value={formData.localidade} onChange={e => set('localidade', e.target.value)} placeholder="Ex: Esturro, 7 de Setembro, Samora Machel" />
             </div>
           </div>
 
@@ -1043,11 +1040,11 @@ export default function HistoricoForm() {
           <div className="hf-field" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
               <label className="hf-label">WhatsApp</label>
-              <input className="hf-input" type="tel" value={formData.whatsapp} onChange={e => set('whatsapp', e.target.value)} placeholder="84 / 85 / 86 ..." />
+              <input className="hf-input" type="tel" value={formData.whatsapp} onChange={e => set('whatsapp', e.target.value)} placeholder="Ex: 80 123 4567" />
             </div>
             <div>
               <label className="hf-label">Telefone *</label>
-              <input required className="hf-input" type="tel" value={formData.telefone} onChange={e => set('telefone', e.target.value)} placeholder="Número de telefone" />
+              <input required className="hf-input" type="tel" value={formData.telefone} onChange={e => set('telefone', e.target.value)} placeholder="Ex: 80 123 4567" />
             </div>
           </div>
 
@@ -1090,7 +1087,7 @@ export default function HistoricoForm() {
           {formData.onde_comecou === 'Outro' && (
             <div className="hf-field">
               <label className="hf-label">Especifique onde começou</label>
-              <input className="hf-input" value={formData.onde_comecou_outro} onChange={e => set('onde_comecou_outro', e.target.value)} placeholder="Descreva o local" />
+              <input className="hf-input" value={formData.onde_comecou_outro} onChange={e => set('onde_comecou_outro', e.target.value)} />
             </div>
           )}
 
@@ -1138,18 +1135,13 @@ export default function HistoricoForm() {
 
           <div className="hf-field">
             <label className="hf-label">Qual foi a primeira igreja a ser inaugurada na sua província?</label>
-            <input className="hf-input" value={formData.primeira_congregacao} onChange={e => set('primeira_congregacao', e.target.value)} placeholder="Nome da primeira igreja" />
+            <input className="hf-input" value={formData.primeira_congregacao} onChange={e => set('primeira_congregacao', e.target.value)} placeholder="Igreja de Bela Vista - Gondola" />
           </div>
 
           <div className="hf-field" style={{ marginBottom: 20 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <div style={{ marginBottom: 8 }}>
               <label className="hf-label" style={{ marginBottom: 0 }}>Igrejas/Congregações na Província</label>
-              <button type="button" onClick={() => set('congregacoes', [...formData.congregacoes, emptyCongregacao()])}
-                style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 12px', borderRadius: '6px', background: G, color: '#000', border: 'none', cursor: 'pointer', fontSize: '0.97rem', fontWeight: 600 }}>
-                <Plus size={14} /> Adicionar
-              </button>
             </div>
-            {formData.congregacoes.length === 0 && <p style={{ color: '#555', fontSize: '1.02rem', fontStyle: 'italic' }}>Nenhuma congregação adicionada.</p>}
             {formData.congregacoes.map((c, i) => (
               <div key={c.id} style={{ background: '#0d0d1a', border: '1px solid #2a2a3a', borderRadius: '8px', padding: '14px', marginBottom: 8 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
@@ -1172,7 +1164,7 @@ export default function HistoricoForm() {
                     <label className="hf-label-sm">Bairro/Localidade</label>
                     <input className="hf-input hf-input-sm" value={c.localidade}
                       onChange={e => set('congregacoes', formData.congregacoes.map(x => x.id === c.id ? { ...x, localidade: e.target.value } : x))}
-                      placeholder="Nome do bairro/localidade" />
+                      placeholder="Ex: Maxaquene, Muhala, Coalane" />
                   </div>
                 </div>
                 <div>
@@ -1182,6 +1174,10 @@ export default function HistoricoForm() {
                 </div>
               </div>
             ))}
+            <button type="button" onClick={() => set('congregacoes', [...formData.congregacoes, emptyCongregacao()])}
+              style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 14px', borderRadius: '6px', background: G, color: '#000', border: 'none', cursor: 'pointer', fontSize: '1.0rem', fontWeight: 600, marginTop: 4 }}>
+              <Plus size={14} /> Adicionar
+            </button>
           </div>
 
           <div className="hf-field">
@@ -1232,7 +1228,7 @@ export default function HistoricoForm() {
 
           <div className="hf-field">
             <label className="hf-label">Impacto na comunidade</label>
-            <textarea className="hf-textarea" style={{ minHeight: 120 }} value={formData.impacto_comunidade} onChange={e => set('impacto_comunidade', e.target.value)} placeholder="Como a IEVC/VCM impactou a comunidade local?" />
+            <textarea className="hf-textarea" style={{ minHeight: 120 }} value={formData.impacto_comunidade} onChange={e => set('impacto_comunidade', e.target.value)} placeholder="Ex: conversão de famílias, construção de uma escola, apoio social..." />
           </div>
         </section>
 
@@ -1296,7 +1292,7 @@ export default function HistoricoForm() {
             <p style={{ fontSize: '0.97rem', color: '#666', margin: '0 0 8px' }}>
               Pode incluir aqui informações sobre outras províncias ou qualquer outro dado relevante.
             </p>
-            <textarea className="hf-textarea" style={{ minHeight: 120 }} value={formData.observacoes_finais} onChange={e => set('observacoes_finais', e.target.value)} placeholder="Observações, informações de outras províncias, etc." />
+            <textarea className="hf-textarea" style={{ minHeight: 120 }} value={formData.observacoes_finais} onChange={e => set('observacoes_finais', e.target.value)} placeholder="Ex: Quando visitei a Igreja de Lichinga, soube que foi inaugurada em 2001... O pastor da nossa missão viajou para a província de Manica em 2005..." />
           </div>
         </section>
 
