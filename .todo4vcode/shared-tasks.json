@@ -3,19 +3,6 @@
   "version": "1.0.0",
   "tasks": [
     {
-      "id": "l48k870vg",
-      "text": "Resolver erro ao realizar inscricao",
-      "description": "\"Mensagem original: \\\"Erro ao realizar inscricao. Verifique a ligacao e tente novamente.\\\"\"",
-      "tags": [
-        "Code"
-      ],
-      "priority": "Must",
-      "status": "Done",
-      "completed": true,
-      "createdAt": 1778828183979,
-      "order": 5000
-    },
-    {
       "id": "l4c_logs_cloud",
       "text": "Verificar sistema de logs Cloud (Vercel/Supabase)",
       "description": "Vercel token: OK | Supabase service role: MISSING | Updated: 2026-05-15T08:14:33.349Z",
@@ -30,59 +17,6 @@
       "order": 5001
     },
     {
-      "id": "l4c_remove_faixa_11",
-      "text": "Remover faixa etaria \"Ate aos 11 anos\"",
-      "description": "",
-      "tags": [
-        "Code"
-      ],
-      "priority": "Should",
-      "status": "Done",
-      "completed": true,
-      "createdAt": 1778830800000,
-      "order": 5002
-    },
-    {
-      "id": "l4c_funcao_nenhuma",
-      "text": "Mudar funcao de \"nenhum\" para \"nenhuma\"",
-      "description": "",
-      "tags": [
-        "Code"
-      ],
-      "priority": "Should",
-      "status": "Done",
-      "completed": true,
-      "createdAt": 1778830801000,
-      "order": 5003
-    },
-    {
-      "id": "l4c_participa_celebracao",
-      "text": "Adicionar na logistica: \"Vai participar na Celebracao?\"",
-      "description": "",
-      "tags": [
-        "Code"
-      ],
-      "priority": "Should",
-      "status": "Done",
-      "completed": true,
-      "createdAt": 1778830802000,
-      "order": 5004
-    },
-    {
-      "id": "l4c_report_errors",
-      "text": "Adicionar sistema de report de erros da inscricao",
-      "description": "Fluxo criado no frontend e tabela dedicada incluida no setup.sql. Executar setup.sql no Supabase para ativar a persistencia.",
-      "tags": [
-        "Code",
-        "Infra"
-      ],
-      "priority": "Must",
-      "status": "Done",
-      "completed": true,
-      "createdAt": 1778830803000,
-      "order": 5005
-    },
-    {
       "id": "l4c_enable_mcp_tools",
       "text": "Ativar e validar MCPs GitHub/Supabase/Vercel nesta sessao",
       "description": "Tentativas feitas: list_mcp_resources global vazio; github-mcp-server, supabase, memory e sequential-thinking retornaram unknown MCP server. Aguardar sessao com MCPs anexados.",
@@ -94,6 +28,89 @@
       "completed": false,
       "createdAt": 1778831200000,
       "order": 5006
+    },
+    {
+      "id": "g46dsvs64",
+      "text": "As ToDo devem seguir esse formato",
+      "description": "",
+      "priority": "Must",
+      "status": "Done",
+      "completed": true,
+      "createdAt": 1779795987996,
+      "order": 6006,
+      "tags": [
+        "Info(Tag)"
+      ]
+    },
+    {
+      "id": "hf_css_inscricao",
+      "text": "Criar src/inscricao/inscricao.css",
+      "description": "Mesmo padrão do historico.css — variáveis CSS (:root) + classes reutilizáveis. Transferir estilos inline do InscricaoForm.jsx e AdminPanel.jsx para este ficheiro.",
+      "tags": [
+        "Code",
+        "Historico"
+      ],
+      "priority": "Should",
+      "status": "Todo",
+      "completed": false,
+      "createdAt": 1748217600000,
+      "order": 6010
+    },
+    {
+      "id": "hf_commit_historico",
+      "text": "Commit: HistoricoForm.jsx + historico.css",
+      "description": "Alterações pendentes da sessão anterior: refactor CSS architecture, DateFlex hideUnknown, tabelas Coordenadores/Outros Missionários, dropdowns de distritos, aumento de fonte.",
+      "tags": [
+        "Code",
+        "Historico"
+      ],
+      "priority": "Must",
+      "status": "Todo",
+      "completed": false,
+      "createdAt": 1748217601000,
+      "order": 6011
+    },
+    {
+      "id": "hf_infra_sql",
+      "text": "INFRA: Criar tabela ievc_historico no Supabase",
+      "description": "Correr supabase_historico.sql no Supabase SQL Editor. URL: https://supabase.com/dashboard/project/wyynplryfcbosnoqtydh/sql/new",
+      "tags": [
+        "Infra",
+        "Historico"
+      ],
+      "priority": "Must",
+      "status": "Done",
+      "completed": true,
+      "createdAt": 1748217602000,
+      "order": 6012
+    },
+    {
+      "id": "hf_infra_bucket",
+      "text": "INFRA: Criar bucket ievc-uploads no Supabase Storage",
+      "description": "Storage → New bucket → nome: ievc-uploads → público: ✅. Necessário para uploads do formulário histórico.",
+      "tags": [
+        "Infra",
+        "Historico"
+      ],
+      "priority": "Must",
+      "status": "Done",
+      "completed": true,
+      "createdAt": 1748217603000,
+      "order": 6013
+    },
+    {
+      "id": "hf_infra_vercel_env",
+      "text": "INFRA: Adicionar VITE_HISTORICO_PASSWORD no Vercel",
+      "description": "Actualmente hardcoded como 'ievc2010'. Mover para variável de ambiente no painel do Vercel.",
+      "tags": [
+        "Infra",
+        "Historico"
+      ],
+      "priority": "Should",
+      "status": "Todo",
+      "completed": false,
+      "createdAt": 1748217604000,
+      "order": 6014
     }
   ]
 }

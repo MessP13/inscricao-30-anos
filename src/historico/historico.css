@@ -1,0 +1,250 @@
+/* ── Variáveis específicas do formulário histórico ────────────── */
+:root {
+  --hf-bg-input:    #1a1a24;
+  --hf-bg-card:     #0d0d1a;
+  --hf-bg-inner:    #0a0a14;
+  --hf-border:      #333;
+  --hf-border-dark: #2a2a3a;
+  --hf-border-inner:#1e1e2e;
+  --hf-text-muted:  #aaa;
+  --hf-text-dim:    #888;
+  --hf-text-dimmer: #555;
+  --hf-radius:      8px;
+  --hf-radius-sm:   6px;
+  --hf-radius-card: 10px;
+  --hf-radius-sec:  16px;
+
+  --hf-font-base:   1.07rem;
+  --hf-font-label:  1.02rem;
+  --hf-font-small:  0.97rem;
+  --hf-font-tiny:   0.9rem;
+  --hf-font-sec:    1.2rem;
+}
+
+/* ── Inputs & selects ─────────────────────────────────────────── */
+
+.hf-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--hf-radius);
+  background: var(--hf-bg-input);
+  border: 1px solid var(--hf-border);
+  color: #fff;
+  font-family: inherit;
+  font-size: var(--hf-font-base);
+  transition: border-color 0.2s;
+}
+
+.hf-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(197,160,89,0.15);
+}
+
+/* versão compacta usada dentro de tabelas/cards */
+.hf-input-sm {
+  padding: 7px 10px;
+  font-size: var(--hf-font-label);
+}
+
+.hf-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--hf-radius);
+  background: var(--hf-bg-input);
+  border: 1px solid var(--hf-border);
+  color: #fff;
+  font-family: inherit;
+  font-size: var(--hf-font-base);
+  min-height: 100px;
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+
+.hf-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(197,160,89,0.15);
+}
+
+/* ── Labels ───────────────────────────────────────────────────── */
+
+.hf-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: var(--hf-font-label);
+  color: #ccc;
+}
+
+.hf-label-sm {
+  display: block;
+  font-size: var(--hf-font-tiny);
+  color: var(--hf-text-dim);
+  margin-bottom: 3px;
+}
+
+/* ── Wrappers de campo ────────────────────────────────────────── */
+
+.hf-field {
+  margin-bottom: 18px;
+}
+
+/* ── Secções do formulário ────────────────────────────────────── */
+
+.hf-section {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--hf-radius-sec);
+  padding: 28px;
+  margin-bottom: 20px;
+}
+
+.hf-section-title {
+  display: block;
+  color: var(--primary);
+  font-size: var(--hf-font-sec);
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+/* ── Cards de linhas nas tabelas dinâmicas ────────────────────── */
+
+.hf-card {
+  background: var(--hf-bg-card);
+  border: 1px solid var(--hf-border-dark);
+  border-radius: var(--hf-radius-card);
+  padding: 12px;
+  margin-bottom: 8px;
+}
+
+.hf-card-period {
+  background: var(--hf-bg-inner);
+  border: 1px solid var(--hf-border-inner);
+  border-radius: var(--hf-radius-sm);
+  padding: 10px;
+  margin-bottom: 6px;
+}
+
+/* ── Botões das tabelas ───────────────────────────────────────── */
+
+.hf-btn-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--hf-radius-sm);
+  background: var(--primary);
+  color: #000;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--hf-font-small);
+  font-weight: 600;
+}
+
+.hf-btn-add-lg {
+  padding: 5px 12px;
+  font-size: var(--hf-font-small);
+}
+
+.hf-btn-period {
+  background: #1a1a2e;
+  border: 1px solid rgba(197,160,89,0.33);
+  color: var(--primary);
+  padding: 3px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--hf-font-tiny);
+}
+
+.hf-btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--hf-text-dimmer);
+  padding: 4px;
+  line-height: 1;
+}
+
+/* ── Banners informativos ─────────────────────────────────────── */
+
+.hf-banner-support {
+  background: #0d1a0d;
+  border: 1px solid #1a3a1a;
+  border-radius: var(--hf-radius-card);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+
+.hf-banner-support-title {
+  margin: 0 0 6px;
+  color: #7cba7c;
+  font-weight: 600;
+  font-size: var(--hf-font-small);
+}
+
+.hf-banner-support-sub {
+  margin: 0 0 8px;
+  color: var(--hf-text-muted);
+  font-size: var(--hf-font-tiny);
+}
+
+.hf-banner-support-contacts {
+  font-size: var(--hf-font-small);
+  color: #ccc;
+  line-height: 1.9;
+}
+
+.hf-banner-province {
+  background: #1a160a;
+  border: 1px solid #3a2e0a;
+  border-radius: var(--hf-radius-sm);
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  font-size: var(--hf-font-small);
+  color: rgba(197,160,89,0.6);
+}
+
+.hf-note-church {
+  background: #1a1a0a;
+  border: 1px solid #2a2a0a;
+  border-radius: var(--hf-radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: var(--hf-font-small);
+  color: var(--hf-text-dim);
+}
+
+/* ── Estados vazios e erros ───────────────────────────────────── */
+
+.hf-empty {
+  color: var(--hf-text-dimmer);
+  font-size: var(--hf-font-label);
+  font-style: italic;
+}
+
+.hf-error {
+  background: #1a0a0a;
+  border: 1px solid #4a1a1a;
+  border-radius: var(--hf-radius);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  color: #f87171;
+  font-size: var(--hf-font-base);
+}
+
+/* ── Subtítulo do cabeçalho ───────────────────────────────────── */
+
+.hf-header-sub {
+  color: var(--hf-text-muted);
+  font-size: var(--hf-font-base);
+  margin: 0;
+}
+
+/* ── Contador de linha ────────────────────────────────────────── */
+
+.hf-row-num {
+  color: var(--hf-text-dimmer);
+  font-size: var(--hf-font-tiny);
+}

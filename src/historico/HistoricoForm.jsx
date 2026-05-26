@@ -1,25 +1,26 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Plus, Trash2, Upload, X } from 'lucide-react';
+import './historico.css';
 
 const HISTORICO_PASSWORD = import.meta.env.VITE_HISTORICO_PASSWORD || 'ievc2010';
 const HISTORICO_TABLE = 'ievc_historico';
-const LS_FORM = 'ievc_form_v1';
-const LS_SUB = 'ievc_sub_v1';
-const G = '#c5a059';
+const LS_FORM = 'historico_form_v1';
+const LS_SUB = 'historico_sub_v1';
+const G = 'var(--primary)';
 
 const PD = {
-  'Cabo Delgado': ['Pemba','Chiúre','Ibo','Macomia','Mocímboa da Praia','Montepuez','Mueda','Muidumbe','Namuno','Nangade','Palma','Quissanga'],
-  'Gaza': ['Xai-Xai','Bilene','Chibuto','Chigubo','Chicualacuala','Chokwè','Guijá','Limpopo','Mabalane','Mandlakaze','Massingir','Massangena'],
-  'Inhambane': ['Inhambane','Govuro','Homoíne','Inharrime','Inhassoro','Jangamo','Mabote','Massinga','Maxixe','Morrumbene','Panda','Vilankulo','Zavala'],
-  'Manica': ['Chimoio','Báruè','Gondola','Guro','Macossa','Mossurize','Sussundenga','Tambara','Vanduzi'],
-  'Maputo Cidade': ['KaMpfumo','KaMaxakeni','KaMavota','KaMubukwana','KaNyaka','KaTembe'],
-  'Maputo Província': ['Matola','Boane','Magude','Manhiça','Marracuene','Matutuíne','Moamba','Namaacha'],
-  'Nampula': ['Nampula','Angoche','Ilha de Moçambique','Malema','Meconta','Mecubúri','Memba','Mogovolas','Moma','Monapo','Mossuril','Muecate','Murrupula','Nacala','Nacarôa','Ribaué'],
-  'Niassa': ['Lichinga','Cuamba','Lago','Majune','Mandimba','Marrupa','Maúa','Mavago','Mecanhelas','Mecula','Metarica','Muembe','Sanga'],
-  'Sofala': ['Beira','Buzi','Chemba','Cheringoma','Chibabava','Dondo','Gorongosa','Machanga','Maringué','Marromeu','Muanza','Nhamatanda'],
-  'Tete': ['Tete','Angónia','Cahora Bassa','Changara','Chifunde','Chiuta','Dôa','Macanga','Marávia','Moatize','Mutarara','Tsangano','Zumbo'],
-  'Zambézia': ['Quelimane','Alto Molócuè','Chinde','Gilé','Guruè','Ile','Inhassunge','Luabo','Lugela','Maganja da Costa','Milange','Mocuba','Mopeia','Morrumbala','Namacurra','Namarrói','Nicoadala','Pebane'],
+  'Cabo Delgado': ['Ancuabe','Balama','Chiúre','Ibo','Macomia','Mecúfi','Meluco','Metuge','Mocímboa da Praia','Montepuez','Mueda','Muidumbe','Namuno','Nangade','Palma','Pemba','Quissanga'],
+  'Gaza': ['Bilene','Chibuto','Chicualacuala','Chigubo','Chókwè','Chongoene','Guijá','Limpopo','Mabalane','Manjacaze','Mapai','Massangena','Massingir','Xai-Xai'],
+  'Inhambane': ['Funhalouro','Govuro','Homoíne','Inhambane','Inharrime','Inhassoro','Jangamo','Mabote','Massinga','Maxixe','Morrumbene','Panda','Vilanculos','Zavala'],
+  'Manica': ['Bárue','Chimoio','Gondola','Guro','Macate','Machaze','Macossa','Manica','Mossurize','Sussundenga','Tambara','Vanduzi'],
+  'Maputo Cidade': ['KaMpfumo','KaNlhamankulu','KaMaxaquene','KaMavota','KaMubukwana','KaTembe','KaNyaka'],
+  'Maputo Província': ['Boane','Magude','Manhiça','Marracuene','Matola','Matutuíne','Moamba','Namaacha'],
+  'Nampula': ['Angoche','Eráti','Ilha de Moçambique','Lalaua','Larde','Liúpo','Malema','Meconta','Mecubúri','Memba','Mogincual','Mogovolas','Moma','Monapo','Mossuril','Muecate','Murrupula','Nacala Porto','Nacala-a-Velha','Nacarôa','Nampula','Rapale','Ribaué'],
+  'Niassa': ['Chimbonila','Cuamba','Lago','Lichinga','Majune','Mandimba','Marrupa','Maúa','Mavago','Mecanhelas','Mecula','Metarica','Muembe',"N'gauma",'Nipepe','Sanga'],
+  'Sofala': ['Beira','Búzi','Caia','Chemba','Cheringoma','Chibabava','Dondo','Gorongosa','Machanga','Maringué','Marromeu','Muanza','Nhamatanda'],
+  'Tete': ['Angónia','Cahora-Bassa','Changara','Chifunde','Chiuta','Dôa','Macanga','Magoé','Marara','Marávia','Moatize','Mutarara','Tete','Tsangano','Zumbo'],
+  'Zambézia': ['Alto Molócue','Chinde','Derre','Gilé','Gurué','Ile','Inhassunge','Luabo','Lugela','Maganja da Costa','Milange','Mocuba','Mocubela','Molumbo','Mopeia','Morrumbala','Mulevala','Namacurra','Namarroi','Nicoadala','Pebane','Quelimane'],
 };
 
 const PROVINCIAS = Object.keys(PD);
@@ -29,11 +30,20 @@ const emptyPeriodo = () => ({ id: uid(), periodo: '', funcao: '', proveniencia: 
 const emptyPessoa = () => ({ id: uid(), nome: '', distritoCidade: '', periodos: [emptyPeriodo()], destaques: '', numObreiros: '', acrescimo: '' });
 const emptyCongregacao = () => ({ id: uid(), distrito: '', localidade: '', data: { mode: 'unknown' } });
 const emptyReferencia = () => ({ id: uid(), nome: '', contacto: '' });
+const emptyCoordenador = () => ({ id: uid(), nome: '', inicio: { mode: 'unknown' }, cessacao: { mode: 'unknown' }, conquistasDestaques: '', desafiosDestaques: '' });
+const emptyOutroMissionario = () => ({ id: uid(), nome: '', distrito: '', areaAtuacao: '', inicio: { mode: 'unknown' }, cessacao: { mode: 'unknown' }, conquistasDestaques: '', desafiosDestaques: '' });
+const emptyObreiroLider = () => ({
+  id: uid(), nome: '', categorias: [], distrito: '',
+  periodoEvangelista: { inicio: { mode: 'unknown' }, cessacao: { mode: 'unknown' } },
+  periodoPastor:      { inicio: { mode: 'unknown' }, cessacao: { mode: 'unknown' } },
+  conquistasDestaques: '', desafiosDestaques: '',
+});
 
 const EMPTY_FORM = {
   nome: '', sexo: '', provincia: '', distrito: '', igreja: '', localidade: '',
   funcao: '', quando_ingressou: '', whatsapp: '', telefone: '', email: '',
-  missionarios: [], obreiros_nacionais: [],
+  coordenadores_provinciais: [], outros_missionarios: [],
+  obreiros_coordenadores: [], obreiros_lideres: [],
   onde_comecou: '', onde_comecou_outro: '',
   igrejas_distrito: '', templos_concluidos_distrito: '', templos_construcao_distrito: '', templos_material_distrito: '',
   primeira_congregacao: '', congregacoes: [], data_inauguracao: { mode: 'unknown' },
@@ -45,7 +55,7 @@ const EMPTY_FORM = {
 };
 
 // ── DateFlex ───────────────────────────────────────────────────────────────────
-function DateFlex({ value = { mode: 'unknown' }, onChange }) {
+function DateFlex({ value = { mode: 'unknown' }, onChange, hideUnknown = false }) {
   const set = (patch) => onChange({ ...value, ...patch });
   const setFrom = (patch) => onChange({ ...value, from: { ...(value.from || {}), ...patch } });
   const setTo   = (patch) => onChange({ ...value, to:   { ...(value.to   || {}), ...patch } });
@@ -58,14 +68,14 @@ function DateFlex({ value = { mode: 'unknown' }, onChange }) {
   ];
   const days = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0'));
 
-  const sSel = { padding: '6px 10px', borderRadius: '6px', background: '#1a1a24', border: '1px solid #333', color: '#fff', fontSize: '0.85rem', flex: 1 };
+  const sSel = { padding: '6px 10px', borderRadius: '6px', background: '#1a1a24', border: '1px solid #333', color: '#fff', fontSize: '1.02rem', flex: 1 };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        {[['exact','Data exacta'],['approximate','Data aproximada'],['unknown','Desconhecida']].map(([val, label]) => (
+        {[['exact','Data exacta'],['approximate','Data aproximada'],['unknown','Desconhecida']].filter(([val]) => !(hideUnknown && val === 'unknown')).map(([val, label]) => (
           <button key={val} type="button" onClick={() => set({ mode: val })} style={{
-            padding: '4px 12px', borderRadius: '6px', fontSize: '0.8rem', cursor: 'pointer',
+            padding: '4px 12px', borderRadius: '6px', fontSize: '0.97rem', cursor: 'pointer',
             background: value.mode === val ? G : '#1a1a24',
             color: value.mode === val ? '#000' : '#aaa',
             border: `1px solid ${value.mode === val ? G : '#333'}`,
@@ -91,29 +101,25 @@ function DateFlex({ value = { mode: 'unknown' }, onChange }) {
       )}
 
       {value.mode === 'approximate' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <span style={{ fontSize: '0.8rem', color: '#aaa' }}>De:</span>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <select style={sSel} value={value.from?.month || ''} onChange={e => setFrom({ month: e.target.value || null })}>
-              <option value="">Mês</option>
-              {months.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-            </select>
-            <select style={sSel} value={value.from?.year || ''} onChange={e => setFrom({ year: e.target.value || null })}>
-              <option value="">Ano</option>
-              {yearOpts.map(y => <option key={y} value={y}>{y}</option>)}
-            </select>
-          </div>
-          <span style={{ fontSize: '0.8rem', color: '#aaa' }}>Até:</span>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <select style={sSel} value={value.to?.month || ''} onChange={e => setTo({ month: e.target.value || null })}>
-              <option value="">Mês</option>
-              {months.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-            </select>
-            <select style={sSel} value={value.to?.year || ''} onChange={e => setTo({ year: e.target.value || null })}>
-              <option value="">Ano</option>
-              {yearOpts.map(y => <option key={y} value={y}>{y}</option>)}
-            </select>
-          </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.97rem', color: '#aaa', whiteSpace: 'nowrap' }}>Entre</span>
+          <select style={sSel} value={value.from?.month || ''} onChange={e => setFrom({ month: e.target.value || null })}>
+            <option value="">Mês</option>
+            {months.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+          </select>
+          <select style={sSel} value={value.from?.year || ''} onChange={e => setFrom({ year: e.target.value || null })}>
+            <option value="">Ano</option>
+            {yearOpts.map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+          <span style={{ fontSize: '0.97rem', color: '#aaa', whiteSpace: 'nowrap' }}>e</span>
+          <select style={sSel} value={value.to?.month || ''} onChange={e => setTo({ month: e.target.value || null })}>
+            <option value="">Mês</option>
+            {months.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+          </select>
+          <select style={sSel} value={value.to?.year || ''} onChange={e => setTo({ year: e.target.value || null })}>
+            <option value="">Ano</option>
+            {yearOpts.map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
         </div>
       )}
     </div>
@@ -156,29 +162,26 @@ function PersonTable({ title, items, onChange, provinciaAtual }) {
     p.id === pid ? { ...p, periodos: p.periodos.map(per => per.id === perId ? { ...per, ...patch } : per) } : p
   ));
 
-  const inp = (extra = {}) => ({
-    width: '100%', padding: '7px 10px', borderRadius: '6px',
-    background: '#1a1a24', border: '1px solid #333', color: '#fff', fontSize: '0.85rem', ...extra,
-  });
+  // estilos → .hf-input.hf-input-sm em CSS; inline só para overrides pontuais
 
   return (
     <div style={{ marginBottom: 20 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <span style={{ color: G, fontWeight: 600, fontSize: '0.95rem' }}>{title}</span>
+        <span style={{ color: G, fontWeight: 600, fontSize: '1.12rem' }}>{title}</span>
         <button type="button" onClick={() => onChange([...items, emptyPessoa()])} style={{
           display: 'flex', alignItems: 'center', gap: 4, padding: '5px 12px',
-          borderRadius: '6px', background: G, color: '#000', border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600,
+          borderRadius: '6px', background: G, color: '#000', border: 'none', cursor: 'pointer', fontSize: '0.97rem', fontWeight: 600,
         }}>
           <Plus size={14} /> Adicionar
         </button>
       </div>
 
-      {items.length === 0 && <p style={{ color: '#555', fontSize: '0.85rem', fontStyle: 'italic' }}>Nenhum registo adicionado.</p>}
+      {items.length === 0 && <p style={{ color: '#555', fontSize: '1.02rem', fontStyle: 'italic' }}>Nenhum registo adicionado.</p>}
 
       {items.map((p, idx) => (
         <div key={p.id} style={{ background: '#0d0d1a', border: '1px solid #2a2a3a', borderRadius: '10px', padding: '16px', marginBottom: 10 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <span style={{ color: '#666', fontSize: '0.78rem' }}>#{idx + 1}</span>
+            <span style={{ color: '#666', fontSize: '1.12rem' }}>#{idx + 1}</span>
             <button type="button" onClick={() => onChange(items.filter(x => x.id !== p.id))}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#555' }}>
               <Trash2 size={15} />
@@ -186,21 +189,22 @@ function PersonTable({ title, items, onChange, provinciaAtual }) {
           </div>
 
           <div style={{ marginBottom: 8 }}>
-            <label style={{ display: 'block', fontSize: '0.78rem', color: '#aaa', marginBottom: 4 }}>Nome *</label>
-            <input style={inp()} value={p.nome} onChange={e => upd(p.id, { nome: e.target.value })} placeholder="Nome completo" />
+            <label style={{ display: 'block', fontSize: '1.12rem', color: '#aaa', marginBottom: 4 }}>Nome *</label>
+            <input className="hf-input hf-input-sm" value={p.nome} onChange={e => upd(p.id, { nome: e.target.value })} placeholder="Nome completo" />
           </div>
 
           {p.nome && <>
             <div style={{ marginBottom: 8 }}>
-              <label style={{ display: 'block', fontSize: '0.78rem', color: '#aaa', marginBottom: 4 }}>
-                Distrito/Cidade{provinciaAtual ? ` (${provinciaAtual})` : ''}
-              </label>
-              <input style={inp()} value={p.distritoCidade} onChange={e => upd(p.id, { distritoCidade: e.target.value })} placeholder="Distrito ou cidade" />
+              <label style={{ display: 'block', fontSize: '1.12rem', color: '#aaa', marginBottom: 4 }}>Distrito</label>
+              <select className="hf-input hf-input-sm" value={p.distritoCidade} onChange={e => upd(p.id, { distritoCidade: e.target.value })}>
+                <option value="">— Seleccione —</option>
+                {(PD[provinciaAtual] || []).map(d => <option key={d}>{d}</option>)}
+              </select>
             </div>
 
             <div style={{ marginBottom: 8 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                <label style={{ fontSize: '0.78rem', color: '#aaa' }}>Períodos</label>
+                <label style={{ fontSize: '1.12rem', color: '#aaa' }}>Períodos</label>
                 <button type="button" onClick={() => onChange(items.map(x => x.id === p.id ? { ...x, periodos: [...x.periodos, emptyPeriodo()] } : x))}
                   style={{ background: '#1a1a2e', border: `1px solid ${G}55`, color: G, padding: '3px 8px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.75rem' }}>
                   + Período
@@ -209,7 +213,7 @@ function PersonTable({ title, items, onChange, provinciaAtual }) {
               {p.periodos.map((per, pIdx) => (
                 <div key={per.id} style={{ background: '#0a0a14', border: '1px solid #1e1e2e', borderRadius: '6px', padding: '10px', marginBottom: 6 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                    <span style={{ color: '#555', fontSize: '0.72rem' }}>Período {pIdx + 1}</span>
+                    <span style={{ color: '#555', fontSize: '1.07rem' }}>Período {pIdx + 1}</span>
                     {p.periodos.length > 1 && (
                       <button type="button" onClick={() => onChange(items.map(x => x.id === p.id ? { ...x, periodos: x.periodos.filter(per2 => per2.id !== per.id) } : x))}
                         style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#555' }}>
@@ -218,10 +222,10 @@ function PersonTable({ title, items, onChange, provinciaAtual }) {
                     )}
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-                    <input style={inp()} value={per.periodo}     onChange={e => updPer(p.id, per.id, { periodo:     e.target.value })} placeholder="Período (ex: 2003–2010)" />
-                    <input style={inp()} value={per.funcao}      onChange={e => updPer(p.id, per.id, { funcao:      e.target.value })} placeholder="Função" />
-                    <input style={inp()} value={per.proveniencia} onChange={e => updPer(p.id, per.id, { proveniencia: e.target.value })} placeholder="Proveniência" />
-                    <input style={inp()} value={per.saidaPara}   onChange={e => updPer(p.id, per.id, { saidaPara:   e.target.value })} placeholder="Saída para?" />
+                    <input className="hf-input hf-input-sm" value={per.periodo}     onChange={e => updPer(p.id, per.id, { periodo:     e.target.value })} placeholder="Período (ex: 2003–2010)" />
+                    <input className="hf-input hf-input-sm" value={per.funcao}      onChange={e => updPer(p.id, per.id, { funcao:      e.target.value })} placeholder="Função" />
+                    <input className="hf-input hf-input-sm" value={per.proveniencia} onChange={e => updPer(p.id, per.id, { proveniencia: e.target.value })} placeholder="Proveniência" />
+                    <input className="hf-input hf-input-sm" value={per.saidaPara}   onChange={e => updPer(p.id, per.id, { saidaPara:   e.target.value })} placeholder="Saída para?" />
                   </div>
                 </div>
               ))}
@@ -229,17 +233,17 @@ function PersonTable({ title, items, onChange, provinciaAtual }) {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', color: '#aaa', marginBottom: 4 }}>Nº de Obreiros</label>
-                <input style={inp()} type="number" min="0" value={p.numObreiros} onChange={e => upd(p.id, { numObreiros: e.target.value })} placeholder="0" />
+                <label style={{ display: 'block', fontSize: '1.12rem', color: '#aaa', marginBottom: 4 }}>Nº de Obreiros</label>
+                <input className="hf-input hf-input-sm" type="number" min="0" value={p.numObreiros} onChange={e => upd(p.id, { numObreiros: e.target.value })} placeholder="0" />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', color: '#aaa', marginBottom: 4 }}>Acréscimo</label>
-                <input style={inp()} value={p.acrescimo} onChange={e => upd(p.id, { acrescimo: e.target.value })} placeholder="Campo aberto" />
+                <label style={{ display: 'block', fontSize: '1.12rem', color: '#aaa', marginBottom: 4 }}>Acréscimo</label>
+                <input className="hf-input hf-input-sm" value={p.acrescimo} onChange={e => upd(p.id, { acrescimo: e.target.value })} placeholder="Campo aberto" />
               </div>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.78rem', color: '#aaa', marginBottom: 4 }}>Destaques</label>
-              <textarea style={{ ...inp(), minHeight: 60, resize: 'vertical' }} value={p.destaques} onChange={e => upd(p.id, { destaques: e.target.value })} placeholder="Destaques relevantes..." />
+              <label style={{ display: 'block', fontSize: '1.12rem', color: '#aaa', marginBottom: 4 }}>Destaques</label>
+              <textarea className="hf-input hf-input-sm" style={{ minHeight: 60, resize: 'vertical' }} value={p.destaques} onChange={e => upd(p.id, { destaques: e.target.value })} placeholder="Destaques relevantes..." />
             </div>
           </>}
         </div>
@@ -248,36 +252,279 @@ function PersonTable({ title, items, onChange, provinciaAtual }) {
   );
 }
 
+const AREAS_ATUACAO = ['Liderança da igreja','Secretaria','EBD','Jovens','Senhoras','C. de Oração','Formação','Outro'];
+
+function CoordenadorTable({ items, onChange, title = 'Coordenadores Provinciais' }) {
+  const upd = (id, patch) => onChange(items.map(x => x.id === id ? { ...x, ...patch } : x));
+
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <span style={{ color: '#ccc', fontSize: '1.02rem', fontWeight: 600 }}>{title}</span>
+        <button type="button" onClick={() => onChange([...items, emptyCoordenador()])}
+          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: '6px', background: G, color: '#000', border: 'none', cursor: 'pointer', fontSize: '1.12rem', fontWeight: 600 }}>
+          <Plus size={13} /> Adicionar
+        </button>
+      </div>
+      {items.length === 0 && <p style={{ color: '#555', fontSize: '1.0rem', fontStyle: 'italic' }}>Nenhum registo adicionado.</p>}
+      {items.map((p, idx) => (
+        <div key={p.id} style={{ background: '#0d0d1a', border: '1px solid #2a2a3a', borderRadius: '8px', padding: '12px', marginBottom: 8 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <span style={{ color: '#555', fontSize: '1.07rem' }}>#{idx + 1}</span>
+            <button type="button" onClick={() => onChange(items.filter(x => x.id !== p.id))}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#555' }}><Trash2 size={14} /></button>
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <label className="hf-label-sm">Nome</label>
+            <input className="hf-input hf-input-sm" value={p.nome} onChange={e => upd(p.id, { nome: e.target.value })} placeholder="Nome completo" />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 10 }}>
+            <div>
+              <label className="hf-label-sm">Início da função</label>
+              <DateFlex value={p.inicio} onChange={v => upd(p.id, { inicio: v })} hideUnknown />
+            </div>
+            <div>
+              <label className="hf-label-sm">Cessação</label>
+              <DateFlex value={p.cessacao} onChange={v => upd(p.id, { cessacao: v })} hideUnknown />
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            <div>
+              <label className="hf-label-sm">Destaques relevantes (conquistas)</label>
+              <textarea className="hf-input hf-input-sm" style={{ minHeight: 64, resize: 'vertical' }} value={p.conquistasDestaques} onChange={e => upd(p.id, { conquistasDestaques: e.target.value })} placeholder="Conquistas e marcos positivos..." />
+            </div>
+            <div>
+              <label className="hf-label-sm">Destaques relevantes (desafios)</label>
+              <textarea className="hf-input hf-input-sm" style={{ minHeight: 64, resize: 'vertical' }} value={p.desafiosDestaques} onChange={e => upd(p.id, { desafiosDestaques: e.target.value })} placeholder="Dificuldades e obstáculos enfrentados..." />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function OutroMissionarioTable({ items, onChange, provinciaAtual }) {
+  const upd = (id, patch) => onChange(items.map(x => x.id === id ? { ...x, ...patch } : x));
+  const distritos = PD[provinciaAtual] || [];
+
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <span style={{ color: '#ccc', fontSize: '1.02rem', fontWeight: 600 }}>Outros Missionários e Missionárias</span>
+        <button type="button" onClick={() => onChange([...items, emptyOutroMissionario()])}
+          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: '6px', background: G, color: '#000', border: 'none', cursor: 'pointer', fontSize: '1.12rem', fontWeight: 600 }}>
+          <Plus size={13} /> Adicionar
+        </button>
+      </div>
+      {items.length === 0 && <p style={{ color: '#555', fontSize: '1.0rem', fontStyle: 'italic' }}>Nenhum registo adicionado.</p>}
+      {items.map((p, idx) => (
+        <div key={p.id} style={{ background: '#0d0d1a', border: '1px solid #2a2a3a', borderRadius: '8px', padding: '12px', marginBottom: 8 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <span style={{ color: '#555', fontSize: '1.07rem' }}>#{idx + 1}</span>
+            <button type="button" onClick={() => onChange(items.filter(x => x.id !== p.id))}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#555' }}><Trash2 size={14} /></button>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
+            <div>
+              <label className="hf-label-sm">Nome</label>
+              <input className="hf-input hf-input-sm" value={p.nome} onChange={e => upd(p.id, { nome: e.target.value })} placeholder="Nome completo" />
+            </div>
+            <div>
+              <label className="hf-label-sm">Distrito</label>
+              <select className="hf-input hf-input-sm" value={p.distrito} onChange={e => upd(p.id, { distrito: e.target.value })}>
+                <option value="">— Seleccione —</option>
+                {distritos.map(d => <option key={d}>{d}</option>)}
+              </select>
+            </div>
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            <label className="hf-label-sm">Área de actuação</label>
+            <select className="hf-input hf-input-sm" value={p.areaAtuacao} onChange={e => upd(p.id, { areaAtuacao: e.target.value })}>
+              <option value="">— Seleccione —</option>
+              {AREAS_ATUACAO.map(a => <option key={a}>{a}</option>)}
+            </select>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 10 }}>
+            <div>
+              <label className="hf-label-sm">Início da função</label>
+              <DateFlex value={p.inicio} onChange={v => upd(p.id, { inicio: v })} hideUnknown />
+            </div>
+            <div>
+              <label className="hf-label-sm">Cessação</label>
+              <DateFlex value={p.cessacao} onChange={v => upd(p.id, { cessacao: v })} hideUnknown />
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            <div>
+              <label className="hf-label-sm">Destaques relevantes (conquistas)</label>
+              <textarea className="hf-input hf-input-sm" style={{ minHeight: 64, resize: 'vertical' }} value={p.conquistasDestaques} onChange={e => upd(p.id, { conquistasDestaques: e.target.value })} placeholder="Conquistas e marcos positivos..." />
+            </div>
+            <div>
+              <label className="hf-label-sm">Destaques relevantes (desafios)</label>
+              <textarea className="hf-input hf-input-sm" style={{ minHeight: 64, resize: 'vertical' }} value={p.desafiosDestaques} onChange={e => upd(p.id, { desafiosDestaques: e.target.value })} placeholder="Dificuldades e obstáculos enfrentados..." />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+const CATEGORIAS_MIN = ['Pastor', 'Evangelista'];
+
+function ObreiroLiderTable({ items, onChange, provinciaAtual }) {
+  const upd = (id, patch) => onChange(items.map(x => x.id === id ? { ...x, ...patch } : x));
+  const distritos = PD[provinciaAtual] || [];
+
+  const toggleCat = (p, cat) => {
+    const cats = p.categorias.includes(cat)
+      ? p.categorias.filter(c => c !== cat)
+      : [...p.categorias, cat];
+    upd(p.id, { categorias: cats });
+  };
+
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <span style={{ color: '#ccc', fontSize: '1.02rem', fontWeight: 600 }}>Pastores/Líderes de Congregação</span>
+        <button type="button" onClick={() => onChange([...items, emptyObreiroLider()])}
+          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: '6px', background: G, color: '#000', border: 'none', cursor: 'pointer', fontSize: '1.12rem', fontWeight: 600 }}>
+          <Plus size={13} /> Adicionar
+        </button>
+      </div>
+      {items.length === 0 && <p style={{ color: '#555', fontSize: '1.0rem', fontStyle: 'italic' }}>Nenhum registo adicionado.</p>}
+      {items.map((p, idx) => (
+        <div key={p.id} className="hf-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <span className="hf-row-num">#{idx + 1}</span>
+            <button type="button" onClick={() => onChange(items.filter(x => x.id !== p.id))} className="hf-btn-icon"><Trash2 size={14} /></button>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 10 }}>
+            <div>
+              <label className="hf-label-sm">Nome</label>
+              <input className="hf-input hf-input-sm" value={p.nome} onChange={e => upd(p.id, { nome: e.target.value })} placeholder="Nome completo" />
+            </div>
+            <div>
+              <label className="hf-label-sm">Distrito</label>
+              <select className="hf-input hf-input-sm" value={p.distrito} onChange={e => upd(p.id, { distrito: e.target.value })}>
+                <option value="">— Seleccione —</option>
+                {distritos.map(d => <option key={d}>{d}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="hf-label-sm" style={{ marginBottom: 6 }}>Função desempenhada</label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {CATEGORIAS_MIN.map(cat => (
+                <button key={cat} type="button" onClick={() => toggleCat(p, cat)} style={{
+                  padding: '5px 16px', borderRadius: '6px', fontSize: '1.02rem', cursor: 'pointer',
+                  background: p.categorias.includes(cat) ? G : '#1a1a24',
+                  color: p.categorias.includes(cat) ? '#000' : '#aaa',
+                  border: `1px solid ${p.categorias.includes(cat) ? G : '#333'}`,
+                  fontWeight: p.categorias.includes(cat) ? 600 : 400,
+                }}>{cat}</button>
+              ))}
+            </div>
+          </div>
+
+          {p.categorias.length === 2 && (
+            <div className="hf-card-period" style={{ marginTop: 12 }}>
+              <p style={{ color: '#aaa', fontSize: '1.0rem', margin: '0 0 14px', lineHeight: 1.6 }}>
+                Esta pessoa desempenhou as duas funções ao longo do tempo.
+                Indique, tanto quanto possível, o período em que exerceu cada uma:
+              </p>
+
+              <div style={{ marginBottom: 14 }}>
+                <p style={{ color: G, fontSize: '1.02rem', fontWeight: 600, margin: '0 0 8px' }}>Como Evangelista</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label className="hf-label-sm">Início</label>
+                    <DateFlex value={p.periodoEvangelista.inicio}
+                      onChange={v => upd(p.id, { periodoEvangelista: { ...p.periodoEvangelista, inicio: v } })} hideUnknown />
+                  </div>
+                  <div>
+                    <label className="hf-label-sm">Cessação</label>
+                    <DateFlex value={p.periodoEvangelista.cessacao}
+                      onChange={v => upd(p.id, { periodoEvangelista: { ...p.periodoEvangelista, cessacao: v } })} hideUnknown />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <p style={{ color: G, fontSize: '1.02rem', fontWeight: 600, margin: '0 0 8px' }}>Como Pastor do distrito</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label className="hf-label-sm">Início</label>
+                    <DateFlex value={p.periodoPastor.inicio}
+                      onChange={v => upd(p.id, { periodoPastor: { ...p.periodoPastor, inicio: v } })} hideUnknown />
+                  </div>
+                  <div>
+                    <label className="hf-label-sm">Cessação</label>
+                    <DateFlex value={p.periodoPastor.cessacao}
+                      onChange={v => upd(p.id, { periodoPastor: { ...p.periodoPastor, cessacao: v } })} hideUnknown />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 10 }}>
+            <div>
+              <label className="hf-label-sm">Destaques relevantes (conquistas)</label>
+              <textarea className="hf-input hf-input-sm" style={{ minHeight: 64, resize: 'vertical' }} value={p.conquistasDestaques} onChange={e => upd(p.id, { conquistasDestaques: e.target.value })} placeholder="Conquistas e marcos positivos..." />
+            </div>
+            <div>
+              <label className="hf-label-sm">Destaques relevantes (desafios)</label>
+              <textarea className="hf-input hf-input-sm" style={{ minHeight: 64, resize: 'vertical' }} value={p.desafiosDestaques} onChange={e => upd(p.id, { desafiosDestaques: e.target.value })} placeholder="Dificuldades e obstáculos enfrentados..." />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ── FileUploadSection ──────────────────────────────────────────────────────────
-function FileUploadSection({ label, category, files, onAdd, onRemove, uploading, setUploading }) {
+function FileUploadSection({ label, category, files, onAdd, onRemove, onUpdateNota, uploading, setUploading }) {
   const handleFile = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    const path = `ievc/${category}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+    const path = `ievc/${category}/${uid()}_${file.name.replace(/\s+/g, '_')}`;
     const { error } = await supabase.storage.from('ievc-uploads').upload(path, file, { upsert: false });
     setUploading(false);
     if (error) { alert('Erro ao carregar ficheiro: ' + error.message); e.target.value = ''; return; }
     const { data: { publicUrl } } = supabase.storage.from('ievc-uploads').getPublicUrl(path);
-    onAdd({ url: publicUrl, categoria: category, nome_original: file.name, mime_type: file.type });
+    onAdd({ url: publicUrl, categoria: category, nome_original: file.name, mime_type: file.type, nota: '' });
     e.target.value = '';
   };
 
   return (
     <div style={{ marginBottom: 8 }}>
-      <p style={{ fontSize: '0.82rem', color: '#888', margin: '0 0 8px' }}>{label}</p>
+      <p style={{ fontSize: '1.0rem', color: '#888', margin: '0 0 8px' }}>{label}</p>
       {files.map((f, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-          <a href={f.url} target="_blank" rel="noopener noreferrer"
-            style={{ color: G, fontSize: '0.8rem', textDecoration: 'none', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {f.nome_original}
-          </a>
-          <button type="button" onClick={() => onRemove(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#555' }}>
-            <X size={13} />
-          </button>
+        <div key={i} style={{ background: '#0d0d1a', border: '1px solid #2a2a3a', borderRadius: '6px', padding: '8px 10px', marginBottom: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <a href={f.url} target="_blank" rel="noopener noreferrer"
+              style={{ color: G, fontSize: '0.97rem', textDecoration: 'none', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {f.nome_original}
+            </a>
+            <button type="button" onClick={() => onRemove(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#555', flexShrink: 0 }}>
+              <X size={13} />
+            </button>
+          </div>
+          <input
+            className="hf-input hf-input-sm"
+            value={f.nota || ''}
+            onChange={e => onUpdateNota(i, e.target.value)}
+            placeholder="Nota sobre este ficheiro (opcional)"
+          />
         </div>
       ))}
-      <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, cursor: uploading ? 'not-allowed' : 'pointer', padding: '6px 12px', borderRadius: '6px', border: `1px dashed ${G}55`, color: G, fontSize: '0.8rem' }}>
+      <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, cursor: uploading ? 'not-allowed' : 'pointer', padding: '6px 12px', borderRadius: '6px', border: `1px dashed ${G}55`, color: G, fontSize: '0.97rem' }}>
         <Upload size={14} />
         {uploading ? 'A carregar...' : 'Adicionar ficheiro'}
         <input type="file" accept="image/*,video/*,.pdf,.doc,.docx" onChange={handleFile} style={{ display: 'none' }} disabled={uploading} />
@@ -290,17 +537,14 @@ function FileUploadSection({ label, category, files, onAdd, onRemove, uploading,
 function SupportBanner() {
   return (
     <div style={{ background: '#0d1a0d', border: '1px solid #1a3a1a', borderRadius: '10px', padding: '16px 20px', marginBottom: 24 }}>
-      <p style={{ margin: '0 0 6px', color: '#7cba7c', fontWeight: 600, fontSize: '0.9rem' }}>
-        Precisa de ajuda? Estamos aqui para ajudar!
+      <p style={{ margin: '0 0 8px', color: '#aaa', fontSize: '1.0rem' }}>
+        Tem dificuldade em preencher alguma parte ou secção? Fale conosco pelo WhatsApp ou chamadas:
       </p>
-      <p style={{ margin: '0 0 8px', color: '#aaa', fontSize: '0.82rem' }}>
-        Tem dificuldade em preencher alguma parte? Fale connosco pelo WhatsApp ou por chamada:
-      </p>
-      <div style={{ fontSize: '0.85rem', color: '#ccc', lineHeight: '1.9' }}>
-        <div>📱 850 153 315 — WhatsApp e Chamadas</div>
-        <div>📱 825 361 510 — WhatsApp</div>
-        <div>📞 877 753 315 — Chamadas</div>
-        <div>📱 855 643 212 — WhatsApp</div>
+      <div style={{ fontSize: '1.02rem', color: '#ccc', lineHeight: '1.9' }}>
+        <div>📱 85 015 3315 — WhatsApp e Chamadas</div>
+        <div>📱 82 536 1510 — WhatsApp</div>
+        <div>📞 87 775 3315 — Chamadas</div>
+        <div>📱 85 564 3212 — WhatsApp</div>
       </div>
     </div>
   );
@@ -308,7 +552,7 @@ function SupportBanner() {
 
 function ProvinceBanner() {
   return (
-    <div style={{ background: '#1a160a', border: '1px solid #3a2e0a', borderRadius: '8px', padding: '10px 16px', marginBottom: 16, fontSize: '0.8rem', color: '#c5a05999' }}>
+    <div style={{ background: '#1a160a', border: '1px solid #3a2e0a', borderRadius: '8px', padding: '10px 16px', marginBottom: 16, fontSize: '0.97rem', color: '#c5a05999' }}>
       As informações devem ser preenchidas apenas sobre a sua província de actuação. Para informações sobre outras províncias, utilize as Observações Finais.
     </div>
   );
@@ -334,8 +578,39 @@ function buildPayload(f) {
     whatsapp:           f.whatsapp || null,
     telefone:           f.telefone || null,
     email:              f.email || null,
-    missionarios:       f.missionarios.map(cleanPessoa),
-    obreiros_nacionais: f.obreiros_nacionais.map(cleanPessoa),
+    missionarios: {
+      coordenadores: f.coordenadores_provinciais.map(({ id: _id, ...c }) => ({
+        ...c,
+        inicio: serializeDateFlex(c.inicio),
+        cessacao: serializeDateFlex(c.cessacao),
+      })),
+      outros: f.outros_missionarios.map(({ id: _id, ...o }) => ({
+        ...o,
+        inicio: serializeDateFlex(o.inicio),
+        cessacao: serializeDateFlex(o.cessacao),
+      })),
+    },
+    obreiros_nacionais: {
+      coordenadores: f.obreiros_coordenadores.map(({ id: _id, ...c }) => ({
+        ...c,
+        inicio: serializeDateFlex(c.inicio),
+        cessacao: serializeDateFlex(c.cessacao),
+      })),
+      lideres: f.obreiros_lideres.map(({ id: _id, periodoEvangelista, periodoPastor, ...l }) => {
+        const obj = { ...l };
+        if (l.categorias.length === 2) {
+          obj.periodoEvangelista = {
+            inicio:   serializeDateFlex(periodoEvangelista.inicio),
+            cessacao: serializeDateFlex(periodoEvangelista.cessacao),
+          };
+          obj.periodoPastor = {
+            inicio:   serializeDateFlex(periodoPastor.inicio),
+            cessacao: serializeDateFlex(periodoPastor.cessacao),
+          };
+        }
+        return obj;
+      }),
+    },
     onde_comecou:       f.onde_comecou || null,
     onde_comecou_outro: f.onde_comecou_outro || null,
     igrejas_distrito:              f.igrejas_distrito              ? parseInt(f.igrejas_distrito)              : null,
@@ -375,14 +650,32 @@ export default function HistoricoForm() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
 
+  const [ingressouRange, setIngressouRange] = useState(() => {
+    const v = formData.quando_ingressou;
+    if (v === '1996') return '1996';
+    if (v >= '1997' && v <= '2010') return '1997-2010';
+    if (v >= '2011') return '2011-2026';
+    return '';
+  });
+
   const [noteModal, setNoteModal] = useState(false);
   const [noteText, setNoteText] = useState('');
+  const [noteAnexos, setNoteAnexos] = useState([]);
+  const [noteUploading, setNoteUploading] = useState(false);
   const [clearStep, setClearStep] = useState(0);
   const [clearInput, setClearInput] = useState('');
+  const [clearCountdown, setClearCountdown] = useState(5);
 
   useEffect(() => {
     if (!submissionId) localStorage.setItem(LS_FORM, JSON.stringify(formData));
   }, [formData, submissionId]);
+
+  useEffect(() => {
+    if (clearStep !== 6) { setClearCountdown(5); return; }
+    if (clearCountdown === 0) return;
+    const t = setTimeout(() => setClearCountdown(c => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [clearStep, clearCountdown]);
 
   useEffect(() => {
     if (submissionId && !submissionData) {
@@ -403,6 +696,11 @@ export default function HistoricoForm() {
   const removeFile = (cat, idx) => {
     const catFiles = filesFor(cat);
     set('anexos', formData.anexos.filter(a => a !== catFiles[idx]));
+  };
+  const updateFileNota = (cat, idx, nota) => {
+    const catFiles = filesFor(cat);
+    const target = catFiles[idx];
+    set('anexos', formData.anexos.map(a => a === target ? { ...a, nota } : a));
   };
 
   const funcoes = formData.sexo === 'Feminino'
@@ -454,14 +752,14 @@ export default function HistoricoForm() {
   const handleAddNote = async () => {
     if (!noteText.trim()) return;
     setLoading(true);
-    const { data: cur } = await supabase.from(HISTORICO_TABLE).select('notas_adicionais').eq('id', submissionId).single();
-    const notes = [...(cur?.notas_adicionais || []), { nota: noteText.trim(), created_at: new Date().toISOString(), anexos: [] }];
+    const notes = [...(submissionData.notas_adicionais || []), { nota: noteText.trim(), created_at: new Date().toISOString(), anexos: noteAnexos }];
     const { error: err } = await supabase.from(HISTORICO_TABLE).update({ notas_adicionais: notes }).eq('id', submissionId);
     setLoading(false);
     if (err) { alert('Erro: ' + err.message); return; }
     setSubmissionData(prev => ({ ...prev, notas_adicionais: notes }));
-    setNoteText(''); setNoteModal(false);
+    setNoteText(''); setNoteAnexos([]); setNoteModal(false);
   };
+
 
   const doClear = () => {
     localStorage.removeItem(LS_FORM); localStorage.removeItem(LS_SUB);
@@ -469,32 +767,26 @@ export default function HistoricoForm() {
     setClearStep(0); setClearInput('');
   };
 
-  // ── Shared styles ────────────────────────────────────────
-  const sIn  = { width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1a1a24', border: '1px solid #333', color: '#fff', fontSize: '0.9rem' };
-  const sTa  = { ...sIn, minHeight: 100, resize: 'vertical' };
-  const sLbl = { display: 'block', marginBottom: 6, fontSize: '0.85rem', color: '#ccc' };
-  const sFld = { marginBottom: 18 };
-  const sSec = { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '28px', marginBottom: 20 };
-  const sSecTitle = { color: G, fontSize: '1.05rem', fontWeight: 700, marginBottom: 20, display: 'block' };
+  // estilos movidos para historico.css — classes: hf-input, hf-textarea, hf-label, hf-field, hf-section, hf-section-title
 
   // ── Password Gate ────────────────────────────────────────
   if (!authed) return (
     <div className="container">
       <div style={{ textAlign: 'center', paddingTop: 40, marginBottom: 32 }}>
-        <p style={{ color: G, textTransform: 'uppercase', letterSpacing: '3px', fontSize: '0.78rem', margin: '0 0 12px' }}>IEVC</p>
+        <p style={{ color: G, textTransform: 'uppercase', letterSpacing: '3px', fontSize: '1.12rem', margin: '0 0 12px' }}>Visão Cristã</p>
         <h1 style={{ fontSize: '1.8rem', background: `linear-gradient(to bottom, #fff, ${G})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', margin: 0 }}>
           Levantamento Histórico
         </h1>
       </div>
       <div className="card" style={{ maxWidth: 360, margin: '0 auto' }}>
-        <h2 style={{ color: G, marginBottom: 24, fontSize: '1.1rem' }}>Acesso ao Formulário</h2>
+        <h2 style={{ color: G, marginBottom: 24, fontSize: '1.25rem' }}>Acesso ao Formulário</h2>
         <form onSubmit={handleLogin}>
-          <div style={sFld}>
-            <label style={sLbl}>Senha de acesso</label>
+          <div className="hf-field">
+            <label className="hf-label">Senha de acesso</label>
             <input type="password" value={pwd} onChange={e => { setPwd(e.target.value); setLoginError(''); }}
-              placeholder="••••••••" autoFocus style={sIn} />
+              placeholder="••••••••" autoFocus className="hf-input" />
           </div>
-          {loginError && <p style={{ color: '#f87171', fontSize: '0.85rem', margin: '0 0 12px' }}>{loginError}</p>}
+          {loginError && <p style={{ color: '#f87171', fontSize: '1.02rem', margin: '0 0 12px' }}>{loginError}</p>}
           <button type="submit" className="btn-primary btn-full">Entrar</button>
         </form>
       </div>
@@ -520,7 +812,7 @@ export default function HistoricoForm() {
 
       <div className="card" style={{ marginBottom: 20 }}>
         <h3 style={{ color: G, marginBottom: 16, fontSize: '1rem' }}>Resumo da submissão</h3>
-        <div style={{ fontSize: '0.85rem', color: '#ccc', lineHeight: 1.9 }}>
+        <div style={{ fontSize: '1.02rem', color: '#ccc', lineHeight: 1.9 }}>
           {submissionData.nome      && <div><strong>Nome:</strong> {submissionData.nome}</div>}
           {submissionData.telefone  && <div><strong>Telefone:</strong> {submissionData.telefone}</div>}
           {submissionData.provincia && <div><strong>Província:</strong> {submissionData.provincia}</div>}
@@ -529,9 +821,9 @@ export default function HistoricoForm() {
         </div>
         {(submissionData.notas_adicionais || []).length > 0 && (
           <div style={{ marginTop: 16, borderTop: '1px solid #222', paddingTop: 16 }}>
-            <h4 style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: 8 }}>Informações adicionadas:</h4>
+            <h4 style={{ color: '#aaa', fontSize: '1.02rem', marginBottom: 8 }}>Informações adicionadas:</h4>
             {(submissionData.notas_adicionais || []).map((n, i) => (
-              <div key={i} style={{ background: '#1a1a24', borderRadius: '6px', padding: '10px', marginBottom: 6, fontSize: '0.8rem', color: '#ccc' }}>
+              <div key={i} style={{ background: '#1a1a24', borderRadius: '6px', padding: '10px', marginBottom: 6, fontSize: '0.97rem', color: '#ccc' }}>
                 <div style={{ color: '#555', marginBottom: 4 }}>{new Date(n.created_at).toLocaleDateString('pt-MZ')}</div>
                 {n.nota}
               </div>
@@ -544,8 +836,11 @@ export default function HistoricoForm() {
         <button type="button" className="btn-primary" onClick={() => setNoteModal(true)} style={{ flex: 1 }}>
           Adicionar informação
         </button>
-        <button type="button" className="btn-secondary" onClick={() => setClearStep(1)} style={{ flex: 1 }}>
-          Nova submissão
+      </div>
+      <div style={{ textAlign: 'right', marginBottom: 16 }}>
+        <button type="button" onClick={() => setClearStep(1)}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7f1d1d', fontSize: '0.82rem', textDecoration: 'underline', opacity: 0.6 }}>
+          Limpar formulário
         </button>
       </div>
 
@@ -555,54 +850,84 @@ export default function HistoricoForm() {
             <h3 style={{ color: G, marginBottom: 16 }}>Adicionar informação</h3>
             <textarea value={noteText} onChange={e => setNoteText(e.target.value)}
               placeholder="Escreva aqui as informações adicionais..."
-              style={{ ...sTa, width: '100%', marginBottom: 16 }} autoFocus />
+              style={{ ...sTa, width: '100%', marginBottom: 12 }} autoFocus />
+            <FileUploadSection
+              label="Anexar ficheiro (opcional)"
+              category={`notas/${submissionId}`}
+              files={noteAnexos}
+              onAdd={f => setNoteAnexos(prev => [...prev, f])}
+              onRemove={i => setNoteAnexos(prev => prev.filter((_, j) => j !== i))}
+              uploading={noteUploading}
+              setUploading={setNoteUploading}
+            />
             <div style={{ display: 'flex', gap: 10 }}>
-              <button type="button" className="btn-primary" onClick={handleAddNote} disabled={loading || !noteText.trim()}>
+              <button type="button" className="btn-primary" onClick={handleAddNote} disabled={loading || noteUploading || !noteText.trim()}>
                 {loading ? 'A guardar...' : 'Guardar'}
               </button>
-              <button type="button" className="btn-secondary" onClick={() => { setNoteModal(false); setNoteText(''); }}>Cancelar</button>
+              <button type="button" className="btn-secondary" onClick={() => { setNoteModal(false); setNoteText(''); setNoteAnexos([]); }}>Cancelar</button>
             </div>
           </div>
         </div>
       )}
 
       {clearStep > 0 && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
           <div style={{ background: '#1a1a24', borderRadius: '12px', padding: '28px', maxWidth: 420, width: '100%', border: '1px solid #444', textAlign: 'center' }}>
             {clearStep === 1 && <>
-              <h3 style={{ color: '#f87171', marginBottom: 12 }}>Tem a certeza?</h3>
-              <p style={{ color: '#ccc', marginBottom: 20 }}>Todos os dados serão apagados.</p>
+              <h3 style={{ color: '#f87171', marginBottom: 12 }}>Atenção</h3>
+              <p style={{ color: '#ccc', marginBottom: 20, lineHeight: 1.6 }}>Para editar as suas respostas, não precisa de limpar o formulário — basta alterar directamente os campos.</p>
               <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
                 <button className="btn-primary" type="button" onClick={() => setClearStep(0)}>Cancelar</button>
-                <button className="btn-secondary" type="button" onClick={() => setClearStep(2)}>Continuar</button>
+                <button className="btn-secondary" type="button" onClick={() => setClearStep(2)}>Continuar mesmo assim</button>
               </div>
             </>}
             {clearStep === 2 && <>
               <h3 style={{ color: '#f87171', marginBottom: 12 }}>Atenção</h3>
-              <p style={{ color: '#ccc', marginBottom: 20 }}>Isto inclui todas as tabelas, uploads e respostas.</p>
+              <p style={{ color: '#ccc', marginBottom: 20, lineHeight: 1.6 }}>Use esta função APENAS se quiser preencher o formulário por outra pessoa.</p>
               <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-                <button className="btn-secondary" type="button" onClick={() => setClearStep(1)}>Voltar</button>
+                <button className="btn-primary" type="button" onClick={() => setClearStep(1)}>Voltar</button>
                 <button className="btn-secondary" type="button" onClick={() => setClearStep(3)}>Percebo, continuar</button>
               </div>
             </>}
             {clearStep === 3 && <>
-              <h3 style={{ color: '#f87171', marginBottom: 12 }}>Último aviso</h3>
-              <p style={{ color: '#ccc', marginBottom: 20 }}>Depois de limpar, esta sessão não pode ser recuperada.</p>
+              <h3 style={{ color: '#f87171', marginBottom: 12 }}>Atenção</h3>
+              <p style={{ color: '#ccc', marginBottom: 20, lineHeight: 1.6 }}>Não será mais possível editar essas informações, nem enviar um formulário com dados pessoais semelhantes.</p>
               <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-                <button className="btn-primary" type="button" onClick={() => setClearStep(2)}>Não, voltar</button>
-                <button className="btn-secondary" type="button" onClick={() => setClearStep(4)}>Sim, tenho a certeza</button>
+                <button className="btn-primary" type="button" onClick={() => setClearStep(2)}>Voltar</button>
+                <button className="btn-secondary" type="button" onClick={() => setClearStep(4)}>Entendi, continuar</button>
               </div>
             </>}
             {clearStep === 4 && <>
-              <h3 style={{ color: '#f87171', marginBottom: 12 }}>Confirmação final</h3>
-              <p style={{ color: '#ccc', marginBottom: 12 }}>Escreva <strong style={{ color: '#f87171' }}>LIMPAR</strong> para confirmar.</p>
-              <input value={clearInput} onChange={e => setClearInput(e.target.value)}
-                style={{ ...sIn, textAlign: 'center', marginBottom: 16 }} placeholder="LIMPAR" autoFocus />
+              <h3 style={{ color: '#f87171', marginBottom: 12 }}>Atenção</h3>
+              <p style={{ color: '#ccc', marginBottom: 20, lineHeight: 1.6 }}>O seu registo ficará guardado mas não poderá ser alterado a partir deste dispositivo.</p>
               <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-                <button className="btn-secondary" type="button" onClick={() => { setClearStep(0); setClearInput(''); }}>Cancelar</button>
-                <button type="button" onClick={doClear} disabled={clearInput !== 'LIMPAR'}
-                  style={{ padding: '10px 20px', borderRadius: '8px', background: clearInput === 'LIMPAR' ? '#ef4444' : '#333', color: '#fff', border: 'none', cursor: clearInput === 'LIMPAR' ? 'pointer' : 'not-allowed', fontWeight: 600 }}>
-                  Confirmar e limpar
+                <button className="btn-primary" type="button" onClick={() => setClearStep(3)}>Voltar</button>
+                <button className="btn-secondary" type="button" onClick={() => setClearStep(5)}>Sim, quero continuar</button>
+              </div>
+            </>}
+            {clearStep === 5 && <>
+              <h3 style={{ color: '#f87171', marginBottom: 12 }}>Atenção</h3>
+              <p style={{ color: '#ccc', marginBottom: 20, lineHeight: 1.6 }}>Esta acção não pode ser desfeita.</p>
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+                <button className="btn-primary" type="button" onClick={() => setClearStep(4)}>Não, voltar</button>
+                <button className="btn-secondary" type="button" onClick={() => setClearStep(6)}>Tenho a certeza</button>
+              </div>
+            </>}
+            {clearStep === 6 && <>
+              <h3 style={{ color: '#f87171', marginBottom: 12 }}>Último Aviso</h3>
+              <p style={{ color: '#ccc', marginBottom: 20, lineHeight: 1.6 }}>
+                Ao confirmar, todos os dados desta sessão serão removidos deste dispositivo permanentemente.
+              </p>
+              {clearCountdown > 0 && (
+                <p style={{ color: '#f87171', fontSize: '0.97rem', marginBottom: 16 }}>
+                  Por favor aguarde <strong>{clearCountdown}</strong> segundo{clearCountdown !== 1 ? 's' : ''}...
+                </p>
+              )}
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+                <button className="btn-primary" type="button" onClick={() => setClearStep(5)}>Não, voltar</button>
+                <button type="button" onClick={doClear} disabled={clearCountdown > 0}
+                  style={{ padding: '10px 20px', borderRadius: '8px', background: clearCountdown > 0 ? '#4a1a1a' : '#ef4444', color: clearCountdown > 0 ? '#888' : '#fff', border: 'none', cursor: clearCountdown > 0 ? 'not-allowed' : 'pointer', fontWeight: 700, fontSize: '1.02rem', transition: 'all 0.3s' }}>
+                  Confirmar e apagar
                 </button>
               </div>
             </>}
@@ -618,182 +943,217 @@ export default function HistoricoForm() {
       <SupportBanner />
 
       <div className="page-header">
-        <p className="header-eyebrow">IEVC · Levantamento Histórico</p>
+        <p className="header-eyebrow">Visão Cristã · Levantamento Histórico</p>
         <h1 className="header-title">Inquérito Histórico</h1>
-        <p style={{ color: '#aaa', fontSize: '0.9rem' }}>
-          Recolha de informações sobre a história da IEVC na sua região.
+        <p style={{ color: '#aaa', fontSize: '1.07rem' }}>
+          Recolha de informações sobre a história da Visão Cristã na sua região.
         </p>
       </div>
 
       <form onSubmit={handleSubmit}>
 
         {/* ── 1. Identificação ───────────────────────── */}
-        <section style={sSec}>
-          <span style={sSecTitle}>1. Identificação do Inquirido</span>
+        <section className="hf-section">
+          <span className="hf-section-title">1. Identificação do Inquirido</span>
 
-          <div style={sFld}>
-            <label style={sLbl}>Nome completo *</label>
-            <input required style={sIn} value={formData.nome} onChange={e => set('nome', e.target.value)} placeholder="Nome e apelido" />
+          <div className="hf-field">
+            <label className="hf-label">Nome completo *</label>
+            <input required className="hf-input" value={formData.nome} onChange={e => set('nome', e.target.value)} placeholder="Nome e apelido" />
           </div>
 
-          <div style={{ ...sFld, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div className="hf-field" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
-              <label style={sLbl}>Sexo *</label>
-              <select required style={sIn} value={formData.sexo} onChange={e => { set('sexo', e.target.value); set('funcao', ''); }}>
+              <label className="hf-label">Sexo *</label>
+              <select required className="hf-input" value={formData.sexo} onChange={e => { set('sexo', e.target.value); set('funcao', ''); }}>
                 <option value="">— Seleccione —</option>
                 <option>Masculino</option>
                 <option>Feminino</option>
               </select>
             </div>
             <div>
-              <label style={sLbl}>Função</label>
-              <select style={sIn} value={formData.funcao} onChange={e => set('funcao', e.target.value)}>
+              <label className="hf-label">Função</label>
+              <select className="hf-input" value={formData.funcao} onChange={e => set('funcao', e.target.value)}>
                 <option value="">— Seleccione —</option>
                 {funcoes.map(f => <option key={f}>{f}</option>)}
               </select>
             </div>
           </div>
 
-          <div style={{ ...sFld, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div className="hf-field" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
-              <label style={sLbl}>Província</label>
-              <select style={sIn} value={formData.provincia} onChange={e => { set('provincia', e.target.value); set('distrito', ''); }}>
+              <label className="hf-label">Província</label>
+              <select className="hf-input" value={formData.provincia} onChange={e => { set('provincia', e.target.value); set('distrito', ''); }}>
                 <option value="">— Seleccione —</option>
                 {PROVINCIAS.map(p => <option key={p}>{p}</option>)}
               </select>
             </div>
             <div>
-              <label style={sLbl}>Distrito</label>
-              <select style={sIn} value={formData.distrito} onChange={e => set('distrito', e.target.value)} disabled={!formData.provincia}>
+              <label className="hf-label">Distrito</label>
+              <select className="hf-input" value={formData.distrito} onChange={e => set('distrito', e.target.value)} disabled={!formData.provincia}>
                 <option value="">— Seleccione —</option>
                 {distritos.map(d => <option key={d}>{d}</option>)}
               </select>
             </div>
           </div>
 
-          <div style={{ ...sFld, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div className="hf-field" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
-              <label style={sLbl}>Igreja</label>
-              <input style={sIn} value={formData.igreja} onChange={e => set('igreja', e.target.value)} placeholder="Nome da igreja" />
+              <label className="hf-label">Cidade/Vila</label>
+              <input className="hf-input" value={formData.igreja} onChange={e => set('igreja', e.target.value)} placeholder="Cidade ou vila" />
             </div>
             <div>
-              <label style={sLbl}>Localidade/Bairro</label>
-              <input style={sIn} value={formData.localidade} onChange={e => set('localidade', e.target.value)} placeholder="Localidade ou bairro" />
-            </div>
-          </div>
-
-          <div style={sFld}>
-            <label style={sLbl}>Quando ingressou na IEVC</label>
-            <select style={sIn} value={formData.quando_ingressou} onChange={e => set('quando_ingressou', e.target.value)}>
-              <option value="">— Seleccione —</option>
-              <option>No início (1996)</option>
-              <option>1997–2010</option>
-              <option>2011–2026</option>
-            </select>
-          </div>
-
-          <div style={{ ...sFld, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div>
-              <label style={sLbl}>WhatsApp</label>
-              <input style={sIn} type="tel" value={formData.whatsapp} onChange={e => set('whatsapp', e.target.value)} placeholder="84 / 85 / 86 ..." />
-            </div>
-            <div>
-              <label style={sLbl}>Telefone *</label>
-              <input required style={sIn} type="tel" value={formData.telefone} onChange={e => set('telefone', e.target.value)} placeholder="Número de telefone" />
+              <label className="hf-label">Em que localidade/Bairro se localiza a igreja?</label>
+              <input className="hf-input" value={formData.localidade} onChange={e => set('localidade', e.target.value)} placeholder="Localidade ou bairro" />
             </div>
           </div>
 
-          <div style={sFld}>
-            <label style={sLbl}>E-mail</label>
-            <input style={sIn} type="email" value={formData.email} onChange={e => set('email', e.target.value)} placeholder="email@exemplo.com" />
+          <div className="hf-field">
+            <label className="hf-label">Em que ano ingressou na IEVC/VCM?</label>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
+              {[['1996','1996'],['1997-2010','Entre 1997 e 2010'],['2011-2026','Entre 2011 e 2026']].map(([range, label]) => (
+                <button key={range} type="button"
+                  onClick={() => {
+                    setIngressouRange(range);
+                    if (range === '1996') set('quando_ingressou', '1996');
+                    else set('quando_ingressou', '');
+                  }}
+                  style={{
+                    padding: '6px 14px', borderRadius: '6px', fontSize: '1.02rem', cursor: 'pointer',
+                    background: ingressouRange === range ? G : '#1a1a24',
+                    color: ingressouRange === range ? '#000' : '#aaa',
+                    border: `1px solid ${ingressouRange === range ? G : '#333'}`,
+                    fontWeight: ingressouRange === range ? 600 : 400,
+                  }}>{label}</button>
+              ))}
+            </div>
+            {ingressouRange === '1997-2010' && (
+              <select className="hf-input" value={formData.quando_ingressou} onChange={e => set('quando_ingressou', e.target.value)}>
+                <option value="">— Seleccione o ano —</option>
+                {Array.from({length: 14}, (_, i) => 1997 + i).map(y => <option key={y} value={String(y)}>{y}</option>)}
+              </select>
+            )}
+            {ingressouRange === '2011-2026' && (
+              <select className="hf-input" value={formData.quando_ingressou} onChange={e => set('quando_ingressou', e.target.value)}>
+                <option value="">— Seleccione o ano —</option>
+                {Array.from({length: 16}, (_, i) => 2011 + i).map(y => <option key={y} value={String(y)}>{y}</option>)}
+              </select>
+            )}
+          </div>
+
+          <div className="hf-field" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div>
+              <label className="hf-label">WhatsApp</label>
+              <input className="hf-input" type="tel" value={formData.whatsapp} onChange={e => set('whatsapp', e.target.value)} placeholder="84 / 85 / 86 ..." />
+            </div>
+            <div>
+              <label className="hf-label">Telefone *</label>
+              <input required className="hf-input" type="tel" value={formData.telefone} onChange={e => set('telefone', e.target.value)} placeholder="Número de telefone" />
+            </div>
+          </div>
+
+          <div className="hf-field">
+            <label className="hf-label">E-mail</label>
+            <input className="hf-input" type="email" value={formData.email} onChange={e => set('email', e.target.value)} placeholder="email@exemplo.com" />
           </div>
         </section>
 
         {/* ── 2. Igreja Local ────────────────────────── */}
-        <section style={sSec}>
-          <span style={sSecTitle}>2. Informações sobre a Igreja Local</span>
+        <section className="hf-section">
+          <span className="hf-section-title">2. Informações sobre a Igreja Local</span>
           <ProvinceBanner />
 
-          <PersonTable title="Missionários" items={formData.missionarios}
-            onChange={v => set('missionarios', v)} provinciaAtual={formData.provincia} />
+          <div style={{ marginBottom: 20 }}>
+            <p style={{ color: G, fontWeight: 700, fontSize: '1.12rem', marginBottom: 4 }}>Missionários ao longo dos 30 anos</p>
+            <p style={{ color: '#777', fontSize: '0.97rem', margin: '0 0 16px' }}>(Se esteve em diferentes lugares, indique um lugar por vez)</p>
+            <CoordenadorTable items={formData.coordenadores_provinciais} onChange={v => set('coordenadores_provinciais', v)} />
+            <OutroMissionarioTable items={formData.outros_missionarios} onChange={v => set('outros_missionarios', v)} provinciaAtual={formData.provincia} />
+          </div>
 
-          <PersonTable title="Obreiros Nacionais" items={formData.obreiros_nacionais}
-            onChange={v => set('obreiros_nacionais', v)} provinciaAtual={formData.provincia} />
+          <div style={{ marginBottom: 20 }}>
+            <p style={{ color: G, fontWeight: 700, fontSize: '1.12rem', marginBottom: 4 }}>Obreiros Nacionais</p>
+            <p style={{ color: '#777', fontSize: '0.97rem', margin: '0 0 16px' }}>(Se esteve em diferentes lugares, indique um lugar por vez)</p>
+            <CoordenadorTable title="Coordenadores Provinciais" items={formData.obreiros_coordenadores} onChange={v => set('obreiros_coordenadores', v)} />
+            <ObreiroLiderTable items={formData.obreiros_lideres} onChange={v => set('obreiros_lideres', v)} provinciaAtual={formData.provincia} />
+          </div>
 
-          <div style={sFld}>
-            <label style={sLbl}>Onde começou a igreja?</label>
-            <select style={sIn} value={formData.onde_comecou} onChange={e => set('onde_comecou', e.target.value)}>
+          <div className="hf-field">
+            <label className="hf-label">Onde começou a igreja?</label>
+            <select className="hf-input" value={formData.onde_comecou} onChange={e => set('onde_comecou', e.target.value)}>
               <option value="">— Seleccione —</option>
-              <option>Templo</option>
-              <option>Casa</option>
-              <option>Escola</option>
+              <option>Num templo</option>
+              <option>Numa casa</option>
+              <option>Numa escola</option>
               <option>Ao ar livre</option>
               <option>Outro</option>
             </select>
           </div>
           {formData.onde_comecou === 'Outro' && (
-            <div style={sFld}>
-              <label style={sLbl}>Especifique onde começou</label>
-              <input style={sIn} value={formData.onde_comecou_outro} onChange={e => set('onde_comecou_outro', e.target.value)} placeholder="Descreva o local" />
+            <div className="hf-field">
+              <label className="hf-label">Especifique onde começou</label>
+              <input className="hf-input" value={formData.onde_comecou_outro} onChange={e => set('onde_comecou_outro', e.target.value)} placeholder="Descreva o local" />
             </div>
           )}
 
           <div style={{ marginBottom: 16 }}>
-            <label style={sLbl}>Tem imagens ou vídeos sobre o início da igreja?</label>
+            <label className="hf-label">Tem imagens ou vídeos sobre o início da igreja?</label>
             <FileUploadSection label="Partilhe imagens, vídeos ou documentos sobre o início da igreja"
               category="inicio_igreja" files={filesFor('inicio_igreja')} onAdd={addFile}
-              onRemove={idx => removeFile('inicio_igreja', idx)} uploading={uploading} setUploading={setUploading} />
+              onRemove={idx => removeFile('inicio_igreja', idx)}
+              onUpdateNota={(idx, nota) => updateFileNota('inicio_igreja', idx, nota)}
+              uploading={uploading} setUploading={setUploading} />
           </div>
 
-          <div style={{ background: '#1a1a0a', border: '1px solid #2a2a0a', borderRadius: '8px', padding: '10px 14px', marginBottom: 16, fontSize: '0.8rem', color: '#888' }}>
+          <div style={{ background: '#1a1a0a', border: '1px solid #2a2a0a', borderRadius: '8px', padding: '10px 14px', marginBottom: 16, fontSize: '0.97rem', color: '#888' }}>
             Entende-se por igreja um grupo de pessoas e não edifícios.
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
             {[
-              ['igrejas_distrito',            'Igrejas no distrito'],
-              ['templos_concluidos_distrito',  'Templos alvenaria concluídos'],
-              ['templos_construcao_distrito',  'Templos alvenaria em construção'],
-              ['templos_material_distrito',    'Templos de material local'],
+              ['igrejas_distrito',            'Quantas igrejas tem o distrito?'],
+              ['templos_concluidos_distrito',  'Quantos templos de alvenaria concluídos tem o distrito?'],
+              ['templos_construcao_distrito',  'Quantos templos de alvenaria em construção há no distrito?'],
+              ['templos_material_distrito',    'Quantos templos de material local tem o distrito?'],
             ].map(([key, label]) => (
-              <div key={key} style={sFld}>
-                <label style={sLbl}>{label}</label>
-                <input style={sIn} type="number" min="0" value={formData[key]} onChange={e => set(key, e.target.value)} placeholder="0" />
+              <div key={key} className="hf-field">
+                <label className="hf-label">{label}</label>
+                <input className="hf-input" type="number" min="0" value={formData[key]} onChange={e => set(key, e.target.value)} placeholder="0" />
               </div>
             ))}
           </div>
 
           <div style={{ marginBottom: 8 }}>
-            <label style={sLbl}>Imagens ou documentos sobre a estrutura</label>
+            <label className="hf-label">Imagens ou documentos sobre a estrutura</label>
             <FileUploadSection label="Partilhe fotos dos templos ou documentos sobre a estrutura"
               category="estrutura_templos" files={filesFor('estrutura_templos')} onAdd={addFile}
-              onRemove={idx => removeFile('estrutura_templos', idx)} uploading={uploading} setUploading={setUploading} />
+              onRemove={idx => removeFile('estrutura_templos', idx)}
+              onUpdateNota={(idx, nota) => updateFileNota('estrutura_templos', idx, nota)}
+              uploading={uploading} setUploading={setUploading} />
           </div>
         </section>
 
         {/* ── 3. Cronologia ──────────────────────────── */}
-        <section style={sSec}>
-          <span style={sSecTitle}>3. Cronologia</span>
+        <section className="hf-section">
+          <span className="hf-section-title">3. Cronologia</span>
           <ProvinceBanner />
 
-          <div style={sFld}>
-            <label style={sLbl}>Primeira congregação inaugurada na sua província</label>
-            <input style={sIn} value={formData.primeira_congregacao} onChange={e => set('primeira_congregacao', e.target.value)} placeholder="Nome da primeira congregação" />
+          <div className="hf-field">
+            <label className="hf-label">Qual foi a primeira igreja a ser inaugurada na sua província?</label>
+            <input className="hf-input" value={formData.primeira_congregacao} onChange={e => set('primeira_congregacao', e.target.value)} placeholder="Nome da primeira igreja" />
           </div>
 
           <div style={{ ...sFld, marginBottom: 20 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <label style={{ ...sLbl, marginBottom: 0 }}>Congregações na província</label>
+              <label style={{ ...sLbl, marginBottom: 0 }}>Igrejas/Congregações na Província</label>
               <button type="button" onClick={() => set('congregacoes', [...formData.congregacoes, emptyCongregacao()])}
-                style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 12px', borderRadius: '6px', background: G, color: '#000', border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>
+                style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 12px', borderRadius: '6px', background: G, color: '#000', border: 'none', cursor: 'pointer', fontSize: '0.97rem', fontWeight: 600 }}>
                 <Plus size={14} /> Adicionar
               </button>
             </div>
-            {formData.congregacoes.length === 0 && <p style={{ color: '#555', fontSize: '0.85rem', fontStyle: 'italic' }}>Nenhuma congregação adicionada.</p>}
+            {formData.congregacoes.length === 0 && <p style={{ color: '#555', fontSize: '1.02rem', fontStyle: 'italic' }}>Nenhuma congregação adicionada.</p>}
             {formData.congregacoes.map((c, i) => (
               <div key={c.id} style={{ background: '#0d0d1a', border: '1px solid #2a2a3a', borderRadius: '8px', padding: '14px', marginBottom: 8 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                  <span style={{ color: '#666', fontSize: '0.78rem' }}>Congregação #{i + 1}</span>
+                  <span style={{ color: '#666', fontSize: '1.12rem' }}>Igreja {c.localidade || `#${i + 1}`}</span>
                   <button type="button" onClick={() => set('congregacoes', formData.congregacoes.filter(x => x.id !== c.id))}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#555' }}>
                     <Trash2 size={14} />
@@ -801,20 +1161,22 @@ export default function HistoricoForm() {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
                   <div>
-                    <label style={{ ...sLbl, fontSize: '0.78rem' }}>Distrito</label>
-                    <input style={{ ...sIn, fontSize: '0.85rem', padding: '7px 10px' }} value={c.distrito}
-                      onChange={e => set('congregacoes', formData.congregacoes.map(x => x.id === c.id ? { ...x, distrito: e.target.value } : x))}
-                      placeholder="Distrito" />
+                    <label style={{ ...sLbl, fontSize: '1.12rem' }}>Distrito</label>
+                    <select className="hf-input hf-input-sm" value={c.distrito}
+                      onChange={e => set('congregacoes', formData.congregacoes.map(x => x.id === c.id ? { ...x, distrito: e.target.value } : x))}>
+                      <option value="">— Seleccione —</option>
+                      {distritos.map(d => <option key={d}>{d}</option>)}
+                    </select>
                   </div>
                   <div>
-                    <label style={{ ...sLbl, fontSize: '0.78rem' }}>Localidade/Congregação</label>
-                    <input style={{ ...sIn, fontSize: '0.85rem', padding: '7px 10px' }} value={c.localidade}
+                    <label style={{ ...sLbl, fontSize: '1.12rem' }}>Bairro/Localidade</label>
+                    <input className="hf-input hf-input-sm" value={c.localidade}
                       onChange={e => set('congregacoes', formData.congregacoes.map(x => x.id === c.id ? { ...x, localidade: e.target.value } : x))}
-                      placeholder="Nome da localidade" />
+                      placeholder="Nome do bairro/localidade" />
                   </div>
                 </div>
                 <div>
-                  <label style={{ ...sLbl, fontSize: '0.78rem' }}>Data de inauguração</label>
+                  <label style={{ ...sLbl, fontSize: '1.12rem' }}>Data de inauguração</label>
                   <DateFlex value={c.data}
                     onChange={d => set('congregacoes', formData.congregacoes.map(x => x.id === c.id ? { ...x, data: d } : x))} />
                 </div>
@@ -822,21 +1184,21 @@ export default function HistoricoForm() {
             ))}
           </div>
 
-          <div style={sFld}>
-            <label style={sLbl}>Quando foi inaugurada a sua congregação?</label>
+          <div className="hf-field">
+            <label className="hf-label">Quando foi inaugurada a sua congregação?</label>
             <DateFlex value={formData.data_inauguracao} onChange={v => set('data_inauguracao', v)} />
           </div>
         </section>
 
         {/* ── 4. Desafios ────────────────────────────── */}
-        <section style={sSec}>
-          <span style={sSecTitle}>4. Desafios</span>
+        <section className="hf-section">
+          <span className="hf-section-title">4. Desafios</span>
           <ProvinceBanner />
 
-          <div style={sFld}>
-            <label style={sLbl}>Quais foram os principais desafios enfrentados?</label>
+          <div className="hf-field">
+            <label className="hf-label">Quais foram os principais desafios enfrentados?</label>
             {['Financeiros', 'Falta de liderança', 'Resistência da comunidade', 'Outros'].map(d => (
-              <label key={d} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, cursor: 'pointer', color: '#ccc', fontSize: '0.9rem' }}>
+              <label key={d} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, cursor: 'pointer', color: '#ccc', fontSize: '1.07rem' }}>
                 <input type="checkbox" checked={formData.desafios.includes(d)}
                   onChange={e => set('desafios', e.target.checked ? [...formData.desafios, d] : formData.desafios.filter(x => x !== d))}
                   style={{ width: 16, height: 16, accentColor: G }} />
@@ -846,56 +1208,55 @@ export default function HistoricoForm() {
           </div>
 
           {formData.desafios.includes('Outros') && (
-            <div style={sFld}>
-              <label style={sLbl}>Outros desafios — descreva</label>
-              <textarea style={sTa} value={formData.desafios_outros} onChange={e => set('desafios_outros', e.target.value)} placeholder="Descreva outros desafios..." />
+            <div className="hf-field">
+              <label className="hf-label">Outros desafios — descrição</label>
+              <textarea className="hf-textarea" value={formData.desafios_outros} onChange={e => set('desafios_outros', e.target.value)} placeholder="Descreva outros desafios..." />
             </div>
           )}
 
-          <div style={sFld}>
-            <label style={sLbl}>Momentos marcantes</label>
-            <textarea style={sTa} value={formData.momentos_marcantes} onChange={e => set('momentos_marcantes', e.target.value)} placeholder="Partilhe os momentos mais marcantes..." />
+          <div className="hf-field">
+            <label className="hf-label">Momentos marcantes</label>
+            <textarea className="hf-textarea" value={formData.momentos_marcantes} onChange={e => set('momentos_marcantes', e.target.value)} placeholder="Partilhe os momentos mais marcantes..." />
           </div>
         </section>
 
         {/* ── 5. Testemunhos ─────────────────────────── */}
-        <section style={sSec}>
-          <span style={sSecTitle}>5. Testemunhos e Impacto</span>
+        <section className="hf-section">
+          <span className="hf-section-title">5. Testemunhos e Impacto</span>
           <ProvinceBanner />
 
-          <div style={sFld}>
-            <label style={sLbl}>Experiência marcante</label>
-            <textarea style={{ ...sTa, minHeight: 120 }} value={formData.experiencia_marcante} onChange={e => set('experiencia_marcante', e.target.value)} placeholder="Partilhe uma experiência que marcou o seu percurso..." />
+          <div className="hf-field">
+            <label className="hf-label">Experiência marcante</label>
+            <textarea className="hf-textarea" style={{ minHeight: 120 }} value={formData.experiencia_marcante} onChange={e => set('experiencia_marcante', e.target.value)} placeholder="Partilhe uma experiência que marcou o seu percurso..." />
           </div>
 
-          <div style={sFld}>
-            <label style={sLbl}>Impacto na comunidade</label>
-            <textarea style={{ ...sTa, minHeight: 120 }} value={formData.impacto_comunidade} onChange={e => set('impacto_comunidade', e.target.value)} placeholder="Como a IEVC impactou a comunidade local?" />
+          <div className="hf-field">
+            <label className="hf-label">Impacto na comunidade</label>
+            <textarea className="hf-textarea" style={{ minHeight: 120 }} value={formData.impacto_comunidade} onChange={e => set('impacto_comunidade', e.target.value)} placeholder="Como a IEVC/VCM impactou a comunidade local?" />
           </div>
         </section>
 
         {/* ── 6. Dados Complementares ─────────────────── */}
-        <section style={sSec}>
-          <span style={sSecTitle}>6. Dados Complementares</span>
+        <section className="hf-section">
+          <span className="hf-section-title">6. Dados Complementares</span>
 
-          <div style={sFld}>
-            <label style={sLbl}>Possui documentos históricos?</label>
-            <div style={{ display: 'flex', gap: 20 }}>
-              {['Sim', 'Não'].map(v => (
-                <label key={v} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', color: '#ccc', fontSize: '0.9rem' }}>
-                  <input type="radio" name="possui_docs" value={v} checked={formData.possui_documentos === v}
-                    onChange={() => set('possui_documentos', v)} style={{ accentColor: G }} />
-                  {v}
-                </label>
-              ))}
-            </div>
+          <div className="hf-field">
+            <label className="hf-label">Possui documentos históricos?</label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', color: '#ccc', fontSize: '1.07rem' }}>
+              <input type="checkbox" checked={formData.possui_documentos === 'Sim'}
+                onChange={e => set('possui_documentos', e.target.checked ? 'Sim' : null)}
+                style={{ width: 16, height: 16, accentColor: G }} />
+              Sim
+            </label>
           </div>
 
           {formData.possui_documentos === 'Sim' && (
             <div style={{ marginBottom: 16 }}>
               <FileUploadSection label="Carregue aqui os documentos históricos que possui"
                 category="documentos_historicos" files={filesFor('documentos_historicos')} onAdd={addFile}
-                onRemove={idx => removeFile('documentos_historicos', idx)} uploading={uploading} setUploading={setUploading} />
+                onRemove={idx => removeFile('documentos_historicos', idx)}
+                onUpdateNota={(idx, nota) => updateFileNota('documentos_historicos', idx, nota)}
+                uploading={uploading} setUploading={setUploading} />
             </div>
           )}
 
@@ -903,21 +1264,21 @@ export default function HistoricoForm() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <label style={{ ...sLbl, marginBottom: 0 }}>Pessoas de referência</label>
               <button type="button" onClick={() => set('referencias', [...formData.referencias, emptyReferencia()])}
-                style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: '6px', background: '#1a1a2e', border: `1px solid ${G}55`, color: G, cursor: 'pointer', fontSize: '0.78rem' }}>
+                style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: '6px', background: '#1a1a2e', border: `1px solid ${G}55`, color: G, cursor: 'pointer', fontSize: '1.12rem' }}>
                 <Plus size={13} /> Adicionar
               </button>
             </div>
             {formData.referencias.map((r) => (
               <div key={r.id} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 8, marginBottom: 8, alignItems: 'end' }}>
                 <div>
-                  <label style={{ ...sLbl, fontSize: '0.78rem' }}>Nome</label>
-                  <input style={{ ...sIn, fontSize: '0.85rem', padding: '7px 10px' }} value={r.nome}
+                  <label style={{ ...sLbl, fontSize: '1.12rem' }}>Nome</label>
+                  <input className="hf-input hf-input-sm" value={r.nome}
                     onChange={e => set('referencias', formData.referencias.map(x => x.id === r.id ? { ...x, nome: e.target.value } : x))}
                     placeholder="Nome da pessoa" />
                 </div>
                 <div>
-                  <label style={{ ...sLbl, fontSize: '0.78rem' }}>Contacto</label>
-                  <input style={{ ...sIn, fontSize: '0.85rem', padding: '7px 10px' }} type="tel" value={r.contacto}
+                  <label style={{ ...sLbl, fontSize: '1.12rem' }}>Contacto</label>
+                  <input className="hf-input hf-input-sm" type="tel" value={r.contacto}
                     onChange={e => set('referencias', formData.referencias.map(x => x.id === r.id ? { ...x, contacto: e.target.value } : x))}
                     placeholder="Telefone" />
                 </div>
@@ -930,46 +1291,46 @@ export default function HistoricoForm() {
             ))}
           </div>
 
-          <div style={sFld}>
-            <label style={sLbl}>Observações finais</label>
-            <p style={{ fontSize: '0.8rem', color: '#666', margin: '0 0 8px' }}>
+          <div className="hf-field">
+            <label className="hf-label">Observações finais</label>
+            <p style={{ fontSize: '0.97rem', color: '#666', margin: '0 0 8px' }}>
               Pode incluir aqui informações sobre outras províncias ou qualquer outro dado relevante.
             </p>
-            <textarea style={{ ...sTa, minHeight: 120 }} value={formData.observacoes_finais} onChange={e => set('observacoes_finais', e.target.value)} placeholder="Observações, informações de outras províncias, etc." />
+            <textarea className="hf-textarea" style={{ minHeight: 120 }} value={formData.observacoes_finais} onChange={e => set('observacoes_finais', e.target.value)} placeholder="Observações, informações de outras províncias, etc." />
           </div>
         </section>
 
         <SupportBanner />
 
         {/* ── 7. Declaração ──────────────────────────── */}
-        <section style={sSec}>
-          <span style={sSecTitle}>7. Declaração</span>
-          <p style={{ color: '#ccc', fontSize: '0.9rem', marginBottom: 20, lineHeight: 1.6 }}>
+        <section className="hf-section">
+          <span className="hf-section-title">7. Declaração</span>
+          <p style={{ color: '#ccc', fontSize: '1.07rem', marginBottom: 20, lineHeight: 1.6 }}>
             "Declaro que as informações prestadas são verdadeiras conforme o meu conhecimento."
           </p>
           <div style={{ display: 'flex', gap: 20 }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
               <input type="radio" name="declaracao" checked={formData.declaracao_verdadeira === true}
                 onChange={() => set('declaracao_verdadeira', true)} style={{ accentColor: G }} />
-              <span style={{ color: formData.declaracao_verdadeira === true ? '#4ade80' : '#ccc', fontWeight: 600, fontSize: '0.9rem' }}>
+              <span style={{ color: formData.declaracao_verdadeira === true ? '#4ade80' : '#ccc', fontWeight: 600, fontSize: '1.07rem' }}>
                 Sim, declaro
               </span>
             </label>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
               <input type="radio" name="declaracao" checked={formData.declaracao_verdadeira === false}
                 onChange={() => set('declaracao_verdadeira', false)} style={{ accentColor: G }} />
-              <span style={{ color: '#ccc', fontSize: '0.9rem' }}>Não confirmo</span>
+              <span style={{ color: '#ccc', fontSize: '1.07rem' }}>Não confirmo</span>
             </label>
           </div>
           {formData.declaracao_verdadeira === false && (
-            <p style={{ color: '#f87171', fontSize: '0.85rem', marginTop: 10 }}>
+            <p style={{ color: '#f87171', fontSize: '1.02rem', marginTop: 10 }}>
               Tem de aceitar a declaração para poder submeter o formulário.
             </p>
           )}
         </section>
 
         {error && (
-          <div style={{ background: '#1a0a0a', border: '1px solid #4a1a1a', borderRadius: '8px', padding: '12px 16px', marginBottom: 16, color: '#f87171', fontSize: '0.9rem' }}>
+          <div style={{ background: '#1a0a0a', border: '1px solid #4a1a1a', borderRadius: '8px', padding: '12px 16px', marginBottom: 16, color: '#f87171', fontSize: '1.07rem' }}>
             {error}
           </div>
         )}
