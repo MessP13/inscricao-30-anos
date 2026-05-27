@@ -364,7 +364,7 @@ export default function AdminPanel({ onBack }) {
             )}
             <button type="submit" className="btn-primary btn-full">Entrar</button>
           </form>
-          <button onClick={onBack} className="admin-back-link">← Voltar ao formulário</button>
+          <button onClick={() => window.history.back()} className="admin-back-link">← Voltar ao formulário</button>
         </div>
       </div>
     );
@@ -440,7 +440,7 @@ export default function AdminPanel({ onBack }) {
           <button className="btn-export" onClick={exportDOC} title="Exportar Word">
             <Download size={15} /> Word
           </button>
-          <button className="btn-secondary" style={{ padding: '8px 18px', fontSize: '0.9rem' }} onClick={() => { setAuthed(false); onBack(); }}>
+          <button className="btn-secondary" style={{ padding: '8px 18px', fontSize: '0.9rem' }} onClick={() => { setAuthed(false); window.location.href = activeTab === 'historico' ? '/historico' : '/inscricao'; }}>
             <LogOut size={15} /> Sair
           </button>
         </div>

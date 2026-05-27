@@ -54,45 +54,19 @@ const EMPTY_FORM = {
   anexos: [],
 };
 
+const YEAR_OPTS = Array.from({ length: 31 }, (_, i) => 2026 - i);
+
 // ── DateFlex ───────────────────────────────────────────────────────────────────
 function DateFlex({ value = { mode: 'unknown' }, onChange }) {
-  const yearOpts = Array.from({ length: 31 }, (_, i) => 2026 - i);
-  const sSel = { padding: '6px 10px', borderRadius: '6px', background: '#1a1a24', border: '1px solid #333', color: '#fff', fontSize: '1.02rem', flex: 1 };
-  const sLink = { alignSelf: 'flex-start', fontSize: '0.78rem', color: '#666', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' };
-
-  const isExact = value.mode === 'exact' && value.year;
-
-  if (isExact) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <select style={{ ...sSel, flex: 2 }} value={value.year || ''} onChange={e => onChange({ mode: 'exact', year: e.target.value || null })}>
-          <option value="">Ano</option>
-          {yearOpts.map(y => <option key={y} value={y}>{y}</option>)}
-        </select>
-        <button type="button" style={sLink} onClick={() => onChange({ mode: 'approximate' })}>
-          usar intervalo de anos
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-        <select style={sSel} value={value.from?.year || ''} onChange={e => onChange({ ...value, mode: 'approximate', from: { ...(value.from || {}), year: e.target.value || null } })}>
-          <option value="">De (ano)</option>
-          {yearOpts.map(y => <option key={y} value={y}>{y}</option>)}
-        </select>
-        <span style={{ color: '#555', flexShrink: 0 }}>–</span>
-        <select style={sSel} value={value.to?.year || ''} onChange={e => onChange({ ...value, mode: 'approximate', to: { ...(value.to || {}), year: e.target.value || null } })}>
-          <option value="">Até (ano)</option>
-          {yearOpts.map(y => <option key={y} value={y}>{y}</option>)}
-        </select>
-      </div>
-      <button type="button" style={sLink} onClick={() => onChange({ mode: 'exact' })}>
-        sei o ano exacto
-      </button>
-    </div>
+    <select
+      style={{ padding: '6px 10px', borderRadius: '6px', background: '#1a1a24', border: '1px solid #333', color: '#fff', fontSize: '1.02rem', width: '100%' }}
+      value={value?.year || ''}
+      onChange={e => onChange({ mode: e.target.value ? 'exact' : 'unknown', year: e.target.value || null })}
+    >
+      <option value="">Ano desconhecido</option>
+      {YEAR_OPTS.map(y => <option key={y} value={y}>{y}</option>)}
+    </select>
   );
 }
 
@@ -768,78 +742,211 @@ export default function HistoricoForm() {
   );
 
   // ── Summary page ─────────────────────────────────────────
-  if (submissionId && submissionData) return (
-    <div className="container">
-      <SupportBanner />
-      <div style={{ textAlign: 'center', marginBottom: 32 }}>
-        <div style={{ color: '#4ade80', fontSize: '2.5rem', marginBottom: 12 }}>✓</div>
-        <h2 style={{ color: G, margin: 0 }}>Formulário submetido com sucesso!</h2>
-        <p style={{ color: '#aaa', marginTop: 8 }}>Obrigado pela sua contribuição.</p>
-      </div>
+  if (submissionId && submissionData) {
+    const s = submissionData;
 
-      <div className="card" style={{ marginBottom: 20 }}>
-        <h3 style={{ color: G, marginBottom: 16, fontSize: '1rem' }}>Resumo da submissão</h3>
-        <div style={{ fontSize: '1.02rem', color: '#ccc', lineHeight: 1.9 }}>
-          {submissionData.nome      && <div><strong>Nome:</strong> {submissionData.nome}</div>}
-          {submissionData.telefone  && <div><strong>Telefone:</strong> {submissionData.telefone}</div>}
-          {submissionData.provincia && <div><strong>Província:</strong> {submissionData.provincia}</div>}
-          {submissionData.igreja    && <div><strong>Igreja:</strong> {submissionData.igreja}</div>}
-          {submissionData.funcao    && <div><strong>Função:</strong> {submissionData.funcao}</div>}
+    const displayDF = (df) => {
+      if (!df || df.mode === 'unknown') return null;
+      if (df.mode === 'exact') return df.year ? String(df.year) : null;
+      if (df.mode === 'approximate') {
+        const from = df.from?.year; const to = df.to?.year;
+        if (from && to) return `${from} – ${to}`;
+        return from ? `a partir de ${from}` : to ? `até ${to}` : null;
+      }
+      return null;
+    };
+
+    const RO = ({ label, val }) => {
+      if (val === null || val === undefined || val === '' || (Array.isArray(val) && val.length === 0)) return null;
+      const display = typeof val === 'boolean' ? (val ? 'Sim' : 'Não') : Array.isArray(val) ? val.join(', ') : String(val);
+      return display.length > 80 ? (
+        <div style={{ marginBottom: 10 }}>
+          <div style={{ color: '#888', fontSize: '0.85rem', marginBottom: 3 }}>{label}</div>
+          <div style={{ color: '#ddd', fontSize: '0.95rem', lineHeight: 1.6 }}>{display}</div>
         </div>
-        {(submissionData.notas_adicionais || []).length > 0 && (
-          <div style={{ marginTop: 16, borderTop: '1px solid #222', paddingTop: 16 }}>
-            <h4 style={{ color: '#aaa', fontSize: '1.02rem', marginBottom: 8 }}>Informações adicionadas:</h4>
-            {(submissionData.notas_adicionais || []).map((n, i) => (
+      ) : (
+        <div style={{ marginBottom: 6, fontSize: '0.97rem', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <span style={{ color: '#888', flexShrink: 0 }}>{label}:</span>
+          <span style={{ color: '#ddd' }}>{display}</span>
+        </div>
+      );
+    };
+
+    const Card = ({ title, children }) => (
+      <div className="card" style={{ marginBottom: 16 }}>
+        <h3 style={{ color: G, marginBottom: 14, fontSize: '1rem', borderBottom: '1px solid #222', paddingBottom: 8 }}>{title}</h3>
+        {children}
+      </div>
+    );
+
+    const missionarios = s.missionarios || {};
+    const obreiros = s.obreiros_nacionais || {};
+    const missAll = [...(missionarios.coordenadores || []), ...(missionarios.outros || [])];
+    const obrAll  = [...(obreiros.coordenadores || []), ...(obreiros.lideres || [])];
+
+    return (
+      <div className="container">
+        <SupportBanner />
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+          <div style={{ color: '#4ade80', fontSize: '2.5rem', marginBottom: 10 }}>✓</div>
+          <h2 style={{ color: G, margin: 0 }}>Formulário submetido com sucesso!</h2>
+          <p style={{ color: '#aaa', marginTop: 6 }}>Obrigado pela sua contribuição.</p>
+        </div>
+
+        <Card title="1. Identificação">
+          <RO label="Nome" val={s.nome} />
+          <RO label="Sexo" val={s.sexo} />
+          <RO label="Função" val={s.funcao} />
+          <RO label="Ingressou em" val={s.quando_ingressou} />
+          <RO label="Telefone" val={s.telefone} />
+          <RO label="WhatsApp" val={s.whatsapp} />
+          <RO label="E-mail" val={s.email} />
+          <RO label="Província" val={s.provincia} />
+          <RO label="Distrito" val={s.distrito} />
+          <RO label="Cidade/Vila" val={s.igreja} />
+          <RO label="Localidade" val={s.localidade} />
+        </Card>
+
+        {(missAll.length > 0 || obrAll.length > 0 || s.onde_comecou || s.igrejas_distrito != null) && (
+          <Card title="2. Igreja Local">
+            {missAll.length > 0 && (
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ color: '#888', fontSize: '0.85rem', marginBottom: 6 }}>Missionários ({missAll.length})</div>
+                {missAll.map((p, i) => (
+                  <div key={i} style={{ background: '#0d0d1a', borderRadius: 6, padding: '8px 12px', marginBottom: 6, fontSize: '0.9rem', color: '#ccc' }}>
+                    <strong>{p.nome}</strong>
+                    {p.areaAtuacao && <span style={{ color: '#888' }}> · {p.areaAtuacao}</span>}
+                    {(displayDF(p.inicio) || displayDF(p.cessacao)) && (
+                      <span style={{ color: '#666', marginLeft: 6 }}>({displayDF(p.inicio) || '?'} – {displayDF(p.cessacao) || '?'})</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            {obrAll.length > 0 && (
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ color: '#888', fontSize: '0.85rem', marginBottom: 6 }}>Obreiros Nacionais ({obrAll.length})</div>
+                {obrAll.map((p, i) => (
+                  <div key={i} style={{ background: '#0d0d1a', borderRadius: 6, padding: '8px 12px', marginBottom: 6, fontSize: '0.9rem', color: '#ccc' }}>
+                    <strong>{p.nome}</strong>
+                    {p.categorias?.length > 0 && <span style={{ color: '#888' }}> · {p.categorias.join(', ')}</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+            <RO label="Onde começou" val={s.onde_comecou === 'Outro' && s.onde_comecou_outro ? `Outro: ${s.onde_comecou_outro}` : s.onde_comecou} />
+            <RO label="Igrejas no distrito" val={s.igrejas_distrito} />
+            <RO label="Templos concluídos" val={s.templos_concluidos_distrito} />
+            <RO label="Templos em construção" val={s.templos_construcao_distrito} />
+            <RO label="Templos material local" val={s.templos_material_distrito} />
+          </Card>
+        )}
+
+        {(s.primeira_congregacao || (s.congregacoes || []).length > 0 || displayDF(s.data_inauguracao)) && (
+          <Card title="3. Cronologia">
+            <RO label="1ª Congregação" val={s.primeira_congregacao} />
+            {(s.congregacoes || []).length > 0 && (
+              <div style={{ marginBottom: 8 }}>
+                <div style={{ color: '#888', fontSize: '0.85rem', marginBottom: 6 }}>Congregações ({s.congregacoes.length})</div>
+                {s.congregacoes.map((c, i) => (
+                  <div key={i} style={{ background: '#0d0d1a', borderRadius: 6, padding: '8px 12px', marginBottom: 6, fontSize: '0.9rem', color: '#ccc' }}>
+                    {c.localidade || c.distrito || `#${i + 1}`}
+                    {c.distrito && c.localidade && <span style={{ color: '#666' }}> · {c.distrito}</span>}
+                    {displayDF(c.data) && <span style={{ color: '#666', marginLeft: 6 }}>({displayDF(c.data)})</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+            {displayDF(s.data_inauguracao) && <RO label="Inauguração da congregação" val={displayDF(s.data_inauguracao)} />}
+          </Card>
+        )}
+
+        {((s.desafios || []).length > 0 || s.momentos_marcantes) && (
+          <Card title="4. Desafios">
+            <RO label="Desafios" val={s.desafios} />
+            <RO label="Outros desafios" val={s.desafios_outros} />
+            <RO label="Momentos marcantes" val={s.momentos_marcantes} />
+          </Card>
+        )}
+
+        {(s.experiencia_marcante || s.impacto_comunidade) && (
+          <Card title="5. Testemunhos e Impacto">
+            <RO label="Experiência marcante" val={s.experiencia_marcante} />
+            <RO label="Impacto na comunidade" val={s.impacto_comunidade} />
+          </Card>
+        )}
+
+        {(s.possui_documentos != null || (s.referencias || []).some(r => r.nome || r.contacto) || s.observacoes_finais) && (
+          <Card title="6. Dados Complementares">
+            <RO label="Possui documentos históricos" val={s.possui_documentos} />
+            {(s.referencias || []).filter(r => r.nome || r.contacto).map((r, i) => (
+              <div key={i} style={{ marginBottom: 6, fontSize: '0.97rem', display: 'flex', gap: 6 }}>
+                <span style={{ color: '#888', flexShrink: 0 }}>Referência {i + 1}:</span>
+                <span style={{ color: '#ddd' }}>{r.nome}{r.contacto ? ` (${r.contacto})` : ''}</span>
+              </div>
+            ))}
+            <RO label="Observações finais" val={s.observacoes_finais} />
+          </Card>
+        )}
+
+        <Card title="7. Declaração">
+          <RO label="Declaração de veracidade" val={s.declaracao_verdadeira} />
+        </Card>
+
+        {(s.notas_adicionais || []).length > 0 && (
+          <div className="card" style={{ marginBottom: 16 }}>
+            <h3 style={{ color: '#aaa', marginBottom: 12, fontSize: '1rem' }}>Informações adicionadas</h3>
+            {s.notas_adicionais.map((n, i) => (
               <div key={i} style={{ background: '#1a1a24', borderRadius: '6px', padding: '10px', marginBottom: 6, fontSize: '0.97rem', color: '#ccc' }}>
-                <div style={{ color: '#555', marginBottom: 4 }}>{new Date(n.created_at).toLocaleDateString('pt-MZ')}</div>
+                <div style={{ color: '#555', marginBottom: 4, fontSize: '0.82rem' }}>{new Date(n.created_at).toLocaleDateString('pt-MZ')}</div>
                 {n.nota}
               </div>
             ))}
           </div>
         )}
-      </div>
 
-      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 32 }}>
-        <button type="button" className="btn-primary" onClick={() => setNoteModal(true)} style={{ flex: 1 }}>
-          Adicionar informação
-        </button>
-      </div>
-      <div style={{ textAlign: 'right', marginBottom: 16 }}>
-        <button type="button" onClick={() => setClearStep(1)}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7f1d1d', fontSize: '0.82rem', textDecoration: 'underline', opacity: 0.6 }}>
-          Limpar formulário
-        </button>
-      </div>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 24 }}>
+          <button type="button" className="btn-primary" onClick={() => setNoteModal(true)} style={{ flex: 1 }}>
+            Adicionar informação
+          </button>
+        </div>
 
-      {noteModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
-          <div style={{ background: '#1a1a24', borderRadius: '12px', padding: '28px', maxWidth: 480, width: '100%', border: '1px solid #333' }}>
-            <h3 style={{ color: G, marginBottom: 16 }}>Adicionar informação</h3>
-            <textarea value={noteText} onChange={e => setNoteText(e.target.value)}
-              placeholder="Escreva aqui as informações adicionais..."
-              className="hf-textarea" style={{ width: '100%', marginBottom: 12 }} autoFocus />
-            <FileUploadSection
-              label="Anexar ficheiro (opcional)"
-              category={`notas/${submissionId}`}
-              files={noteAnexos}
-              onAdd={f => setNoteAnexos(prev => [...prev, f])}
-              onRemove={i => setNoteAnexos(prev => prev.filter((_, j) => j !== i))}
-              uploading={noteUploading}
-              setUploading={setNoteUploading}
-            />
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button type="button" className="btn-primary" onClick={handleAddNote} disabled={loading || noteUploading || !noteText.trim()}>
-                {loading ? 'A guardar...' : 'Guardar'}
-              </button>
-              <button type="button" className="btn-secondary" onClick={() => { setNoteModal(false); setNoteText(''); setNoteAnexos([]); }}>Cancelar</button>
+        <div style={{ textAlign: 'right', marginBottom: 16 }}>
+          <button type="button" onClick={() => setClearStep(1)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7f1d1d', fontSize: '0.82rem', textDecoration: 'underline', opacity: 0.6 }}>
+            Limpar formulário
+          </button>
+        </div>
+
+        {noteModal && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
+            <div style={{ background: '#1a1a24', borderRadius: '12px', padding: '28px', maxWidth: 480, width: '100%', border: '1px solid #333' }}>
+              <h3 style={{ color: G, marginBottom: 16 }}>Adicionar informação</h3>
+              <textarea value={noteText} onChange={e => setNoteText(e.target.value)}
+                placeholder="Ex: Escreva aqui informações adicionais..."
+                className="hf-textarea" style={{ width: '100%', marginBottom: 12 }} autoFocus />
+              <FileUploadSection
+                label="Anexar ficheiro (opcional)"
+                category={`notas/${submissionId}`}
+                files={noteAnexos}
+                onAdd={f => setNoteAnexos(prev => [...prev, f])}
+                onRemove={i => setNoteAnexos(prev => prev.filter((_, j) => j !== i))}
+                uploading={noteUploading}
+                setUploading={setNoteUploading}
+              />
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button type="button" className="btn-primary" onClick={handleAddNote} disabled={loading || noteUploading || !noteText.trim()}>
+                  {loading ? 'A guardar...' : 'Guardar'}
+                </button>
+                <button type="button" className="btn-secondary" onClick={() => { setNoteModal(false); setNoteText(''); setNoteAnexos([]); }}>Cancelar</button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {clearStep > 0 && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
-          <div style={{ background: '#1a1a24', borderRadius: '12px', padding: '28px', maxWidth: 420, width: '100%', border: '1px solid #444', textAlign: 'center' }}>
+        {clearStep > 0 && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
+            <div style={{ background: '#1a1a24', borderRadius: '12px', padding: '28px', maxWidth: 420, width: '100%', border: '1px solid #444', textAlign: 'center' }}>
             {clearStep === 1 && <>
               <h3 style={{ color: '#f87171', marginBottom: 12 }}>Atenção</h3>
               <p style={{ color: '#ccc', marginBottom: 20, lineHeight: 1.6 }}>Para editar as suas respostas, não precisa de limpar o formulário — basta alterar directamente os campos.</p>
@@ -898,11 +1005,12 @@ export default function HistoricoForm() {
                 </button>
               </div>
             </>}
+            </div>
           </div>
-        </div>
-      )}
-    </div>
-  );
+        )}
+      </div>
+    );
+  }
 
   // ── Form ─────────────────────────────────────────────────
   return (
@@ -1020,7 +1128,7 @@ export default function HistoricoForm() {
 
           <div className="hf-field">
             <label className="hf-label">E-mail</label>
-            <input className="hf-input" type="email" value={formData.email} onChange={e => set('email', e.target.value)} placeholder="email@exemplo.com" />
+            <input className="hf-input" type="email" value={formData.email} onChange={e => set('email', e.target.value)} placeholder="Ex: email@exemplo.com" />
           </div>
         </section>
 
@@ -1105,7 +1213,7 @@ export default function HistoricoForm() {
 
           <div className="hf-field">
             <label className="hf-label">Qual foi a primeira igreja a ser inaugurada na sua província?</label>
-            <input className="hf-input" value={formData.primeira_congregacao} onChange={e => set('primeira_congregacao', e.target.value)} placeholder="Igreja de Bela Vista - Gondola" />
+            <input className="hf-input" value={formData.primeira_congregacao} onChange={e => set('primeira_congregacao', e.target.value)} placeholder="Ex: Igreja de Bela Vista - Gondola" />
           </div>
 
           <div className="hf-field" style={{ marginBottom: 20 }}>
@@ -1307,6 +1415,11 @@ export default function HistoricoForm() {
           </button>
         </div>
       </form>
+
+      <footer className="page-footer">
+        &copy; 2026 Visão Cristã · Levantamento Histórico
+        <button className="admin-link" onClick={() => { window.location.href = '/admin'; }}>·</button>
+      </footer>
     </div>
   );
 }

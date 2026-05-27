@@ -158,10 +158,12 @@ export default function HistoricoAdminTab() {
     if (!selectedIds.size) return;
     if (!window.confirm(`Eliminar permanentemente ${selectedIds.size} registo(s)?`)) return;
     setSaving(true);
-    for (const id of selectedIds) await supabase.from(HISTORICO_TABLE).delete().eq('id', id);
+    const ids = [...selectedIds];
+    const { error } = await supabase.from(HISTORICO_TABLE).delete().in('id', ids);
     setSaving(false);
+    if (error) { alert('Erro: ' + error.message); return; }
     setData(prev => prev.filter(r => !selectedIds.has(r.id)));
-    setFlaggedIds(prev => { const n = new Set(prev); selectedIds.forEach(id => n.delete(id)); return n; });
+    setFlaggedIds(prev => { const n = new Set(prev); ids.forEach(id => n.delete(id)); return n; });
     setSelectedIds(new Set());
   };
 
@@ -231,6 +233,7 @@ export default function HistoricoAdminTab() {
   };
 
   const sCard = { background: 'rgba(255,255,255,0.03)', padding: '15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' };
+  const sSectionTitle = { color: G, marginBottom: 12, fontSize: '0.9rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: 8 };
 
   return (
     <div style={{ padding: '0 0 40px' }}>
@@ -401,7 +404,7 @@ export default function HistoricoAdminTab() {
         </div>
       )}
 
-      {/* Edit modal — centrado, estilo inscricao */}
+      {/* Edit modal */}
       {editingRow && (
         <div className="modal-overlay">
           <div className="modal-content" style={{ maxWidth: 800 }}>
@@ -412,17 +415,16 @@ export default function HistoricoAdminTab() {
 
             <form onSubmit={handleUpdate}>
 
-              {/* 1. Identificação */}
               <div className="form-section">
-                <h4 style={{ color: G, marginBottom: 12, fontSize: '0.9rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: 8 }}>Identificação</h4>
+                <h4 style={sSectionTitle}>Identificação</h4>
                 <div className="field">
                   <label>Nome completo</label>
-                  <input value={editingRow.nome || ''} onChange={e => setEditingRow({ ...editingRow, nome: e.target.value })} required />
+                  <input value={editingRow.nome || ''} onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, nome: v })); }} required />
                 </div>
                 <div className="grid-2">
                   <div className="field">
                     <label>Sexo</label>
-                    <select value={editingRow.sexo || ''} onChange={e => setEditingRow({ ...editingRow, sexo: e.target.value })}>
+                    <select value={editingRow.sexo || ''} onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, sexo: v })); }}>
                       <option value="">—</option>
                       <option>Masculino</option>
                       <option>Feminino</option>
@@ -430,66 +432,64 @@ export default function HistoricoAdminTab() {
                   </div>
                   <div className="field">
                     <label>Função</label>
-                    <input value={editingRow.funcao || ''} onChange={e => setEditingRow({ ...editingRow, funcao: e.target.value })} />
+                    <input value={editingRow.funcao || ''} onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, funcao: v })); }} />
                   </div>
                 </div>
                 <div className="grid-2">
                   <div className="field">
                     <label>Ano de ingresso</label>
-                    <input value={editingRow.quando_ingressou || ''} onChange={e => setEditingRow({ ...editingRow, quando_ingressou: e.target.value })} placeholder="Ex: 2003" />
+                    <input value={editingRow.quando_ingressou || ''} onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, quando_ingressou: v })); }} placeholder="Ex: 2003" />
                   </div>
                   <div className="field">
                     <label>E-mail</label>
-                    <input type="email" value={editingRow.email || ''} onChange={e => setEditingRow({ ...editingRow, email: e.target.value })} />
+                    <input type="email" value={editingRow.email || ''} onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, email: v })); }} />
                   </div>
                 </div>
                 <div className="grid-2">
                   <div className="field">
                     <label>Telefone</label>
-                    <input value={editingRow.telefone || ''} onChange={e => setEditingRow({ ...editingRow, telefone: e.target.value })} />
+                    <input value={editingRow.telefone || ''} onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, telefone: v })); }} />
                   </div>
                   <div className="field">
                     <label>WhatsApp</label>
-                    <input value={editingRow.whatsapp || ''} onChange={e => setEditingRow({ ...editingRow, whatsapp: e.target.value })} />
+                    <input value={editingRow.whatsapp || ''} onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, whatsapp: v })); }} />
                   </div>
                 </div>
               </div>
 
-              {/* 2. Localização */}
               <div className="form-section">
-                <h4 style={{ color: G, marginBottom: 12, fontSize: '0.9rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: 8 }}>Localização</h4>
+                <h4 style={sSectionTitle}>Localização</h4>
                 <div className="grid-2">
                   <div className="field">
                     <label>Província</label>
-                    <select value={editingRow.provincia || ''} onChange={e => setEditingRow({ ...editingRow, provincia: e.target.value, distrito: '' })}>
+                    <select value={editingRow.provincia || ''} onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, provincia: v, distrito: '' })); }}>
                       <option value="">—</option>
                       {PROVINCIAS.map(p => <option key={p}>{p}</option>)}
                     </select>
                   </div>
                   <div className="field">
                     <label>Distrito</label>
-                    <input value={editingRow.distrito || ''} onChange={e => setEditingRow({ ...editingRow, distrito: e.target.value })} />
+                    <input value={editingRow.distrito || ''} onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, distrito: v })); }} />
                   </div>
                 </div>
                 <div className="grid-2">
                   <div className="field">
                     <label>Cidade/Vila</label>
-                    <input value={editingRow.igreja || ''} onChange={e => setEditingRow({ ...editingRow, igreja: e.target.value })} />
+                    <input value={editingRow.igreja || ''} onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, igreja: v })); }} />
                   </div>
                   <div className="field">
                     <label>Localidade/Bairro</label>
-                    <input value={editingRow.localidade || ''} onChange={e => setEditingRow({ ...editingRow, localidade: e.target.value })} />
+                    <input value={editingRow.localidade || ''} onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, localidade: v })); }} />
                   </div>
                 </div>
               </div>
 
-              {/* 3. Igreja */}
               <div className="form-section">
-                <h4 style={{ color: G, marginBottom: 12, fontSize: '0.9rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: 8 }}>Igreja Local</h4>
+                <h4 style={sSectionTitle}>Igreja Local</h4>
                 <div className="grid-2">
                   <div className="field">
                     <label>Onde começou</label>
-                    <select value={editingRow.onde_comecou || ''} onChange={e => setEditingRow({ ...editingRow, onde_comecou: e.target.value })}>
+                    <select value={editingRow.onde_comecou || ''} onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, onde_comecou: v })); }}>
                       <option value="">—</option>
                       <option>Num templo</option><option>Numa casa</option>
                       <option>Numa escola</option><option>Ao ar livre</option><option>Outro</option>
@@ -497,47 +497,46 @@ export default function HistoricoAdminTab() {
                   </div>
                   <div className="field">
                     <label>1ª Congregação inaugurada</label>
-                    <input value={editingRow.primeira_congregacao || ''} onChange={e => setEditingRow({ ...editingRow, primeira_congregacao: e.target.value })} />
+                    <input value={editingRow.primeira_congregacao || ''} onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, primeira_congregacao: v })); }} />
                   </div>
                 </div>
                 {editingRow.onde_comecou === 'Outro' && (
                   <div className="field">
                     <label>Especifique onde começou</label>
-                    <input value={editingRow.onde_comecou_outro || ''} onChange={e => setEditingRow({ ...editingRow, onde_comecou_outro: e.target.value })} />
+                    <input value={editingRow.onde_comecou_outro || ''} onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, onde_comecou_outro: v })); }} />
                   </div>
                 )}
                 <div className="grid-2">
                   <div className="field">
                     <label>Igrejas no distrito</label>
-                    <input type="number" min="0" value={editingRow.igrejas_distrito ?? ''} onChange={e => setEditingRow({ ...editingRow, igrejas_distrito: e.target.value === '' ? null : parseInt(e.target.value) })} />
+                    <input type="number" min="0" value={editingRow.igrejas_distrito ?? ''} onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, igrejas_distrito: v === '' ? null : parseInt(v) })); }} />
                   </div>
                   <div className="field">
                     <label>Templos concluídos</label>
-                    <input type="number" min="0" value={editingRow.templos_concluidos_distrito ?? ''} onChange={e => setEditingRow({ ...editingRow, templos_concluidos_distrito: e.target.value === '' ? null : parseInt(e.target.value) })} />
+                    <input type="number" min="0" value={editingRow.templos_concluidos_distrito ?? ''} onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, templos_concluidos_distrito: v === '' ? null : parseInt(v) })); }} />
                   </div>
                 </div>
                 <div className="grid-2">
                   <div className="field">
                     <label>Templos em construção</label>
-                    <input type="number" min="0" value={editingRow.templos_construcao_distrito ?? ''} onChange={e => setEditingRow({ ...editingRow, templos_construcao_distrito: e.target.value === '' ? null : parseInt(e.target.value) })} />
+                    <input type="number" min="0" value={editingRow.templos_construcao_distrito ?? ''} onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, templos_construcao_distrito: v === '' ? null : parseInt(v) })); }} />
                   </div>
                   <div className="field">
                     <label>Templos material local</label>
-                    <input type="number" min="0" value={editingRow.templos_material_distrito ?? ''} onChange={e => setEditingRow({ ...editingRow, templos_material_distrito: e.target.value === '' ? null : parseInt(e.target.value) })} />
+                    <input type="number" min="0" value={editingRow.templos_material_distrito ?? ''} onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, templos_material_distrito: v === '' ? null : parseInt(v) })); }} />
                   </div>
                 </div>
                 <div className="field">
                   <label>Possui documentos históricos</label>
                   <select value={editingRow.possui_documentos === true ? 'Sim' : editingRow.possui_documentos === false ? 'Não' : ''}
-                    onChange={e => setEditingRow({ ...editingRow, possui_documentos: e.target.value === 'Sim' ? true : e.target.value === 'Não' ? false : null })}>
+                    onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, possui_documentos: v === 'Sim' ? true : v === 'Não' ? false : null })); }}>
                     <option value="">—</option><option>Sim</option><option>Não</option>
                   </select>
                 </div>
               </div>
 
-              {/* 4. Desafios e Testemunhos */}
               <div className="form-section">
-                <h4 style={{ color: G, marginBottom: 12, fontSize: '0.9rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: 8 }}>Desafios e Testemunhos</h4>
+                <h4 style={sSectionTitle}>Desafios e Testemunhos</h4>
                 <div className="field">
                   <label>Desafios enfrentados</label>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -546,8 +545,11 @@ export default function HistoricoAdminTab() {
                         <input type="checkbox" style={{ accentColor: G }}
                           checked={(editingRow.desafios || []).includes(d)}
                           onChange={e => {
-                            const cur = editingRow.desafios || [];
-                            setEditingRow({ ...editingRow, desafios: e.target.checked ? [...cur, d] : cur.filter(x => x !== d) });
+                            const checked = e.target.checked;
+                            setEditingRow(prev => {
+                              const cur = prev.desafios || [];
+                              return { ...prev, desafios: checked ? [...cur, d] : cur.filter(x => x !== d) };
+                            });
                           }} />
                         {d}
                       </label>
@@ -557,38 +559,37 @@ export default function HistoricoAdminTab() {
                 {(editingRow.desafios || []).includes('Outros') && (
                   <div className="field">
                     <label>Outros desafios — descrição</label>
-                    <textarea value={editingRow.desafios_outros || ''} onChange={e => setEditingRow({ ...editingRow, desafios_outros: e.target.value })} rows={2} />
+                    <textarea value={editingRow.desafios_outros || ''} onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, desafios_outros: v })); }} rows={2} />
                   </div>
                 )}
                 <div className="field">
                   <label>Momentos marcantes</label>
-                  <textarea value={editingRow.momentos_marcantes || ''} onChange={e => setEditingRow({ ...editingRow, momentos_marcantes: e.target.value })} rows={3} />
+                  <textarea value={editingRow.momentos_marcantes || ''} onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, momentos_marcantes: v })); }} rows={3} />
                 </div>
                 <div className="grid-2">
                   <div className="field">
                     <label>Experiência marcante</label>
-                    <textarea value={editingRow.experiencia_marcante || ''} onChange={e => setEditingRow({ ...editingRow, experiencia_marcante: e.target.value })} rows={4} />
+                    <textarea value={editingRow.experiencia_marcante || ''} onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, experiencia_marcante: v })); }} rows={4} />
                   </div>
                   <div className="field">
                     <label>Impacto na comunidade</label>
-                    <textarea value={editingRow.impacto_comunidade || ''} onChange={e => setEditingRow({ ...editingRow, impacto_comunidade: e.target.value })} rows={4} />
+                    <textarea value={editingRow.impacto_comunidade || ''} onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, impacto_comunidade: v })); }} rows={4} />
                   </div>
                 </div>
               </div>
 
-              {/* 5. Declaração e Observações */}
               <div className="form-section">
-                <h4 style={{ color: G, marginBottom: 12, fontSize: '0.9rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: 8 }}>Declaração e Observações</h4>
+                <h4 style={sSectionTitle}>Declaração e Observações</h4>
                 <div className="field">
                   <label>Declaração de veracidade</label>
                   <select value={editingRow.declaracao_verdadeira === true ? 'Sim' : editingRow.declaracao_verdadeira === false ? 'Não' : ''}
-                    onChange={e => setEditingRow({ ...editingRow, declaracao_verdadeira: e.target.value === 'Sim' ? true : e.target.value === 'Não' ? false : null })}>
+                    onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, declaracao_verdadeira: v === 'Sim' ? true : v === 'Não' ? false : null })); }}>
                     <option value="">—</option><option>Sim</option><option>Não</option>
                   </select>
                 </div>
                 <div className="field">
                   <label>Observações finais</label>
-                  <textarea value={editingRow.observacoes_finais || ''} onChange={e => setEditingRow({ ...editingRow, observacoes_finais: e.target.value })} rows={4} />
+                  <textarea value={editingRow.observacoes_finais || ''} onChange={e => { const v = e.target.value; setEditingRow(prev => ({ ...prev, observacoes_finais: v })); }} rows={4} />
                 </div>
               </div>
 
