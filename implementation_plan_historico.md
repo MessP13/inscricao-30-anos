@@ -1,6 +1,8 @@
 # Plano de Implementacao: IEVC Historico
 
-Atualizado em: 2026-05-15
+Atualizado em: 2026-05-27
+
+> **Dica para agentes:** Quando for necessário alterar algo no Supabase (RLS, storage, schema), gere os comandos SQL e peça ao utilizador para os enviar ao agente do IDE com o MCP do Supabase — não os execute directamente.
 
 Este documento e a fonte de verdade operacional do projeto. Deve ser lido e atualizado antes e depois de alteracoes estruturais, integracoes externas, mudancas de schema ou novas funcionalidades relevantes.
 

@@ -1,6 +1,8 @@
 # Architecture & Implementation Plan: Sistema de Inscricoes (30 Anos Visao Crista)
 
-> Ultima atualizacao: 2026-05-18 (v9)
+> Ultima atualizacao: 2026-05-27 (v10)
+
+> **Dica para agentes:** Quando for necessário alterar algo no Supabase (RLS, storage, schema), gere os comandos SQL e peça ao utilizador para os enviar ao agente do IDE com o MCP do Supabase — não os execute directamente.
 
 ---
 
