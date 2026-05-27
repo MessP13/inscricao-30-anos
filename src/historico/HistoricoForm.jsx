@@ -434,7 +434,10 @@ function FileUploadSection({ label, category, files, onAdd, onRemove, onUpdateNo
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    const path = `ievc/${category}/${uid()}_${file.name.replace(/\s+/g, '_')}`;
+    const safeName = file.name
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-zA-Z0-9._-]/g, '_');
+    const path = `ievc/${category}/${uid()}_${safeName}`;
     const { error } = await supabase.storage.from('ievc-uploads').upload(path, file, { upsert: false });
     setUploading(false);
     if (error) { alert('Erro ao carregar ficheiro: ' + error.message); e.target.value = ''; return; }
