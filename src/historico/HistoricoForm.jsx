@@ -55,73 +55,43 @@ const EMPTY_FORM = {
 };
 
 // ── DateFlex ───────────────────────────────────────────────────────────────────
-function DateFlex({ value = { mode: 'unknown' }, onChange, hideUnknown = false }) {
-  const set = (patch) => onChange({ ...value, ...patch });
-  const setFrom = (patch) => onChange({ ...value, from: { ...(value.from || {}), ...patch } });
-  const setTo   = (patch) => onChange({ ...value, to:   { ...(value.to   || {}), ...patch } });
-
+function DateFlex({ value = { mode: 'unknown' }, onChange }) {
   const yearOpts = Array.from({ length: 31 }, (_, i) => 2026 - i);
-  const months = [
-    ['01','Janeiro'],['02','Fevereiro'],['03','Março'],['04','Abril'],
-    ['05','Maio'],['06','Junho'],['07','Julho'],['08','Agosto'],
-    ['09','Setembro'],['10','Outubro'],['11','Novembro'],['12','Dezembro'],
-  ];
-  const days = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0'));
-
   const sSel = { padding: '6px 10px', borderRadius: '6px', background: '#1a1a24', border: '1px solid #333', color: '#fff', fontSize: '1.02rem', flex: 1 };
+  const sLink = { alignSelf: 'flex-start', fontSize: '0.78rem', color: '#666', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' };
+
+  const isExact = value.mode === 'exact' && value.year;
+
+  if (isExact) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <select style={{ ...sSel, flex: 2 }} value={value.year || ''} onChange={e => onChange({ mode: 'exact', year: e.target.value || null })}>
+          <option value="">Ano</option>
+          {yearOpts.map(y => <option key={y} value={y}>{y}</option>)}
+        </select>
+        <button type="button" style={sLink} onClick={() => onChange({ mode: 'approximate' })}>
+          usar intervalo de anos
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        {[['exact','Data exacta'],['approximate','Data aproximada'],['unknown','Desconhecida']].filter(([val]) => !(hideUnknown && val === 'unknown')).map(([val, label]) => (
-          <button key={val} type="button" onClick={() => set({ mode: val })} style={{
-            padding: '4px 12px', borderRadius: '6px', fontSize: '0.97rem', cursor: 'pointer',
-            background: value.mode === val ? G : '#1a1a24',
-            color: value.mode === val ? '#000' : '#aaa',
-            border: `1px solid ${value.mode === val ? G : '#333'}`,
-          }}>{label}</button>
-        ))}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <select style={sSel} value={value.from?.year || ''} onChange={e => onChange({ ...value, mode: 'approximate', from: { ...(value.from || {}), year: e.target.value || null } })}>
+          <option value="">De (ano)</option>
+          {yearOpts.map(y => <option key={y} value={y}>{y}</option>)}
+        </select>
+        <span style={{ color: '#555', flexShrink: 0 }}>–</span>
+        <select style={sSel} value={value.to?.year || ''} onChange={e => onChange({ ...value, mode: 'approximate', to: { ...(value.to || {}), year: e.target.value || null } })}>
+          <option value="">Até (ano)</option>
+          {yearOpts.map(y => <option key={y} value={y}>{y}</option>)}
+        </select>
       </div>
-
-      {value.mode === 'exact' && (
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <select style={sSel} value={value.day || ''} onChange={e => set({ day: e.target.value || null })}>
-            <option value="">Dia</option>
-            {days.map(d => <option key={d} value={d}>{d}</option>)}
-          </select>
-          <select style={{ ...sSel, flex: 2 }} value={value.month || ''} onChange={e => set({ month: e.target.value || null })}>
-            <option value="">Mês</option>
-            {months.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-          </select>
-          <select style={{ ...sSel, flex: 2 }} value={value.year || ''} onChange={e => set({ year: e.target.value || null })}>
-            <option value="">Ano</option>
-            {yearOpts.map(y => <option key={y} value={y}>{y}</option>)}
-          </select>
-        </div>
-      )}
-
-      {value.mode === 'approximate' && (
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-          <span style={{ fontSize: '0.97rem', color: '#aaa', whiteSpace: 'nowrap' }}>Entre</span>
-          <select style={sSel} value={value.from?.month || ''} onChange={e => setFrom({ month: e.target.value || null })}>
-            <option value="">Mês</option>
-            {months.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-          </select>
-          <select style={sSel} value={value.from?.year || ''} onChange={e => setFrom({ year: e.target.value || null })}>
-            <option value="">Ano</option>
-            {yearOpts.map(y => <option key={y} value={y}>{y}</option>)}
-          </select>
-          <span style={{ fontSize: '0.97rem', color: '#aaa', whiteSpace: 'nowrap' }}>e</span>
-          <select style={sSel} value={value.to?.month || ''} onChange={e => setTo({ month: e.target.value || null })}>
-            <option value="">Mês</option>
-            {months.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-          </select>
-          <select style={sSel} value={value.to?.year || ''} onChange={e => setTo({ year: e.target.value || null })}>
-            <option value="">Ano</option>
-            {yearOpts.map(y => <option key={y} value={y}>{y}</option>)}
-          </select>
-        </div>
-      )}
+      <button type="button" style={sLink} onClick={() => onChange({ mode: 'exact' })}>
+        sei o ano exacto
+      </button>
     </div>
   );
 }

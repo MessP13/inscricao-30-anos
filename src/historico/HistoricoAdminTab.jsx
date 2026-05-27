@@ -40,6 +40,7 @@ function fmt(col, val) {
   return String(val);
 }
 
+
 function hasMissionarios(r) {
   const m = r.missionarios;
   if (!m) return false;
@@ -169,7 +170,7 @@ export default function HistoricoAdminTab() {
   const handleUpdate = async (e) => {
     e.preventDefault();
     setSaving(true);
-    const { created_at: _ca, id: _id, missionarios, obreiros_nacionais, congregacoes, anexos, notas_adicionais, ...payload } = editingRow;
+    const { created_at: _ca, id: _id, missionarios, obreiros_nacionais, congregacoes, referencias, data_inauguracao, anexos, notas_adicionais, ...payload } = editingRow;
     const { error } = await supabase.from(HISTORICO_TABLE).update(payload).eq('id', editingRow.id);
     setSaving(false);
     if (error) { alert('Erro: ' + error.message); return; }
@@ -400,17 +401,19 @@ export default function HistoricoAdminTab() {
         </div>
       )}
 
-      {/* Edit modal */}
+      {/* Edit modal — centrado, estilo inscricao */}
       {editingRow && (
         <div className="modal-overlay">
-          <div className="modal-content" style={{ maxWidth: 700 }}>
+          <div className="modal-content" style={{ maxWidth: 800 }}>
             <div className="modal-header">
               <h3 className="modal-title">Editar Registo</h3>
               <button className="modal-close" onClick={() => setEditingRow(null)}><X size={20} /></button>
             </div>
+
             <form onSubmit={handleUpdate}>
 
-              <div className="form-section" style={{ marginBottom: 20 }}>
+              {/* 1. Identificação */}
+              <div className="form-section">
                 <h4 style={{ color: G, marginBottom: 12, fontSize: '0.9rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: 8 }}>Identificação</h4>
                 <div className="field">
                   <label>Nome completo</label>
@@ -432,6 +435,16 @@ export default function HistoricoAdminTab() {
                 </div>
                 <div className="grid-2">
                   <div className="field">
+                    <label>Ano de ingresso</label>
+                    <input value={editingRow.quando_ingressou || ''} onChange={e => setEditingRow({ ...editingRow, quando_ingressou: e.target.value })} placeholder="Ex: 2003" />
+                  </div>
+                  <div className="field">
+                    <label>E-mail</label>
+                    <input type="email" value={editingRow.email || ''} onChange={e => setEditingRow({ ...editingRow, email: e.target.value })} />
+                  </div>
+                </div>
+                <div className="grid-2">
+                  <div className="field">
                     <label>Telefone</label>
                     <input value={editingRow.telefone || ''} onChange={e => setEditingRow({ ...editingRow, telefone: e.target.value })} />
                   </div>
@@ -440,13 +453,10 @@ export default function HistoricoAdminTab() {
                     <input value={editingRow.whatsapp || ''} onChange={e => setEditingRow({ ...editingRow, whatsapp: e.target.value })} />
                   </div>
                 </div>
-                <div className="field">
-                  <label>E-mail</label>
-                  <input type="email" value={editingRow.email || ''} onChange={e => setEditingRow({ ...editingRow, email: e.target.value })} />
-                </div>
               </div>
 
-              <div className="form-section" style={{ marginBottom: 20 }}>
+              {/* 2. Localização */}
+              <div className="form-section">
                 <h4 style={{ color: G, marginBottom: 12, fontSize: '0.9rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: 8 }}>Localização</h4>
                 <div className="grid-2">
                   <div className="field">
@@ -473,18 +483,16 @@ export default function HistoricoAdminTab() {
                 </div>
               </div>
 
-              <div className="form-section" style={{ marginBottom: 20 }}>
-                <h4 style={{ color: G, marginBottom: 12, fontSize: '0.9rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: 8 }}>Igreja</h4>
+              {/* 3. Igreja */}
+              <div className="form-section">
+                <h4 style={{ color: G, marginBottom: 12, fontSize: '0.9rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: 8 }}>Igreja Local</h4>
                 <div className="grid-2">
                   <div className="field">
                     <label>Onde começou</label>
                     <select value={editingRow.onde_comecou || ''} onChange={e => setEditingRow({ ...editingRow, onde_comecou: e.target.value })}>
                       <option value="">—</option>
-                      <option>Num templo</option>
-                      <option>Numa casa</option>
-                      <option>Numa escola</option>
-                      <option>Ao ar livre</option>
-                      <option>Outro</option>
+                      <option>Num templo</option><option>Numa casa</option>
+                      <option>Numa escola</option><option>Ao ar livre</option><option>Outro</option>
                     </select>
                   </div>
                   <div className="field">
@@ -492,20 +500,95 @@ export default function HistoricoAdminTab() {
                     <input value={editingRow.primeira_congregacao || ''} onChange={e => setEditingRow({ ...editingRow, primeira_congregacao: e.target.value })} />
                   </div>
                 </div>
+                {editingRow.onde_comecou === 'Outro' && (
+                  <div className="field">
+                    <label>Especifique onde começou</label>
+                    <input value={editingRow.onde_comecou_outro || ''} onChange={e => setEditingRow({ ...editingRow, onde_comecou_outro: e.target.value })} />
+                  </div>
+                )}
                 <div className="grid-2">
                   <div className="field">
                     <label>Igrejas no distrito</label>
                     <input type="number" min="0" value={editingRow.igrejas_distrito ?? ''} onChange={e => setEditingRow({ ...editingRow, igrejas_distrito: e.target.value === '' ? null : parseInt(e.target.value) })} />
                   </div>
                   <div className="field">
-                    <label>Possui documentos</label>
-                    <select value={editingRow.possui_documentos === true ? 'Sim' : editingRow.possui_documentos === false ? 'Não' : ''}
-                      onChange={e => setEditingRow({ ...editingRow, possui_documentos: e.target.value === 'Sim' ? true : e.target.value === 'Não' ? false : null })}>
-                      <option value="">—</option>
-                      <option>Sim</option>
-                      <option>Não</option>
-                    </select>
+                    <label>Templos concluídos</label>
+                    <input type="number" min="0" value={editingRow.templos_concluidos_distrito ?? ''} onChange={e => setEditingRow({ ...editingRow, templos_concluidos_distrito: e.target.value === '' ? null : parseInt(e.target.value) })} />
                   </div>
+                </div>
+                <div className="grid-2">
+                  <div className="field">
+                    <label>Templos em construção</label>
+                    <input type="number" min="0" value={editingRow.templos_construcao_distrito ?? ''} onChange={e => setEditingRow({ ...editingRow, templos_construcao_distrito: e.target.value === '' ? null : parseInt(e.target.value) })} />
+                  </div>
+                  <div className="field">
+                    <label>Templos material local</label>
+                    <input type="number" min="0" value={editingRow.templos_material_distrito ?? ''} onChange={e => setEditingRow({ ...editingRow, templos_material_distrito: e.target.value === '' ? null : parseInt(e.target.value) })} />
+                  </div>
+                </div>
+                <div className="field">
+                  <label>Possui documentos históricos</label>
+                  <select value={editingRow.possui_documentos === true ? 'Sim' : editingRow.possui_documentos === false ? 'Não' : ''}
+                    onChange={e => setEditingRow({ ...editingRow, possui_documentos: e.target.value === 'Sim' ? true : e.target.value === 'Não' ? false : null })}>
+                    <option value="">—</option><option>Sim</option><option>Não</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* 4. Desafios e Testemunhos */}
+              <div className="form-section">
+                <h4 style={{ color: G, marginBottom: 12, fontSize: '0.9rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: 8 }}>Desafios e Testemunhos</h4>
+                <div className="field">
+                  <label>Desafios enfrentados</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {['Financeiros', 'Falta de liderança', 'Resistência da comunidade', 'Outros'].map(d => (
+                      <label key={d} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', color: '#ccc', fontSize: '0.95rem' }}>
+                        <input type="checkbox" style={{ accentColor: G }}
+                          checked={(editingRow.desafios || []).includes(d)}
+                          onChange={e => {
+                            const cur = editingRow.desafios || [];
+                            setEditingRow({ ...editingRow, desafios: e.target.checked ? [...cur, d] : cur.filter(x => x !== d) });
+                          }} />
+                        {d}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                {(editingRow.desafios || []).includes('Outros') && (
+                  <div className="field">
+                    <label>Outros desafios — descrição</label>
+                    <textarea value={editingRow.desafios_outros || ''} onChange={e => setEditingRow({ ...editingRow, desafios_outros: e.target.value })} rows={2} />
+                  </div>
+                )}
+                <div className="field">
+                  <label>Momentos marcantes</label>
+                  <textarea value={editingRow.momentos_marcantes || ''} onChange={e => setEditingRow({ ...editingRow, momentos_marcantes: e.target.value })} rows={3} />
+                </div>
+                <div className="grid-2">
+                  <div className="field">
+                    <label>Experiência marcante</label>
+                    <textarea value={editingRow.experiencia_marcante || ''} onChange={e => setEditingRow({ ...editingRow, experiencia_marcante: e.target.value })} rows={4} />
+                  </div>
+                  <div className="field">
+                    <label>Impacto na comunidade</label>
+                    <textarea value={editingRow.impacto_comunidade || ''} onChange={e => setEditingRow({ ...editingRow, impacto_comunidade: e.target.value })} rows={4} />
+                  </div>
+                </div>
+              </div>
+
+              {/* 5. Declaração e Observações */}
+              <div className="form-section">
+                <h4 style={{ color: G, marginBottom: 12, fontSize: '0.9rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: 8 }}>Declaração e Observações</h4>
+                <div className="field">
+                  <label>Declaração de veracidade</label>
+                  <select value={editingRow.declaracao_verdadeira === true ? 'Sim' : editingRow.declaracao_verdadeira === false ? 'Não' : ''}
+                    onChange={e => setEditingRow({ ...editingRow, declaracao_verdadeira: e.target.value === 'Sim' ? true : e.target.value === 'Não' ? false : null })}>
+                    <option value="">—</option><option>Sim</option><option>Não</option>
+                  </select>
+                </div>
+                <div className="field">
+                  <label>Observações finais</label>
+                  <textarea value={editingRow.observacoes_finais || ''} onChange={e => setEditingRow({ ...editingRow, observacoes_finais: e.target.value })} rows={4} />
                 </div>
               </div>
 
