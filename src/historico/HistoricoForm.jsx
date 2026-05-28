@@ -799,8 +799,8 @@ export default function HistoricoForm() {
           <h3 style={{ color: G, fontSize: '1rem', margin: 0 }}>{title}</h3>
           {secao && (
             <button type="button" onClick={() => openNote(secao)}
-              style={{ background: 'none', border: `1px solid ${G}55`, color: G, borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, lineHeight: 1 }}>
-              +
+              style={{ background: G, color: '#000', border: 'none', borderRadius: '6px', padding: '4px 12px', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0, letterSpacing: '0.02em' }}>
+              + Adicionar
             </button>
           )}
         </div>
