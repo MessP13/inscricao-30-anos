@@ -603,6 +603,7 @@ export default function HistoricoForm() {
   });
 
   const [noteModal, setNoteModal] = useState(false);
+  const [noteSecao, setNoteSecao] = useState(null);
   const [noteText, setNoteText] = useState('');
   const [noteAnexos, setNoteAnexos] = useState([]);
   const [noteUploading, setNoteUploading] = useState(false);
@@ -696,12 +697,12 @@ export default function HistoricoForm() {
   const handleAddNote = async () => {
     if (!noteText.trim()) return;
     setLoading(true);
-    const notes = [...(submissionData.notas_adicionais || []), { nota: noteText.trim(), created_at: new Date().toISOString(), anexos: noteAnexos }];
+    const notes = [...(submissionData.notas_adicionais || []), { nota: noteText.trim(), created_at: new Date().toISOString(), anexos: noteAnexos, secao: noteSecao || null }];
     const { error: err } = await supabase.from(HISTORICO_TABLE).update({ notas_adicionais: notes }).eq('id', submissionId);
     setLoading(false);
     if (err) { alert('Erro: ' + err.message); return; }
     setSubmissionData(prev => ({ ...prev, notas_adicionais: notes }));
-    setNoteText(''); setNoteAnexos([]); setNoteModal(false);
+    setNoteText(''); setNoteAnexos([]); setNoteSecao(null); setNoteModal(false);
   };
 
 
@@ -775,10 +776,36 @@ export default function HistoricoForm() {
       );
     };
 
-    const Card = ({ title, children }) => (
+    const openNote = (secao) => { setNoteSecao(secao); setNoteModal(true); };
+
+    const SectionNotes = ({ secao }) => {
+      const notes = (s.notas_adicionais || []).filter(n => n.secao === secao);
+      if (!notes.length) return null;
+      return (
+        <div style={{ marginTop: 10, borderTop: '1px solid #1a1a1a', paddingTop: 10 }}>
+          {notes.map((n, i) => (
+            <div key={i} style={{ background: '#0d0d1a', borderRadius: 6, padding: '8px 12px', marginBottom: 6, fontSize: '0.9rem', color: '#ccc' }}>
+              <div style={{ color: '#555', fontSize: '0.78rem', marginBottom: 3 }}>{new Date(n.created_at).toLocaleDateString('pt-MZ')}</div>
+              {n.nota}
+            </div>
+          ))}
+        </div>
+      );
+    };
+
+    const Card = ({ title, secao, children }) => (
       <div className="card" style={{ marginBottom: 16 }}>
-        <h3 style={{ color: G, marginBottom: 14, fontSize: '1rem', borderBottom: '1px solid #222', paddingBottom: 8 }}>{title}</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, borderBottom: '1px solid #222', paddingBottom: 8 }}>
+          <h3 style={{ color: G, fontSize: '1rem', margin: 0 }}>{title}</h3>
+          {secao && (
+            <button type="button" onClick={() => openNote(secao)}
+              style={{ background: 'none', border: `1px solid ${G}55`, color: G, borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, lineHeight: 1 }}>
+              +
+            </button>
+          )}
+        </div>
         {children}
+        {secao && <SectionNotes secao={secao} />}
       </div>
     );
 
@@ -796,7 +823,7 @@ export default function HistoricoForm() {
           <p style={{ color: '#aaa', marginTop: 6 }}>Obrigado pela sua contribuição.</p>
         </div>
 
-        <Card title="1. Identificação">
+        <Card title="1. Identificação" secao="identificacao">
           <RO label="Nome" val={s.nome} />
           <RO label="Sexo" val={s.sexo} />
           <RO label="Função" val={s.funcao} />
@@ -811,7 +838,7 @@ export default function HistoricoForm() {
         </Card>
 
         {(missAll.length > 0 || obrAll.length > 0 || s.onde_comecou || s.igrejas_distrito != null) && (
-          <Card title="2. Igreja Local">
+          <Card title="2. Igreja Local" secao="igreja_local">
             {missAll.length > 0 && (
               <div style={{ marginBottom: 10 }}>
                 <div style={{ color: '#888', fontSize: '0.85rem', marginBottom: 6 }}>Missionários ({missAll.length})</div>
@@ -846,7 +873,7 @@ export default function HistoricoForm() {
         )}
 
         {(s.primeira_congregacao || (s.congregacoes || []).length > 0 || displayDF(s.data_inauguracao)) && (
-          <Card title="3. Cronologia">
+          <Card title="3. Cronologia" secao="cronologia">
             <RO label="1ª Congregação" val={s.primeira_congregacao} />
             {(s.congregacoes || []).length > 0 && (
               <div style={{ marginBottom: 8 }}>
@@ -865,7 +892,7 @@ export default function HistoricoForm() {
         )}
 
         {((s.desafios || []).length > 0 || s.momentos_marcantes) && (
-          <Card title="4. Desafios">
+          <Card title="4. Desafios" secao="desafios">
             <RO label="Desafios" val={s.desafios} />
             <RO label="Outros desafios" val={s.desafios_outros} />
             <RO label="Momentos marcantes" val={s.momentos_marcantes} />
@@ -873,14 +900,14 @@ export default function HistoricoForm() {
         )}
 
         {(s.experiencia_marcante || s.impacto_comunidade) && (
-          <Card title="5. Testemunhos e Impacto">
+          <Card title="5. Testemunhos e Impacto" secao="testemunhos">
             <RO label="Experiência marcante" val={s.experiencia_marcante} />
             <RO label="Impacto na comunidade" val={s.impacto_comunidade} />
           </Card>
         )}
 
         {(s.possui_documentos != null || (s.referencias || []).some(r => r.nome || r.contacto) || s.observacoes_finais) && (
-          <Card title="6. Dados Complementares">
+          <Card title="6. Dados Complementares" secao="complementares">
             <RO label="Possui documentos históricos" val={s.possui_documentos} />
             {(s.referencias || []).filter(r => r.nome || r.contacto).map((r, i) => (
               <div key={i} style={{ marginBottom: 6, fontSize: '0.97rem', display: 'flex', gap: 6 }}>
@@ -896,10 +923,10 @@ export default function HistoricoForm() {
           <RO label="Declaração de veracidade" val={s.declaracao_verdadeira} />
         </Card>
 
-        {(s.notas_adicionais || []).length > 0 && (
+        {(s.notas_adicionais || []).filter(n => !n.secao).length > 0 && (
           <div className="card" style={{ marginBottom: 16 }}>
             <h3 style={{ color: '#aaa', marginBottom: 12, fontSize: '1rem' }}>Informações adicionadas</h3>
-            {s.notas_adicionais.map((n, i) => (
+            {s.notas_adicionais.filter(n => !n.secao).map((n, i) => (
               <div key={i} style={{ background: '#1a1a24', borderRadius: '6px', padding: '10px', marginBottom: 6, fontSize: '0.97rem', color: '#ccc' }}>
                 <div style={{ color: '#555', marginBottom: 4, fontSize: '0.82rem' }}>{new Date(n.created_at).toLocaleDateString('pt-MZ')}</div>
                 {n.nota}
@@ -924,7 +951,9 @@ export default function HistoricoForm() {
         {noteModal && (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
             <div style={{ background: '#1a1a24', borderRadius: '12px', padding: '28px', maxWidth: 480, width: '100%', border: '1px solid #333' }}>
-              <h3 style={{ color: G, marginBottom: 16 }}>Adicionar informação</h3>
+              <h3 style={{ color: G, marginBottom: 16 }}>
+                Adicionar informação{noteSecao ? ` — ${noteSecao.replace(/_/g, ' ')}` : ''}
+              </h3>
               <textarea value={noteText} onChange={e => setNoteText(e.target.value)}
                 placeholder="Ex: Escreva aqui informações adicionais..."
                 className="hf-textarea" style={{ width: '100%', marginBottom: 12 }} autoFocus />
@@ -941,7 +970,7 @@ export default function HistoricoForm() {
                 <button type="button" className="btn-primary" onClick={handleAddNote} disabled={loading || noteUploading || !noteText.trim()}>
                   {loading ? 'A guardar...' : 'Guardar'}
                 </button>
-                <button type="button" className="btn-secondary" onClick={() => { setNoteModal(false); setNoteText(''); setNoteAnexos([]); }}>Cancelar</button>
+                <button type="button" className="btn-secondary" onClick={() => { setNoteModal(false); setNoteText(''); setNoteAnexos([]); setNoteSecao(null); }}>Cancelar</button>
               </div>
             </div>
           </div>
