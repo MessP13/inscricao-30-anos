@@ -600,6 +600,21 @@ export default function HistoricoAdminTab() {
                 </button>
               </div>
             </form>
+
+            {(editingRow.notas_adicionais || []).length > 0 && (
+              <div className="form-section" style={{ marginTop: 8 }}>
+                <h4 style={sSectionTitle}>Informações adicionadas após o Envio</h4>
+                {editingRow.notas_adicionais.map((n, i) => (
+                  <div key={i} style={{ background: '#0a0a14', border: '1px solid #1e1e2e', borderRadius: 8, padding: '10px 14px', marginBottom: 8 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: '0.78rem', color: '#555' }}>
+                      <span>{new Date(n.created_at).toLocaleDateString('pt-MZ')}</span>
+                      {n.secao && <span style={{ color: G, textTransform: 'capitalize' }}>{n.secao.replace(/_/g, ' ')}</span>}
+                    </div>
+                    <div style={{ color: '#ccc', fontSize: '0.95rem', lineHeight: 1.6 }}>{n.nota}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

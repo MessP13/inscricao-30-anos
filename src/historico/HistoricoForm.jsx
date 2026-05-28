@@ -602,6 +602,7 @@ export default function HistoricoForm() {
     return '';
   });
 
+  const [showWelcomeBack, setShowWelcomeBack] = useState(() => !!localStorage.getItem(LS_SUB));
   const [noteModal, setNoteModal] = useState(false);
   const [noteSecao, setNoteSecao] = useState(null);
   const [noteText, setNoteText] = useState('');
@@ -776,6 +777,15 @@ export default function HistoricoForm() {
       );
     };
 
+    const SECAO_INFO = {
+      identificacao:  { label: 'Identificação',          placeholder: 'Ex: nome anterior, outros contactos, cargo adicional...' },
+      igreja_local:   { label: 'Igreja Local',            placeholder: 'Ex: novo missionário, ampliação do templo, novo líder...' },
+      cronologia:     { label: 'Cronologia',              placeholder: 'Ex: nova congregação inaugurada, data corrigida...' },
+      desafios:       { label: 'Desafios',                placeholder: 'Ex: novo desafio enfrentado, momento marcante recente...' },
+      testemunhos:    { label: 'Testemunhos e Impacto',   placeholder: 'Ex: impacto recente na comunidade, experiência adicional...' },
+      complementares: { label: 'Dados Complementares',    placeholder: 'Ex: novo documento encontrado, referência adicional...' },
+    };
+
     const openNote = (secao) => { setNoteSecao(secao); setNoteModal(true); };
 
     const SectionNotes = ({ secao }) => {
@@ -799,8 +809,8 @@ export default function HistoricoForm() {
           <h3 style={{ color: G, fontSize: '1rem', margin: 0 }}>{title}</h3>
           {secao && (
             <button type="button" onClick={() => openNote(secao)}
-              style={{ background: G, color: '#000', border: 'none', borderRadius: '6px', padding: '4px 12px', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0, letterSpacing: '0.02em' }}>
-              + Adicionar
+              style={{ background: G, color: '#000', border: 'none', borderRadius: '6px', padding: '5px 14px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0, whiteSpace: 'nowrap' }}>
+              + Adicionar Informação Relevante sobre {SECAO_INFO[secao]?.label ?? secao}
             </button>
           )}
         </div>
@@ -817,6 +827,23 @@ export default function HistoricoForm() {
     return (
       <div className="container">
         <SupportBanner />
+
+        {showWelcomeBack && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.82)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: 20 }}>
+            <div style={{ background: '#1a1a24', borderRadius: 14, padding: '32px 28px', maxWidth: 460, width: '100%', border: `1px solid ${G}55`, textAlign: 'center' }}>
+              <div style={{ color: '#4ade80', fontSize: '2.2rem', marginBottom: 12 }}>✓</div>
+              <h2 style={{ color: G, margin: '0 0 12px', fontSize: '1.2rem' }}>Formulário enviado e guardado</h2>
+              <p style={{ color: '#bbb', lineHeight: 1.7, marginBottom: 20, fontSize: '0.97rem' }}>
+                As suas informações foram registadas com sucesso.<br />
+                Se quiser acrescentar algo, utilize os botões <strong style={{ color: G }}>Adicionar Informação Relevante</strong> em cada secção — as adições ficam agrupadas com os dados originais.
+              </p>
+              <button type="button" className="btn-primary" style={{ width: '100%' }} onClick={() => setShowWelcomeBack(false)}>
+                Ver o meu formulário
+              </button>
+            </div>
+          </div>
+        )}
+
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <div style={{ color: '#4ade80', fontSize: '2.5rem', marginBottom: 10 }}>✓</div>
           <h2 style={{ color: G, margin: 0 }}>Formulário submetido com sucesso!</h2>
@@ -951,11 +978,13 @@ export default function HistoricoForm() {
         {noteModal && (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
             <div style={{ background: '#1a1a24', borderRadius: '12px', padding: '28px', maxWidth: 480, width: '100%', border: '1px solid #333' }}>
-              <h3 style={{ color: G, marginBottom: 16 }}>
-                Adicionar informação{noteSecao ? ` — ${noteSecao.replace(/_/g, ' ')}` : ''}
+              <h3 style={{ color: G, marginBottom: 4, fontSize: '1rem' }}>
+                {noteSecao
+                  ? `Adicionar Informação Relevante sobre ${({ identificacao: 'Identificação', igreja_local: 'Igreja Local', cronologia: 'Cronologia', desafios: 'Desafios', testemunhos: 'Testemunhos e Impacto', complementares: 'Dados Complementares' })[noteSecao] ?? noteSecao}`
+                  : 'Adicionar Informação Geral'}
               </h3>
               <textarea value={noteText} onChange={e => setNoteText(e.target.value)}
-                placeholder="Ex: Escreva aqui informações adicionais..."
+                placeholder={({ identificacao: 'Ex: nome anterior, outros contactos, cargo adicional...', igreja_local: 'Ex: novo missionário, ampliação do templo, novo líder...', cronologia: 'Ex: nova congregação inaugurada, data corrigida...', desafios: 'Ex: novo desafio enfrentado, momento marcante recente...', testemunhos: 'Ex: impacto recente na comunidade, experiência adicional...', complementares: 'Ex: novo documento encontrado, referência adicional...' })[noteSecao] ?? 'Ex: escreva aqui informações adicionais...'}
                 className="hf-textarea" style={{ width: '100%', marginBottom: 12 }} autoFocus />
               <FileUploadSection
                 label="Anexar ficheiro (opcional)"
