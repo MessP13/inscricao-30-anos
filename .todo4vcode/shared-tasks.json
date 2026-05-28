@@ -65,8 +65,8 @@
         "Historico"
       ],
       "priority": "Must",
-      "status": "Todo",
-      "completed": false,
+      "status": "Done",
+      "completed": true,
       "createdAt": 1748217601000,
       "order": 6011
     },
