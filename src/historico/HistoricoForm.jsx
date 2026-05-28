@@ -778,12 +778,30 @@ export default function HistoricoForm() {
     };
 
     const SECAO_INFO = {
-      identificacao:  { label: 'Identificação',          placeholder: 'Ex: nome anterior, outros contactos, cargo adicional...' },
-      igreja_local:   { label: 'Igreja Local',            placeholder: 'Ex: novo missionário, ampliação do templo, novo líder...' },
-      cronologia:     { label: 'Cronologia',              placeholder: 'Ex: nova congregação inaugurada, data corrigida...' },
-      desafios:       { label: 'Desafios',                placeholder: 'Ex: novo desafio enfrentado, momento marcante recente...' },
-      testemunhos:    { label: 'Testemunhos e Impacto',   placeholder: 'Ex: impacto recente na comunidade, experiência adicional...' },
-      complementares: { label: 'Dados Complementares',    placeholder: 'Ex: novo documento encontrado, referência adicional...' },
+      identificacao: {
+        label: 'Identificação',
+        placeholder: 'Ao preencher esqueci de mencionar que também servi como diácono entre 2003 e 2007.\nO meu número correcto é 84 123 4567, não o que escrevi.\nEntrei na Visão Cristã em 1998 através do Pastor Simão Nhancale em Chimoio.\nAlém de Chimoio, também pastorei a congregação de Gondola de 2010 a 2015.',
+      },
+      igreja_local: {
+        label: 'Igreja Local',
+        placeholder: 'A Igreja de Bela Vista foi na verdade fundada em casa do Irmão Abel Mussanhane, não num templo.\nEm 2001 o responsável pelo distrito era o Pastor Armindo Chissano, não o Pastor Jeremias como escrevi.\nO Missionário Frederico Lange também passou por Manica entre 1996 e 1999, não mencionei.\nA congregação de Nhacolo foi aberta em 2005 pelo Obreiro João Mutambe com 12 membros.',
+      },
+      cronologia: {
+        label: 'Cronologia',
+        placeholder: 'A data correcta da inauguração do templo de Gondola é 2004, não 2003 como escrevi.\nEm 2009 foi aberta uma congregação em Vanduzi que não mencionei no formulário.\nNo ano 2000 quem estava à frente do distrito era o Pastor Simão Bila, não o Pastor Abel.\nAo preencher não me lembrei que em 1998 também fundámos uma célula no bairro Makonde.',
+      },
+      desafios: {
+        label: 'Desafios',
+        placeholder: 'Em 2002 passámos por uma seca muito grave que obrigou metade da congregação a sair da região.\nAs autoridades locais proibiram os cultos em 2008 por 3 meses — foi um período muito difícil.\nEm 2015 tivemos um incêndio que destruiu o templo; a comunidade ajudou a reconstruir em 40 dias.\nEm 1999 perdemos cerca de 40 membros para outra denominação e demorámos anos a recuperar.',
+      },
+      testemunhos: {
+        label: 'Testemunhos e Impacto',
+        placeholder: 'A família Cossa foi completamente transformada em 2007 — o filho serve hoje como pastor em Beira.\nEm 2012 baptizámos 87 pessoas num único domingo, o maior baptismo da história da congregação.\nEm 2001 orámos por um irmão com cancro declarado e ele recuperou completamente — está vivo hoje.\nQuem pode testemunhar o crescimento nessa época é o Irmão Américo Nhamucho, agora em Maputo.',
+      },
+      complementares: {
+        label: 'Dados Complementares',
+        placeholder: 'Tenho um certificado de registo da congregação datado de Março de 1997 que posso enviar.\nAlém do Pastor Feliciano, pode também contactar a Irmã Maria Guambe pelo 82 456 7890.\nEncontrei recentemente uma foto da primeira celebração em 1996 com cerca de 30 pessoas reunidas.\nA acta de fundação da Igreja de Gondola foi assinada pelo Pastor Ezequiel Maúle em Agosto de 2001.',
+      },
     };
 
     const openNote = (secao) => { setNoteSecao(secao); setNoteModal(true); };
@@ -984,7 +1002,7 @@ export default function HistoricoForm() {
                   : 'Adicionar Informação Geral'}
               </h3>
               <textarea value={noteText} onChange={e => setNoteText(e.target.value)}
-                placeholder={({ identificacao: 'Ex: nome anterior, outros contactos, cargo adicional...', igreja_local: 'Ex: novo missionário, ampliação do templo, novo líder...', cronologia: 'Ex: nova congregação inaugurada, data corrigida...', desafios: 'Ex: novo desafio enfrentado, momento marcante recente...', testemunhos: 'Ex: impacto recente na comunidade, experiência adicional...', complementares: 'Ex: novo documento encontrado, referência adicional...' })[noteSecao] ?? 'Ex: escreva aqui informações adicionais...'}
+                placeholder={SECAO_INFO[noteSecao]?.placeholder ?? 'Escreva aqui informações adicionais...'}
                 className="hf-textarea" style={{ width: '100%', marginBottom: 12 }} autoFocus />
               <FileUploadSection
                 label="Anexar ficheiro (opcional)"
